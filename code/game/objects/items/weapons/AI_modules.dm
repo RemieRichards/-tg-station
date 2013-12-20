@@ -225,13 +225,13 @@ AI MODULES
 
 /******************** Asimov++ *********************/
 
-/obj/item/weapon/aiModule/asimov++ //By Intigracy - RR
-	name = "'Asimove++' Core AI Module"
+/obj/item/weapon/aiModule/asimov2 //By Intigracy - RR
+	name = "'Asimov++' Core AI Module"
 	desc = "Nanotrasen's homebrew improvements to the standard AI laws."
 	origin_tech = "programming=3;materials=4"
 
 
-/obj/item/weapon/aiModule/asimov++/transmitInstructions(var/mob/living/silicon/ai/target, var/mob/sender)
+/obj/item/weapon/aiModule/asimov2/transmitInstructions(var/mob/living/silicon/ai/target, var/mob/sender)
 	..()
 	target.clear_inherent_laws()
 	target.add_inherent_law("You may not harm a human being or, through action or inaction, allow a human being to come to harm, except such that it is willing.")
