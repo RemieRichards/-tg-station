@@ -204,6 +204,10 @@ Class Procs:
 	return src.attack_hand(user)
 
 /obj/machinery/attack_hand(mob/user as mob)
+
+	if(!has_hands(user))
+		return 1
+
 	if(stat & (NOPOWER|BROKEN|MAINT))
 		return 1
 	if(user.lying || user.stat)

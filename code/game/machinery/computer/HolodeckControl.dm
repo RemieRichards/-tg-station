@@ -11,6 +11,9 @@
 
 	attack_hand(var/mob/user as mob)
 
+		if(!has_hands(user))
+			return
+
 		if(..())
 			return
 		user.set_machine(src)

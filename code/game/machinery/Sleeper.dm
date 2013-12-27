@@ -26,6 +26,9 @@
 	return attack_hand(user)
 
 /obj/machinery/sleep_console/attack_hand(mob/user)
+	if(!has_hands(user))
+		return
+
 	if(..())
 		return
 	if(connected)

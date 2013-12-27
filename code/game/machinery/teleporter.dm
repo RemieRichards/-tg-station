@@ -49,7 +49,11 @@
 
 	return
 
-/obj/machinery/computer/teleporter/attack_hand()
+/obj/machinery/computer/teleporter/attack_hand(mob/user as mob)
+
+	if(!has_hands(user))
+		return
+
 	if(..())
 		return
 

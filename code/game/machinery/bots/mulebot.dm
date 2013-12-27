@@ -172,6 +172,10 @@ var/global/mulebot_count = 0
 
 /obj/machinery/bot/mulebot/attack_hand(var/mob/user)
 	. = ..()
+
+	if(!has_hands(user))
+		return
+
 	if (.)
 		return
 	user.set_machine(src)

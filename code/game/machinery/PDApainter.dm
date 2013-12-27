@@ -58,6 +58,9 @@
 /obj/machinery/pdapainter/attack_hand(mob/user as mob)
 	..()
 
+	if(!has_hands(user))
+		return
+
 	src.add_fingerprint(user)
 
 	if(storedpda)

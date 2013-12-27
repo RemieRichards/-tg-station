@@ -62,6 +62,10 @@
 	return src.attack_hand(user)
 
 /obj/machinery/door_control/attack_hand(mob/user as mob)
+
+	if(!has_hands(user))
+		return
+
 	src.add_fingerprint(usr)
 	if(stat & (NOPOWER|BROKEN))
 		return

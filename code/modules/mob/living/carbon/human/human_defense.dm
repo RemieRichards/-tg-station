@@ -122,6 +122,9 @@ emp_act
 
 	var/obj/item/organ/limb/affecting = get_organ(ran_zone(user.zone_sel.selecting))
 
+	if(!affecting && !istype(I, /obj/item/robot_parts)) //No arm, and were not Augmenting
+		return 0
+
 //--------------------- Cyber limb stuff ---------------------\\
 
 	if(istype(I, /obj/item/weapon/weldingtool))
@@ -142,7 +145,6 @@ emp_act
 				user << "<span class='warning'>Need more welding fuel!</span>"
 				return
 
-
 	if(istype(I, /obj/item/weapon/cable_coil))
 		var/obj/item/weapon/cable_coil/coil = I
 		if(affecting.status == ORGAN_ROBOTIC)
@@ -156,6 +158,31 @@ emp_act
 			else
 				user << "<span class='notice'>[src]'s [affecting.getDisplayName()] is already in good condidtion</span>"
 				return
+
+	if(istype(I, /obj/item/augment))
+		if(affecting.state == ORGAN_REMOVED) //if there is no limb or the chest is assumed to be removed - RR
+			var/obj/item/augment/AUG = I
+			if(affecting.body_part == AUG.limb_part)
+				affecting.status = ORGAN_ROBOTIC
+				affecting.state = ORGAN_FINE
+				affecting.bonus = AUG.bonus
+				visible_message("<span class='notice'>[user] has attachet [src]'s new limb!</span>")
+			else
+				user << "<span class='notice'>You can't attach a [AUG.name] to [src]'s [affecting.getDisplayName()]!</span>"
+				return
+
+			if(affecting.name == "chest" && affecting.body_part == AUG.limb_part)
+				for(var/datum/disease/appendicitis/A in viruses) //If they already have Appendicitis, Remove it
+					A.cure(1)
+			user.drop_item()
+			del(AUG)
+			update_damage_overlays(0)
+			update_body() //Gives them the Cyber limb overlay, (update_body() calls update_body_parts() as well)
+			user.attack_log += "\[[time_stamp()]\]<font color='red'> Augmented [src.name]'s [parse_zone(user.zone_sel.selecting)] ([src.ckey]) INTENT: [uppertext(user.a_intent)])</font>"
+			src.attack_log += "\[[time_stamp()]\]<font color='orange'> Augmented by [user.name] ([user.ckey]) (INTENT: [uppertext(user.a_intent)])</font>"
+			log_attack("<font color='red'>[user.name] ([user.ckey]) augmented [src.name] ([src.ckey]) (INTENT: [uppertext(user.a_intent)])</font>")
+			return //Not an attack as well
+
 
 //-------------------- End of Cyber limb stuff ---------------------\\
 
@@ -176,11 +203,39 @@ emp_act
 	if(!I.force)	return 0
 	var/Iforce = I.force //to avoid runtimes on the forcesay checks at the bottom. Some items might delete themselves if you drop them. (stunning yourself, ninja swords)
 
-	apply_damage(I.force, I.damtype, affecting, armor , I)
+//-------------------- DISMEMBERMENT --------------------\\
+
+//It's about time - RR
+	if(I.flags & SHARP)
+		if(affecting.brute_dam >= (affecting.max_damage / 2)) //if it has taken significant enough damage
+			if(prob(I.sharp_power)) //Probaility can be a unique variable for each item.
+				apply_damage(30,"brute","[affecting]")
+				if(istype(affecting, /obj/item/organ/limb/head))
+					for(var/obj/item/organ/brain/B in internal_organs)
+						internal_organs -= B
+						affecting.contents += B //Put the brain in the head
+				if(istype(affecting, /obj/item/organ/limb/chest))
+					for(var/obj/item/organ/O in internal_organs)
+						if(!(istype(O, /obj/item/organ/brain)))
+							internal_organs -= O
+							O.loc = get_turf(src)
+				affecting.state = ORGAN_REMOVED
+
+				dummy_limbs(affecting, src)
+
+				visible_message("<span class='danger'><B>[src]'s [affecting.getDisplayName()] has been chopped off by [user]!</B></span>")
+			drop_both_hands() //Removes any items they may be carrying in their now non existant arms
+	update_body() //removes eye overlays if necessary and calls update_body_parts()
+	update_damage_overlays(0)
+
+//-------------------- End of DISMEMBERMENT --------------------\\
+
+	if(affecting) //if the body part still exists
+		apply_damage(I.force, I.damtype, affecting, armor , I)
 
 	var/bloody = 0
 	if(((I.damtype == BRUTE) || (I.damtype == HALLOSS)) && prob(25 + (I.force * 2)))
-		if(affecting.status == ORGAN_ORGANIC)
+		if(affecting.status == ORGAN_ORGANIC && affecting.state != ORGAN_REMOVED)
 			I.add_blood(src)	//Make the weapon bloody, not the person.
 			if(prob(I.force * 2))	//blood spatter!
 				bloody = 1
@@ -260,5 +315,7 @@ emp_act
 					src.Stun(rand(1,5))
 
 
-			src << "<span class='danger'>Error, electormagnetic pulse detected in cyber limb!</span>"
+			src << "<span class='danger'>Your cybernetic limb refuses input for a second!</span>"
 			..()
+
+

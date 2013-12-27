@@ -711,6 +711,23 @@ note dizziness decrements automatically in the mob's Life() proc.
 		lying = 0
 		canmove = 1
 
+	if(ishuman(src)) //Limb based movement checks - RR
+		var/mob/living/carbon/human/H = src
+
+		if(!(stunned) && !(stat || weakened || paralysis || resting || sleeping || (status_flags & FAKEDEATH)))
+
+			if(H.leg_ok())//We have atleast 1 functional leg
+				H.canmove = 1
+				H.density = 1 //If were stood we can't be walked over
+			else //if we don't, then check the arms.
+				if(H.arm_ok())
+					H.canmove = 1 //Atleast 1 arm, let's crawl!
+
+				else
+					H.canmove = 0 //No Legs No Arms No service.
+				H.density = 0 //were 'crawling' so we can be walked over
+
+
 	if(lying)
 		density = 0
 		drop_l_hand()
@@ -837,3 +854,73 @@ note dizziness decrements automatically in the mob's Life() proc.
 /mob/proc/AdjustResting(amount)
 	resting = max(resting + amount,0)
 	return
+
+/mob/proc/empty(var/includes_organs, var/includes_contents, var/kills, var/bleeds) //Empties everything out of a mob onto the ground, Organs that are required for life are only removed if asked for in the proc.
+
+	//Expand this top check if you add more things to the above.
+	if(!includes_organs && !includes_contents && !kills && !bleeds)
+		return //Why did you even call the proc if you specified nothing to be removed.
+
+	if(ishuman(src))
+		var/mob/living/carbon/human/H = src
+		if(includes_organs)
+			for(var/obj/item/organ/limb/L in H.organs) //Remove limbs.
+				if(L.name != "chest" && L.name != "head" && !kills || kills) //if its a chest or a head and were not killing them OR were killing them
+					if(kills) // if were killing them
+						for(var/obj/item/organ/brain/B in H.internal_organs)
+							for(var/obj/item/organ/limb/head/Head in H.organs)
+								H.internal_organs -= B
+								Head.contents += B //Put the brain in the head
+					H.organs -= L
+					L.loc = get_turf(H)
+
+			for(var/obj/item/organ/O in H.internal_organs)
+				if(kills && istype(O, /obj/item/organ/brain))
+					var/obj/item/organ/brain/B = O
+					H.internal_organs -= B
+					B.loc = get_turf(H)
+				H.internal_organs -= O
+				O.loc = get_turf(H)
+
+	if(includes_contents)
+		for(var/obj/item/I in src.contents)
+			src.contents -= I
+			I.loc = get_turf(src)
+
+	if(bleeds)
+		var/turf/location = loc
+		if(istype(location, /turf/simulated))
+			location.add_blood(src)
+
+/*
+empty() Examples:
+
+empty(1,0,1,1) - This one is used in human Gib()
+1 - Removes organs
+0 - Does not include their contents (clothing etc.)
+1 - Kills the Mob by removing the brain and other vital organs
+1 - Spawns blood
+
+empty(0,0,0,0) - Pointless
+Returns due to this being a pointless state of the proc.
+
+empty(1,1,1,1) - Remove all the things
+1 - Removes organs
+1 - Removes the mobs contents
+1 - Removes vital organs, Killing the mob
+1 - Spawns blood
+
+empty(0,1,0,1) - Remove the persons clothing so violently that they bleed
+0 - Does not remove organs
+1 - Removes the mobs contents
+0 - Does not removed vital organs, is overidden by the first "0"
+1 - Spawns blood
+
+empty(0,0,1,1) - Spawns blood randomly beneath the person
+0 - Does not remove organs
+0 - Does not remove contents
+1 - Does nothing due to being overridden by the first "0"
+1 - Spawns blood
+
+Probably some other instances that have uses/are completely pointless
+*/

@@ -91,6 +91,9 @@
 
 
 /obj/machinery/suit_storage_unit/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	var/dat
 	if(..())
 		return

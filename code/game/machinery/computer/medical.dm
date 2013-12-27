@@ -19,6 +19,10 @@
 /obj/machinery/computer/med_data/attack_hand(mob/user as mob)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	var/dat
 	if (src.temp)
 		dat = text("<TT>[src.temp]</TT><BR><BR><A href='?src=\ref[src];temp=1'>Clear Screen</A>")

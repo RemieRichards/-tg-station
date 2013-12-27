@@ -371,6 +371,9 @@
 		user << "<span class='notice'>There seems to be a firewall preventing you from accessing this device.</span>"
 
 /obj/machinery/turretid/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	if ( get_dist(src, user) > 0 )
 		if ( !issilicon(user) )
 			user << "<span class='notice'>You are too far away.</span>"
@@ -521,6 +524,8 @@
 
 
 	attack_hand(mob/user as mob)
+		if(!has_hands(user))
+			return
 		user.set_machine(src)
 		var/dat = {"<html>
 						<head><title>[src] Control</title></head>

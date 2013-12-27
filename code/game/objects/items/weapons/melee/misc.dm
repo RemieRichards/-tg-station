@@ -63,3 +63,27 @@
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
 		H.forcesay(hit_appends)
+
+/obj/item/weapon/melee/dismemberer //Mainly a Test weapon for trialing "sharp" damtype and Dismemberment - RR
+	name = "dismemberer"
+	desc = "A weapon used to dismember ones foes."
+	icon_state = "katana"
+	item_state = "katana"
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
+	slot_flags = SLOT_BELT
+	force = 35
+	throwforce = 7
+	w_class = 3
+	hitsound = 'sound/weapons/bladeslice.ogg'
+	origin_tech = "combat=4"
+	attack_verb = list("slashed", "diced", "sliced", "carved")
+	sharp_power = 20
+
+/obj/item/weapon/melee/dismemberer/suicide_act(mob/user)
+	viewers(user) << "\red <b>[user] is carving \himself with the [src.name]! It looks like \he's trying to commit suicide.</b>"
+	return (BRUTELOSS)
+
+/obj/item/weapon/melee/dismemberer/dism2
+	name = "superior dismemberer"
+	desc = "better than all the rest"
+	sharp_power = 100

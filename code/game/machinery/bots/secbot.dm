@@ -98,6 +98,10 @@
 
 /obj/machinery/bot/secbot/attack_hand(mob/user as mob)
 	. = ..()
+
+	if(!has_hands(user))
+		return
+
 	if(.)
 		return
 	usr.set_machine(src)

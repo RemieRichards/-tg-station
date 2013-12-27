@@ -173,6 +173,9 @@
 		..()
 
 	attack_hand(mob/user as mob)
+		if(!has_hands(user))
+			return
+
 		if(..()) return
 		var/output = "<html><head><title>[src.name]</title></head><body>"
 		if(!recharge_floor)

@@ -22,7 +22,7 @@
 	var/obj/item/weapon/reagent_containers/glass/B = beaker
 	if(beaker)
 		B.loc = get_step(loc, SOUTH) //Beaker is carefully ejected from the wreckage of the cryotube
-	..() 
+	..()
 
 /obj/machinery/atmospherics/unary/cryo_cell/initialize()
 	if(node) return
@@ -68,7 +68,7 @@
 
 /obj/machinery/atmospherics/unary/cryo_cell/examine()
 	..()
-	
+
 	if(in_range(usr, src))
 		usr << "You can just about make out some loose objects floating in the murk:"
 		for(var/obj/O in src)
@@ -81,6 +81,8 @@
 		usr << "<span class='notice'>Too far away to view contents.</span>"
 
 /obj/machinery/atmospherics/unary/cryo_cell/attack_hand(mob/user)
+	if(!has_hands(user))
+		return
 	ui_interact(user)
 
 
@@ -167,7 +169,7 @@
 	if(href_list["switchOn"])
 		on = 1
 		update_icon()
-		
+
 	if(href_list["switchOff"])
 		on = 0
 		update_icon()
@@ -177,12 +179,12 @@
 			var/obj/item/weapon/reagent_containers/glass/B = beaker
 			B.loc = get_step(loc, SOUTH)
 			beaker = null
-			
+
 	if(href_list["ejectOccupant"])
 		if(!occupant || isslime(usr) || ispAI(usr))
 			return 0 // don't update UIs attached to this object
 		go_out()
-	
+
 	add_fingerprint(usr)
 	return 1 // update UIs attached to this object
 
@@ -352,6 +354,6 @@
 	for(var/obj/O in src)
 		if(O != beaker)
 			O.loc = get_step(loc, SOUTH)
-	for(var/mob/M in contents) 
+	for(var/mob/M in contents)
 		M.loc = get_step(loc, SOUTH)
 		update_icon()

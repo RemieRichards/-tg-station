@@ -43,6 +43,10 @@
 /obj/machinery/computer/atmos_alert/attack_hand(mob/user)
 	if(..(user))
 		return
+
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 	//user << browse(return_text(),"window=computer")
 	//onclose(user, "computer")

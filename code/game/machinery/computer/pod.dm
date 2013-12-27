@@ -44,6 +44,9 @@
 	if(..())
 		return
 
+	if(!has_hands(user))
+		return
+
 	var/dat = ""
 	user.set_machine(src)
 	if(connected)

@@ -119,6 +119,9 @@
 	return 0
 
 /obj/machinery/smartfridge/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 	interact(user)
 

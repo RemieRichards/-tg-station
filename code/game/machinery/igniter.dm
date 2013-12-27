@@ -21,6 +21,10 @@
 /obj/machinery/igniter/attack_hand(mob/user as mob)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	add_fingerprint(user)
 
 	use_power(50)

@@ -84,6 +84,10 @@
 /obj/machinery/computer/message_monitor/attack_hand(var/mob/living/user as mob)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	//If the computer is being hacked or is emagged, display the reboot message.
 	if(hacking || emag)
 		message = rebootmsg

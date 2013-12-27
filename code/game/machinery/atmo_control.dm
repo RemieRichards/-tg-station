@@ -88,6 +88,9 @@ obj/machinery/computer/general_air_control
 	var/datum/radio_frequency/radio_connection
 
 	attack_hand(mob/user)
+		if(!has_hands(user))
+			return
+
 		if(..(user))
 			return
 		//user << browse(return_text(),"window=computer")

@@ -113,6 +113,10 @@
 
 /obj/machinery/bot/ed209/attack_hand(mob/user as mob)
 	. = ..()
+
+	if(!has_hands(user))
+		return
+
 	if (.)
 		return
 	var/dat

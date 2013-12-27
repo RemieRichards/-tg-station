@@ -78,6 +78,9 @@
 	if(..())
 		return
 
+	if(!has_hands(user))
+		return
+
 	updatemodules()
 
 	var/dat = ""

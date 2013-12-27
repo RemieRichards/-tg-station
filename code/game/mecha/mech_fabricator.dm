@@ -537,6 +537,9 @@
 
 
 /obj/machinery/mecha_part_fabricator/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	var/dat, left_part
 	if (..())
 		return

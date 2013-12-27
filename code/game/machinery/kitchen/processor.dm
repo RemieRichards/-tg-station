@@ -129,6 +129,9 @@
 	return
 
 /obj/machinery/processor/attack_hand(var/mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	if (src.stat != 0) //NOPOWER etc
 		return
 	if(src.processing)

@@ -120,6 +120,10 @@ var/list/obj/machinery/requests_console/allConsoles = list()
 /obj/machinery/requests_console/attack_hand(var/mob/user)
 	if(..(user))
 		return
+
+	if(!has_hands(user))
+		return
+
 	var/dat = ""
 	if(!open)
 		switch(screen)

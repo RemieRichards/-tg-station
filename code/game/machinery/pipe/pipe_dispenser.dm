@@ -12,6 +12,10 @@
 /obj/machinery/pipedispenser/attack_hand(user as mob)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	var/dat = {"
 <b>Regular pipes:</b><BR>
 <A href='?src=\ref[src];make=0;dir=1'>Pipe</A><BR>

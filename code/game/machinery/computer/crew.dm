@@ -15,6 +15,10 @@
 /obj/machinery/computer/crew/attack_hand(mob/user)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	if(stat & (BROKEN|NOPOWER))
 		return
 	crewmonitor(user)

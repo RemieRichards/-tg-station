@@ -40,6 +40,9 @@
 		user << "\red Access Denied"
 		return
 
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 
 	var/dat = {"Location: [curr_location]<br>

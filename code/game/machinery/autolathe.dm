@@ -247,6 +247,8 @@ var/global/list/autolathe_recipes_hidden = list( \
 		return src.attack_hand(user)
 
 	attack_hand(mob/user as mob)
+		if(!has_hands(user))
+			return
 		user.set_machine(src)
 		interact(user)
 

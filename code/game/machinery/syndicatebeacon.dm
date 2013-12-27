@@ -20,6 +20,9 @@
 	var/charges = 1
 
 	attack_hand(var/mob/user as mob)
+		if(!has_hands(user))
+			return
+
 		usr.set_machine(src)
 		var/dat = "<font color=#005500><i>Scanning [pick("retina pattern", "voice print", "fingerprints", "dna sequence")]...<br>Identity confirmed,<br></i></font>"
 		if(istype(user, /mob/living/carbon/human) || istype(user, /mob/living/silicon/ai))

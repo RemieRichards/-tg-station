@@ -94,6 +94,9 @@
 	if(..())
 		return
 
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 	var/dat
 	if(!ticker)	return

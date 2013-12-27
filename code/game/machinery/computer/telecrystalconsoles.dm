@@ -82,6 +82,10 @@ var/list/possible_uplinker_IDs = list("Alfa","Bravo","Charlie","Delta","Echo","F
 /obj/machinery/computer/telecrystals/uplinker/attack_hand(mob/user as mob)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	src.add_fingerprint(user)
 	user.set_machine(src)
 

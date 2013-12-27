@@ -64,6 +64,9 @@ var/list/ingredients_source = list(
 		ingredients.Add(5)
 
 /obj/machinery/icecream_vat/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 	interact(user)
 

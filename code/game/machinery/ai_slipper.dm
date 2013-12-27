@@ -55,6 +55,10 @@
 /obj/machinery/ai_slipper/attack_hand(mob/user as mob)
 	if(stat & (NOPOWER|BROKEN))
 		return
+
+	if(!has_hands(user))
+		return
+
 	if ( (get_dist(src, user) > 1 ))
 		if (!istype(user, /mob/living/silicon))
 			user << text("Too far away.")

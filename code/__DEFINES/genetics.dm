@@ -79,5 +79,17 @@
 #define TR_KEEPSRC		128
 
 //Organ stuff, It's here because "Genetics" is the most relevant file for organs
+
+//Organ type (Organic, robot, etc.)
 #define ORGAN_ORGANIC   1
 #define ORGAN_ROBOTIC   2
+
+//Organ state (Fine, damaged, etc.)
+#define ORGAN_FINE      3
+#define ORGAN_DAMAGED   4
+#define ORGAN_REMOVED   5
+
+//Augment/Organ Bonuses
+#define BONUS_NONE		1
+#define BONUS_BLADE		2
+#define BONUS_GUN		3

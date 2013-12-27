@@ -143,6 +143,10 @@
 	. = ..()
 	if(.)
 		return
+
+	if(!has_hands(user))
+		return
+
 	var/dat
 
 	//The browse() text, similar to ED-209s and beepskies.

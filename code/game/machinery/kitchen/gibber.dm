@@ -70,6 +70,10 @@
 	return
 
 /obj/machinery/gibber/attack_hand(mob/user as mob)
+
+	if(!has_hands(user))
+		return
+
 	if(stat & (NOPOWER|BROKEN))
 		return
 	if(operating)

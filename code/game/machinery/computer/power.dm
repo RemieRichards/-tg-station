@@ -37,6 +37,10 @@
 /obj/machinery/computer/monitor/attack_hand(mob/user)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	interact(user)
 
 /obj/machinery/computer/monitor/interact(mob/user)

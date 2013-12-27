@@ -9,13 +9,14 @@
 	throw_range = 20
 	var/heal_brute = 0
 	var/heal_burn = 0
+	var/limb_type = ORGAN_ORGANIC //the limb type it heals
 
 /obj/item/stack/medical/attack(mob/living/carbon/M as mob, mob/user as mob)
 	var/mob/living/carbon/human/H = M
 	var/obj/item/organ/limb/affecting = H.get_organ("chest")
 
 
-	if(affecting.status == ORGAN_ORGANIC) //Limb must be organic to be healed - RR
+	if(affecting.status == ORGAN_ORGANIC || src.limb_type == ORGAN_ROBOTIC && affecting.status == ORGAN_ROBOTIC) //Limb must be organic or the item must be able to heal robotic limbs, to work - RR
 		if (M.stat == 2)
 			var/t_him = "it"
 			if (M.gender == MALE)
@@ -63,7 +64,7 @@
 				if(!istype(affecting, /obj/item/organ/limb) || affecting:burn_dam <= 0)
 					affecting = H.get_organ("head")
 
-			if(affecting.status == ORGAN_ORGANIC) // Just in case a robotic limb SOMEHOW got down to this point of the proc all you get is a message - RR
+			if(affecting.status == ORGAN_ORGANIC || src.limb_type == ORGAN_ROBOTIC && affecting.status == ORGAN_ROBOTIC) //Limb is organic, or medical item works on Robolimb - RR
 
 				if (affecting.heal_damage(src.heal_brute, src.heal_burn))
 					H.update_damage_overlays(0)
@@ -75,7 +76,8 @@
 
 		use(1)
 	else
-		user << "<span class='notice'>Medicine won't work on a robotic limb!</span>"
+		user << "<span class='notice'>This medicine won't work on a robotic limb!</span>"
+		return 1
 
 
 /obj/item/stack/medical/bruise_pack
@@ -94,3 +96,13 @@
 	icon_state = "ointment"
 	heal_burn = 40
 	origin_tech = "biotech=1"
+
+/obj/item/stack/medical/nano
+	name = "nanopaste"
+	desc = "Used to treat augmented limb burns and bruises."
+	singular_name = "nanopaste"
+	icon_state = "nanopaste"
+	heal_burn = 20 //Heals both to half the organic version
+	heal_brute = 30
+	origin_tech = "biotech=2"
+	limb_type = ORGAN_ROBOTIC

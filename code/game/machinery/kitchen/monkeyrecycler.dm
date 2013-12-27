@@ -36,6 +36,9 @@
 	return
 
 /obj/machinery/monkey_recycler/attack_hand(var/mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	if (src.stat != 0) //NOPOWER etc
 		return
 	if(grinded >=5)

@@ -12,6 +12,9 @@
 	var/insisting = 0
 
 /obj/machinery/wish_granter/attack_hand(var/mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	usr.set_machine(src)
 
 	if(charges <= 0)

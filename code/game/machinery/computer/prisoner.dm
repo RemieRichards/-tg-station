@@ -16,6 +16,10 @@
 	attack_hand(var/mob/user as mob)
 		if(..())
 			return
+
+		if(!has_hands(user))
+			return
+
 		user.set_machine(src)
 		var/dat = ""
 		if(screen == 0)

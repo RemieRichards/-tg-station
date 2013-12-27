@@ -40,6 +40,9 @@
 	if(..())
 		return
 
+	if(!has_hands(user))
+		return
+
 	src.current = select_active_ai(user)
 
 	if (!src.current)

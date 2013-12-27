@@ -227,6 +227,10 @@
 	checkhp()
 
 /obj/machinery/shieldgen/attack_hand(mob/user as mob)
+
+	if(!has_hands(user))
+		return
+
 	if(locked)
 		user << "The machine is locked, you are unable to use it."
 		return

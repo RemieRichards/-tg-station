@@ -12,6 +12,10 @@
 	attack_hand(mob/user)
 		if(..())
 			return
+
+		if(!has_hands(user))
+			return
+
 		interact(user)
 		return
 

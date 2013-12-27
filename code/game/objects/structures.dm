@@ -20,6 +20,10 @@ obj/structure/ex_act(severity)
 obj/structure/meteorhit(obj/O as obj)
 	del(src)
 
+obj/structure/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 
 
 

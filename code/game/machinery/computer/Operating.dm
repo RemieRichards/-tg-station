@@ -20,6 +20,10 @@
 /obj/machinery/computer/operating/attack_hand(mob/user)
 	if(..())
 		return
+
+	if(!has_hands(user))
+		return
+
 	interact(user)
 
 /obj/machinery/computer/operating/interact(mob/user)

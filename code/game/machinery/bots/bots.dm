@@ -155,6 +155,11 @@
 /obj/machinery/bot/attack_ai(mob/user as mob)
 	src.attack_hand(user)
 
+/obj/machinery/bot/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
+
 /******************************************************************/
 // Navigation procs
 // Used for A-star pathfinding

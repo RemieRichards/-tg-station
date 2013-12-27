@@ -176,6 +176,10 @@
 
 /obj/machinery/recharge_station/attack_hand(user as mob)
 	if(..())	return
+
+	if(!has_hands(user))
+		return
+
 	if(construct_op == 0)
 		toggle_open()
 	else

@@ -21,6 +21,9 @@
 	circuit = "/obj/item/weapon/circuitboard/comm_monitor"
 
 	attack_hand(mob/user as mob)
+		if(!has_hands(user))
+			return
+
 		if(..())
 			return
 		user.set_machine(src)

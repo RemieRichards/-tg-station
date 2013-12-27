@@ -1,6 +1,8 @@
 /obj/item/organ
 	name = "organ"
 	icon = 'icons/obj/surgery.dmi'
+	var/status = ORGAN_ORGANIC
+	var/state = ORGAN_FINE
 
 
 
@@ -44,14 +46,15 @@
 	var/brute_dam = 0
 	var/burn_dam = 0
 	var/max_damage = 0
-	var/status = ORGAN_ORGANIC
-
+	var/dam_icon = "chest" //So damage icons are not tied to the icon_state of the obj - RR
+	var/bonus = BONUS_NONE
 
 
 /obj/item/organ/limb/chest
 	name = "chest"
 	desc = "why is it detached..."
 	icon_state = "chest"
+	dam_icon = "chest"
 	max_damage = 200
 	body_part = CHEST
 
@@ -60,6 +63,7 @@
 	name = "head"
 	desc = "what a way to get a head in life..."
 	icon_state = "head"
+	dam_icon = "head"
 	max_damage = 200
 	body_part = HEAD
 
@@ -68,6 +72,7 @@
 	name = "l_arm"
 	desc = "why is it detached..."
 	icon_state = "l_arm"
+	dam_icon = "l_arm"
 	max_damage = 75
 	body_part = ARM_LEFT
 
@@ -76,6 +81,7 @@
 	name = "l_leg"
 	desc = "why is it detached..."
 	icon_state = "l_leg"
+	dam_icon = "l_leg"
 	max_damage = 75
 	body_part = LEG_LEFT
 
@@ -84,6 +90,7 @@
 	name = "r_arm"
 	desc = "why is it detached..."
 	icon_state = "r_arm"
+	dam_icon = "r_arm"
 	max_damage = 75
 	body_part = ARM_RIGHT
 
@@ -92,6 +99,7 @@
 	name = "r_leg"
 	desc = "why is it detached..."
 	icon_state = "r_leg"
+	dam_icon = "r_leg"
 	max_damage = 75
 	body_part = LEG_RIGHT
 
@@ -185,5 +193,39 @@
 		if("chest")     return "chest"
 		if("head")		return "head"
 		else			return name
+
+
+
+//Informs us if the user has atleast 1 functional Arm.
+/mob/living/carbon/human/proc/arm_ok()
+	var/num_of_arms = 0
+
+	for(var/obj/item/organ/limb/affecting in organs)
+		if(affecting.name == "r_arm" || affecting.name == "l_arm")
+			if(affecting.state == ORGAN_FINE)
+				num_of_arms += 1
+
+
+	if(num_of_arms == 1 || num_of_arms == 2)
+		return 1
+	else
+		return 0
+
+//Informs us if the user has atleast 1 functional Leg.
+/mob/living/carbon/human/proc/leg_ok()
+	var/num_of_legs = 0
+
+	for(var/obj/item/organ/limb/affecting in organs)
+		if(affecting.name == "r_leg" || affecting.name == "l_leg")
+			if(affecting.state == ORGAN_FINE)
+				num_of_legs += 1
+
+
+	if(num_of_legs == 1 || num_of_legs == 2)
+		return 1
+	else
+		return 0
+
+
 
 

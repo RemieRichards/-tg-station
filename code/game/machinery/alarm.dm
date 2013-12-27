@@ -162,6 +162,10 @@
 	. = ..()
 	if (.)
 		return
+
+	if(!has_hands(user))
+		return
+
 	user.set_machine(src)
 
 	if ( (get_dist(src, user) > 1 ))
@@ -1065,6 +1069,9 @@ FIRE ALARM
 			update_icon()
 
 /obj/machinery/firealarm/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
+
 	if(user.stat || stat & (NOPOWER|BROKEN))
 		return
 

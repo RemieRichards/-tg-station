@@ -47,6 +47,10 @@
 	. = ..()
 
 /mob/living/carbon/attack_hand(mob/user)
+
+	if(!has_hands(user))
+		return
+
 	if(!iscarbon(user)) return
 
 	for(var/datum/disease/D in viruses)

@@ -1,8 +1,10 @@
 /proc/gibs(atom/location, var/list/viruses, var/datum/dna/MobDNA)
 	new /obj/effect/gibspawner/generic(get_turf(location),viruses,MobDNA)
 
+/*
 /proc/hgibs(atom/location, var/list/viruses, var/datum/dna/MobDNA)
-	new /obj/effect/gibspawner/human(get_turf(location),viruses,MobDNA)
+	new /obj/effect/gibspawner/human(get_turf(location),viruses,MobDNA) Unused
+*/
 
 /proc/xgibs(atom/location, var/list/viruses)
 	new /obj/effect/gibspawner/xeno(get_turf(location),viruses)
