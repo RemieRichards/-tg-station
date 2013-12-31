@@ -18,9 +18,22 @@
 
 	if(shoes)
 		tally += shoes.slowdown
-	
+
 	if(back)
 		tally += back.slowdown
+
+
+	//Limb based speed - RR
+	if(leg_ok() == 1)
+		tally += 1.0 //1 leg missing, + 1.0 delay
+
+	if(leg_ok() == 0)
+		tally += 2.0 //2 legs missing, + 2.0 delay
+		if(arm_ok() == 1)
+			tally += 1.0 // 1 arm missing, + 1.0 delay
+		else
+			if(!(arm_ok() == 2)) //2 arms missing, + 2.0 delay again
+				tally += 2.0
 
 	if(FAT in src.mutations)
 		tally += 1.5

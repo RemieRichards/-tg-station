@@ -2,6 +2,9 @@
 	if(..())	//to allow surgery to return properly.
 		return
 
+	if(!has_hands(M))
+		return
+
 	if((M != src) && check_shields(0, M.name))
 		visible_message("<span class='warning'>[M] attempted to touch [src]!</span>")
 		return 0

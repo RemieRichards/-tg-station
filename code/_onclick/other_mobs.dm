@@ -15,7 +15,10 @@
 
 	A.attack_hand(src)
 /atom/proc/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return
 	return
+
 
 /mob/living/carbon/human/RestrainedClickOn(var/atom/A)
 	return

@@ -11,8 +11,10 @@ var/const/ALIEN_AFK_BRACKET = 450 // 45 seconds
 	var/stage = 0
 
 /obj/item/alien_embryo/New()
-	if(affected_mob.getlimb(/obj/item/organ/limb/robot/chest)) //If our Victim is augmented in the chest, No Babby - RR
-		return
+	if(affected_mob.getlimb(/obj/item/organ/limb/chest)) //If our Victim is augmented in the chest, No Babby - RR
+		var/obj/item/organ/limb/chest/Affecting_chest
+		if(Affecting_chest.status == ORGAN_ROBOTIC)
+			return
 	if(istype(loc, /mob/living))
 		affected_mob = loc
 		processing_objects.Add(src)

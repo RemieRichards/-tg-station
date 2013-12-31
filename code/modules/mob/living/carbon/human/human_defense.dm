@@ -122,14 +122,17 @@ emp_act
 
 	var/obj/item/organ/limb/affecting = get_organ(ran_zone(user.zone_sel.selecting))
 
+	if(!affecting && !istype(I, /obj/item/augment)) //No arm, and were not Augmenting
+		return 0
+
 //--------------------- Cyber limb stuff ---------------------\\
 
 	if(istype(I, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/WT = I
-		if(affecting.status == ORGAN_ROBOTIC)
+		if(affecting.status == ORGAN_ROBOTIC && affecting.state != ORGAN_REMOVED)
 			if (WT.remove_fuel(0))
 				if(affecting.brute_dam > 0)
-					affecting.heal_robotic_damage(30,0) //Repair Brute
+					affecting.heal_damage(30,0,1) //Repair Brute
 					update_damage_overlays(0)
 					updatehealth()
 					for(var/mob/O in viewers(user, null))
@@ -142,12 +145,11 @@ emp_act
 				user << "<span class='warning'>Need more welding fuel!</span>"
 				return
 
-
 	if(istype(I, /obj/item/weapon/cable_coil))
 		var/obj/item/weapon/cable_coil/coil = I
-		if(affecting.status == ORGAN_ROBOTIC)
+		if(affecting.status == ORGAN_ROBOTIC && affecting.state != ORGAN_REMOVED)
 			if(affecting.burn_dam > 0)
-				affecting.heal_robotic_damage(0,30) //Repair Burn
+				affecting.heal_damage(0,30,1) //Repair Burn
 				updatehealth()
 				coil.use(1)
 				for(var/mob/O in viewers(user, null))
@@ -157,6 +159,11 @@ emp_act
 				user << "<span class='notice'>[src]'s [affecting.getDisplayName()] is already in good condidtion</span>"
 				return
 
+	if(istype(I, /obj/item/augment))
+		augmentation(affecting, user, I)
+		return //Not attacking
+
+
 //-------------------- End of Cyber limb stuff ---------------------\\
 
 	var/hit_area = parse_zone(affecting.name)
@@ -164,23 +171,28 @@ emp_act
 	if((user != src) && check_shields(I.force, "the [I.name]"))
 		return 0
 
-	if(I.attack_verb.len)
-		visible_message("<span class='danger'>[src] has been [pick(I.attack_verb)] in the [hit_area] with [I] by [user]!</span>", \
-						"<span class='userdanger'>[src] has been [pick(I.attack_verb)] in the [hit_area] with [I] by [user]!</span>")
-	else
-		visible_message("<span class='danger'>[src] has been attacked in the [hit_area] with [I] by [user]!</span>", \
-						"<span class='userdanger'>[src] has been attacked in the [hit_area] with [I] by [user]!</span>")
+	if(affecting.state != ORGAN_REMOVED)
+		if(I.attack_verb.len)
+			visible_message("<span class='danger'>[src] has been [pick(I.attack_verb)] in the [hit_area] with [I] by [user]!</span>", \
+							"<span class='userdanger'>[src] has been [pick(I.attack_verb)] in the [hit_area] with [I] by [user]!</span>")
+		else
+			visible_message("<span class='danger'>[src] has been attacked in the [hit_area] with [I] by [user]!</span>", \
+							"<span class='userdanger'>[src] has been attacked in the [hit_area] with [I] by [user]!</span>")
 
 	var/armor = run_armor_check(affecting, "melee", "<span class='warning'>Your armour has protected your [hit_area].</span>", "<span class='warning'>Your armour has softened a hit to your [hit_area].</span>")
 	if(armor >= 2)	return 0
 	if(!I.force)	return 0
 	var/Iforce = I.force //to avoid runtimes on the forcesay checks at the bottom. Some items might delete themselves if you drop them. (stunning yourself, ninja swords)
 
-	apply_damage(I.force, I.damtype, affecting, armor , I)
+	if(I.flags & SHARP) //Not all dismemerment relies on Item sharpness
+		affecting.dismember(I, MELEE) //DISMEMBERMENT - It's about time - RR
+
+	if(affecting && affecting.state != ORGAN_REMOVED) //if the body part still exists, and hasn't already been removed.
+		apply_damage(I.force, I.damtype, affecting, armor , I)
 
 	var/bloody = 0
 	if(((I.damtype == BRUTE) || (I.damtype == HALLOSS)) && prob(25 + (I.force * 2)))
-		if(affecting.status == ORGAN_ORGANIC)
+		if(affecting.status == ORGAN_ORGANIC && affecting.state != ORGAN_REMOVED)
 			I.add_blood(src)	//Make the weapon bloody, not the person.
 			if(prob(I.force * 2))	//blood spatter!
 				bloody = 1
@@ -260,5 +272,7 @@ emp_act
 					src.Stun(rand(1,5))
 
 
-			src << "<span class='danger'>Error, electormagnetic pulse detected in cyber limb!</span>"
+			src << "<span class='danger'>Your cybernetic limb refuses input for a second!</span>"
 			..()
+
+

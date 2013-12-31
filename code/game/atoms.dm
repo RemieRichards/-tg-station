@@ -353,3 +353,25 @@ var/list/blood_splatter_icons = list()
 		return 1
 	else
 		return 0
+
+
+/atom/proc/has_hands(mob/user as mob) //checks that whomever is using this atom has hands if they are human - RR
+	if(user.hand)
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			var/obj/item/organ/limb/L = H.get_organ("l_arm")
+			if(L && L.state == ORGAN_REMOVED)
+				user << "<span class='notice'>You look at your stump.</span>"
+				return 0 //Halt interaction
+			else
+				return 1 //Normal interaction
+	else
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			var/obj/item/organ/limb/L = H.get_organ("r_arm")
+			if(L && L.state == ORGAN_REMOVED)
+				user << "<span class='notice'>You look at your stump.</span>"
+				return 0
+			else
+				return 1
+

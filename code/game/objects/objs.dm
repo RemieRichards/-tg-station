@@ -130,3 +130,7 @@
 		mo.show_message(rendered, 2)
 		*/
 	return
+
+/obj/attack_hand(mob/user as mob)
+	if(!has_hands(user))
+		return

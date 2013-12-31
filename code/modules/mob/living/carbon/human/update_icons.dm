@@ -40,15 +40,34 @@ There are several things that need to be remembered:
 
 
 >	There are also these special cases:
+
+> 	IN ACTIVE USE:
+
 		update_mutations()			//handles updating your appearance for certain mutations.  e.g TK head-glows
+
 		update_damage_overlays()	//handles damage overlays for brute/burn damage
-		update_base_icon_state()	//Handles updating var/base_icon_state (WIP) This is used to update the
-									mob's icon_state easily e.g. "[base_icon_state]_s" is the standing icon_state
-		update_body()				//Handles updating your mob's icon_state (using update_base_icon_state())
-									as well as sprite-accessories that didn't really fit elsewhere (underwear, lips, eyes)
-									//NOTE: update_mutantrace() is now merged into this!
+
+		update_body()				//Handles sprite-accessories that didn't really fit elsewhere (underwear, lips, eyes)
+									//NOTE: calls update_body_parts() automatically - RR
+
 		update_hair()				//Handles updating your hair overlay (used to be update_face, but mouth and
 									eyes were merged into update_body())
+
+		update_body_parts()			//Handles updating of body part overlays, it automatically calls update_damage_overlays(),
+									ANYWHERE We would usually change a humans "icon_state" call this directly, or call
+									update_body() to have this called with it.
+
+>	REMOVED/REDUNDANT: //Just incase some documentation still refers to them, and for Legacy
+
+		update_base_icon_state      //REMOVED Due to being made Redundant by update_body_parts() - RR
+		update_augments()			//REMOVED Due to being made Redundant by a rework of update_body_parts() - RR
+
+>   Information about update_body_parts()
+	this proc handles all the necessities of building a mob out of it's limb overlays, this includes mutant races and skin tones.
+	augmentations are handled here also due to augmented limbs, still being limbs,
+	update_body_parts() looks big due to it being the condensed form of about 3 other icon procs, and it has to handle
+	icon genders, it's either have copies of every arm and leg sprite with male and female in their name being the only
+	difference, or a few lines of code to not need gender in genderless parts, I know which i prefer - RR
 
 >	I repurposed an old unused variable which was in the code called (coincidentally) var/update_icon
 	It can be used as another method of triggering regenerate_icons(). It's basically a flag that when set to non-zero
@@ -61,9 +80,9 @@ Please contact me on #coderbus IRC. ~Carnie x
 */
 
 //Human Overlays Indexes/////////
-#define BODY_LAYER				22		//underwear, eyes, lips(makeup)
-#define MUTATIONS_LAYER			21		//Tk headglows etc.
-#define AUGMENTS_LAYER			20
+#define BODYPARTS_LAYER			22		//The Human mob's parts, Arms, Chest etc.
+#define BODY_LAYER				21		//underwear, eyes, lips(makeup)
+#define MUTATIONS_LAYER			20		//Tk headglows etc.
 #define DAMAGE_LAYER			19		//damage indicators (cuts and burns)
 #define UNIFORM_LAYER			18
 #define ID_LAYER				17
@@ -90,19 +109,6 @@ Please contact me on #coderbus IRC. ~Carnie x
 	var/list/overlays_lying[TOTAL_LAYERS]
 	var/list/overlays_standing[TOTAL_LAYERS]
 
-/mob/living/carbon/human/proc/update_base_icon_state()
-	var/race = dna ? dna.mutantrace : null
-	switch(race)
-		if("lizard","golem","slime","shadow","adamantine","fly","plant")
-			base_icon_state = "[dna.mutantrace]_[(gender == FEMALE) ? "f" : "m"]"
-		if("skeleton")
-			base_icon_state = "skeleton"
-		else
-			if(HUSK in mutations)
-				base_icon_state = "husk"
-			else
-				base_icon_state = "[skin_tone]_[(gender == FEMALE) ? "f" : "m"]"
-
 
 /mob/living/carbon/human/proc/apply_overlay(cache_index)
 	var/image/I = lying ? overlays_lying[cache_index] : overlays_standing[cache_index]
@@ -126,7 +132,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 	overlays.Cut()
 
 	if(lying)		//can't be cloaked whilst lying down
-		icon_state = "[base_icon_state]_l"
+		update_body_parts()
 		for(var/thing in overlays_lying)
 			if(thing)	overlays += thing
 	else
@@ -146,7 +152,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 			if(overlays_standing[R_HAND_LAYER])
 				overlays += overlays_standing[R_HAND_LAYER]
 		else
-			icon_state = "[base_icon_state]_s"
+			update_body_parts()
 			for(var/thing in overlays_standing)
 				if(thing)	overlays += thing
 
@@ -163,12 +169,13 @@ Please contact me on #coderbus IRC. ~Carnie x
 	overlays_lying[DAMAGE_LAYER]	= lying
 
 	for(var/obj/item/organ/limb/O in organs)
-		if(O.brutestate)
-			standing.overlays	+= "[O.icon_state]_[O.brutestate]0"	//we're adding icon_states of the base image as overlays //made icon_name redundant - RR
-			lying.overlays		+= "[O.icon_state]2_[O.brutestate]0"
-		if(O.burnstate)
-			standing.overlays	+= "[O.icon_state]_0[O.burnstate]"
-			lying.overlays		+= "[O.icon_state]2_0[O.burnstate]"
+		if(O.status == ORGAN_ORGANIC && O.state != ORGAN_REMOVED)
+			if(O.brutestate)
+				standing.overlays	+= "[O.dam_icon]_[O.brutestate]0"	//we're adding dam_icons of the base image as overlays //Made this use "dam_icon" instead - RR
+				lying.overlays		+= "[O.dam_icon]2_[O.brutestate]0"
+			if(O.burnstate)
+				standing.overlays	+= "[O.dam_icon]_0[O.burnstate]"
+				lying.overlays		+= "[O.dam_icon]2_0[O.burnstate]"
 
 	apply_overlay(DAMAGE_LAYER)
 
@@ -197,10 +204,11 @@ Please contact me on #coderbus IRC. ~Carnie x
 			standing	+= image("icon"=facial_s, "layer"=-HAIR_LAYER)
 			lying		+= image("icon"=facial_l, "layer"=-HAIR_LAYER)
 
-	//Applies the debrained overlay if there is no brain
-	if(!getorgan(/obj/item/organ/brain))
+	//Applies the debrained overlay if there is no brain and the head is still there
+	if(!getorgan(/obj/item/organ/brain) && getlimb(/obj/item/organ/limb/head))
 		standing	+= image("icon"='icons/mob/human_face.dmi', "icon_state"="debrained_s", "layer"=-HAIR_LAYER)
 		lying		+= image("icon"='icons/mob/human_face.dmi', "icon_state"="debrained_l", "layer"=-HAIR_LAYER)
+
 	else if(hair_style)
 		S = hair_styles_list[hair_style]
 		if(S)
@@ -210,6 +218,9 @@ Please contact me on #coderbus IRC. ~Carnie x
 			hair_l.Blend("#[hair_color]", ICON_ADD)
 			standing	+= image("icon"=hair_s, "layer"=-HAIR_LAYER)
 			lying		+= image("icon"=hair_l, "layer"=-HAIR_LAYER)
+
+	if(!getlimb(/obj/item/organ/limb/head)) //No head no hair - RR
+		remove_overlay(HAIR_LAYER)
 
 	if(lying.len)
 		overlays_lying[HAIR_LAYER]		= lying
@@ -225,12 +236,10 @@ Please contact me on #coderbus IRC. ~Carnie x
 	var/list/standing	= list()
 	var/list/lying		= list()
 
-	var/g = (gender == FEMALE) ? "f" : "m"
 	for(var/mut in mutations)
 		switch(mut)
 			if(HULK)
-				lying		+= image("icon"='icons/effects/genetics.dmi', "icon_state"="hulk_[g]_l", "layer"=-MUTATIONS_LAYER)
-				standing	+= image("icon"='icons/effects/genetics.dmi', "icon_state"="hulk_[g]_s", "layer"=-MUTATIONS_LAYER)
+				update_body() //This handles Mutantrace Parts, Including Hulk - RR
 			if(COLD_RESISTANCE)
 				lying		+= image("icon"='icons/effects/genetics.dmi', "icon_state"="fire_l", "layer"=-MUTATIONS_LAYER)
 				standing	+= image("icon"='icons/effects/genetics.dmi', "icon_state"="fire_s", "layer"=-MUTATIONS_LAYER)
@@ -251,8 +260,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 /mob/living/carbon/human/proc/update_body()
 	remove_overlay(BODY_LAYER)
 
-	update_base_icon_state()
-	icon_state = "[base_icon_state]_[src.lying ? "l" : "s"]"
+	update_body_parts()
 
 	var/list/lying		= list()
 	var/list/standing	= list()
@@ -264,12 +272,14 @@ Please contact me on #coderbus IRC. ~Carnie x
 
 	//Eyes
 	if(!dna || dna.mutantrace != "skeleton")
-		var/icon/eyes_s = icon('icons/mob/human_face.dmi', "eyes_s")
-		var/icon/eyes_l = icon('icons/mob/human_face.dmi', "eyes_l")
-		eyes_s.Blend("#[eye_color]", ICON_ADD)
-		eyes_l.Blend("#[eye_color]", ICON_ADD)
-		standing	+= image("icon"=eyes_s, "layer"=-BODY_LAYER)
-		lying		+= image("icon"=eyes_l, "layer"=-BODY_LAYER)
+		if(getlimb(/obj/item/organ/limb/head))
+			var/icon/eyes_s = icon('icons/mob/human_face.dmi', "eyes_s")
+			var/icon/eyes_l = icon('icons/mob/human_face.dmi', "eyes_l")
+			eyes_s.Blend("#[eye_color]", ICON_ADD)
+			eyes_l.Blend("#[eye_color]", ICON_ADD)
+			standing	+= image("icon"=eyes_s, "layer"=-BODY_LAYER)
+			lying		+= image("icon"=eyes_l, "layer"=-BODY_LAYER)
+
 
 	//Underwear
 	if(underwear)
@@ -278,12 +288,121 @@ Please contact me on #coderbus IRC. ~Carnie x
 			standing	+= image("icon"=U.icon, "icon_state"="[U.icon_state]_s", "layer"=-BODY_LAYER)
 			lying		+= image("icon"=U.icon, "icon_state"="[U.icon_state]_l", "layer"=-BODY_LAYER)
 
+
 	if(lying.len)
 		overlays_lying[BODY_LAYER]		= lying
 	if(standing.len)
 		overlays_standing[BODY_LAYER]	= standing
 
 	apply_overlay(BODY_LAYER)
+
+
+/mob/living/carbon/human/proc/update_body_parts()
+	remove_overlay(BODYPARTS_LAYER)
+
+	icon_state = "" //Should any rogue piece of code attempt to reassign icon_state, we remove it once more - RR
+
+	var/list/lying			= list()
+	var/list/standing		= list()
+
+	var/icon_gender			= (gender == FEMALE) ? "f" : "m"
+
+	var/mutant_type = null
+
+	var/icon/human_parts = 'icons/mob/human_parts.dmi'
+	var/icon/augment_parts = 'icons/mob/augments.dmi'
+
+	var/race = dna ? dna.mutantrace : null
+
+	if(!(HUSK in mutations) && !(HULK in mutations))
+		switch(race)
+			if("lizard")
+				mutant_type = "lizard"
+			if("golem")
+				mutant_type = "golem"
+			if("slime")
+				mutant_type = "slime"
+			if("shadow")
+				mutant_type = "shadow"
+			if("adamantine")
+				mutant_type = "adamantine"
+			if("fly")
+				mutant_type = "fly"
+			if("plant")
+				mutant_type = "plant"
+			if("skeleton")
+				mutant_type = "skeleton"
+			else
+				mutant_type = "normal"
+	else
+		if(HUSK in mutations)
+			mutant_type = "husk"
+		else
+			mutant_type = "hulk"
+
+
+	for(var/obj/item/organ/limb/affecting in organs)
+
+		if(affecting.name == "chest" || affecting.name == "head") // These body parts have genders
+			if(affecting.state != ORGAN_REMOVED)
+				if(affecting.status == ORGAN_ORGANIC)//if Organic check the necessary variables
+					if(mutant_type != "normal")	//Skin tone is irrelevant in Mutant races
+						if(stat == DEAD)
+							if(mutant_type == "plant") //Stupid Plant people
+								lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_dead", "layer"=-BODYPARTS_LAYER)
+
+							if(mutant_type == "husk")
+								standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+								lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+						else
+							standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
+							lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_l", "layer"=-BODYPARTS_LAYER)
+
+					if(mutant_type == "normal") //Skin tone IS Relevant in "Normal" race humans
+						standing 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
+						lying	 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_[icon_gender]_l", "layer"=-BODYPARTS_LAYER)
+
+
+				if(affecting.status == ORGAN_ROBOTIC) //Otherwise ignore Race, skin tone, etc.
+					standing 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+					lying	 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+		else // These body parts have no gender, and do not use the gender variable in their icon names
+			if(affecting.state != ORGAN_REMOVED)
+				if(affecting.status == ORGAN_ORGANIC)
+					if(mutant_type != "normal")
+						if(stat == DEAD)
+							if(mutant_type == "plant")
+								lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+							if(mutant_type == "husk")
+								standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+								lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+						else
+							standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+							lying		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+					if(mutant_type == "normal")
+						standing 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+						lying	 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+
+				if(affecting.status == ORGAN_ROBOTIC)
+					standing 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+					lying	 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_l", "layer"=-BODYPARTS_LAYER)
+
+
+	if(lying.len)
+		overlays_lying[BODYPARTS_LAYER]			 = lying
+	if(standing.len)
+		overlays_standing[BODYPARTS_LAYER]		 = standing
+
+	apply_overlay(BODYPARTS_LAYER)
+
+	update_damage_overlays() //No limb no damage overlay
+	update_hair() //No head no hair
 
 
 /mob/living/carbon/human/update_fire()
@@ -296,52 +415,12 @@ Please contact me on #coderbus IRC. ~Carnie x
 	apply_overlay(FIRE_LAYER)
 
 
-/mob/living/carbon/human/proc/update_augments()
-	remove_overlay(AUGMENTS_LAYER)
-
-	var/list/lying		= list()
-	var/list/standing	= list()
-
-
-	if(getlimb(/obj/item/organ/limb/robot/r_arm))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="r_arm_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="r_arm_l", "layer"=-AUGMENTS_LAYER)
-	if(getlimb(/obj/item/organ/limb/robot/l_arm))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="l_arm_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="l_arm_l", "layer"=-AUGMENTS_LAYER)
-
-	if(getlimb(/obj/item/organ/limb/robot/r_leg))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="r_leg_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="r_leg_l", "layer"=-AUGMENTS_LAYER)
-	if(getlimb(/obj/item/organ/limb/robot/l_leg))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="l_leg_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="l_leg_l", "layer"=-AUGMENTS_LAYER)
-
-	if(getlimb(/obj/item/organ/limb/robot/chest))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="chest_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="chest_l", "layer"=-AUGMENTS_LAYER)
-	if(getlimb(/obj/item/organ/limb/robot/head))
-		standing	+= image("icon"='icons/mob/augments.dmi', "icon_state"="head_s", "layer"=-AUGMENTS_LAYER)
-		lying		+= image("icon"='icons/mob/augments.dmi', "icon_state"="head_l", "layer"=-AUGMENTS_LAYER)
-
-
-
-	if(lying.len)
-		overlays_lying[AUGMENTS_LAYER]		= lying
-	if(standing.len)
-		overlays_standing[AUGMENTS_LAYER]	= standing
-
-	apply_overlay(AUGMENTS_LAYER)
-
-
-
 /* --------------------------------------- */
 //For legacy support.
 /mob/living/carbon/human/regenerate_icons()
 	..()
 	if(monkeyizing)		return
-	update_body()
-	update_hair()
+	update_body() //Handles update_body_parts() which in turn handles update_hair() - RR
 	update_mutations()
 	update_inv_w_uniform()
 	update_inv_wear_id()
@@ -734,3 +813,4 @@ Please contact me on #coderbus IRC. ~Carnie x
 #undef R_HAND_LAYER
 #undef FIRE_LAYER
 #undef TOTAL_LAYERS
+#undef BODYPARTS_LAYER

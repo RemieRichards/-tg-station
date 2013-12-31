@@ -204,6 +204,7 @@ Class Procs:
 	return src.attack_hand(user)
 
 /obj/machinery/attack_hand(mob/user as mob)
+
 	if(stat & (NOPOWER|BROKEN|MAINT))
 		return 1
 	if(user.lying || user.stat)
@@ -225,6 +226,9 @@ Class Procs:
 			return 1
 		else if(prob(H.getBrainLoss()))
 			user << "\red You momentarily forget how to use [src]."
+			return 1
+
+		if(!(has_hands(H)))
 			return 1
 
 	src.add_fingerprint(user)
