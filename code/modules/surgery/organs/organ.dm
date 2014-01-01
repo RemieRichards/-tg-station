@@ -206,6 +206,7 @@
 	switch(removal_type)
 		if(EXPLOSION)
 			removal_word = "blown"
+			dismember_chance = 45
 		if(GUN)
 			removal_word = "shot"
 		else //Spelling mistake or Melee
@@ -213,6 +214,7 @@
 
 	if(I)
 		dismember_chance = I.sharp_power
+
 
 	if(affecting.brute_dam >= (affecting.max_damage / 2) && affecting.state != ORGAN_REMOVED) //if it has taken significant enough damage
 		if(prob(dismember_chance)) //Probaility can be a unique variable for each item.
@@ -227,14 +229,29 @@
 					owner.u_equip(owner.wear_mask)
 			if(istype(affecting, /obj/item/organ/limb/chest))
 				for(var/obj/item/organ/O in owner.internal_organs)
-					if(!(istype(O, /obj/item/organ/brain)))
+					if(!istype(O, /obj/item/organ/brain))
 						owner.internal_organs -= O
-						O.loc = get_turf(src)
+						O.loc = get_turf(owner)
+			if(istype(affecting, /obj/item/organ/limb/r_arm) || istype(affecting, /obj/item/organ/limb/l_arm))
+				if(owner.handcuffed)
+					owner.handcuffed.loc = owner.loc
+					owner.handcuffed = null
+					owner.update_inv_handcuffed(0)
+			if(istype(affecting, /obj/item/organ/limb/r_leg) || istype(affecting, /obj/item/organ/limb/l_leg))
+				if(owner.legcuffed)
+					owner.legcuffed.loc = owner.loc
+					owner.legcuffed = null
+					owner.update_inv_legcuffed(0)
+
 			affecting.state = ORGAN_REMOVED
 
 			affecting.drop_limb(owner)
 
-			owner.visible_message("<span class='danger'><B>[owner]'s [affecting.getDisplayName()] has been [removal_word] off!</B></span>")
+			if(affecting.name != "chest")
+				owner.visible_message("<span class='danger'><B>[owner]'s [affecting.getDisplayName()] has been [removal_word] off!</B></span>")
+			else
+				owner.visible_message("<span class='danger'><B>[owner]'s internal organs have spilled onto the floor!</B></span>")
+
 		owner.drop_both_hands() //Removes any items they may be carrying in their now non existant arms
 	owner.update_body()
 
@@ -342,32 +359,30 @@
 	if(status == ORGAN_ORGANIC)
 		switch(body_part)
 			if(HEAD)
-				LIMB = /obj/item/organ/limb/head
+				LIMB = new /obj/item/organ/limb/head (Loc)
 			//No chests, they can't be removed
 			if(ARM_RIGHT)
-				LIMB = /obj/item/organ/limb/r_arm
+				LIMB = new /obj/item/organ/limb/r_arm (Loc)
 			if(ARM_LEFT)
-				LIMB = /obj/item/organ/limb/l_arm
+				LIMB = new /obj/item/organ/limb/l_arm (Loc)
 			if(LEG_RIGHT)
-				LIMB = /obj/item/organ/limb/r_leg
+				LIMB = new /obj/item/organ/limb/r_leg (Loc)
 			if(LEG_LEFT)
-				LIMB = /obj/item/organ/limb/l_leg
+				LIMB = new /obj/item/organ/limb/l_leg (Loc)
 	else if(status == ORGAN_ROBOTIC)
 		switch(body_part)
 			if(HEAD)
-				LIMB = /obj/item/augment/head
+				LIMB = new /obj/item/augment/head (Loc)
 			//No chests, they can't be removed
 			if(ARM_RIGHT)
-				LIMB = /obj/item/augment/r_arm
+				LIMB = new /obj/item/augment/r_arm (Loc)
 			if(ARM_LEFT)
-				LIMB = /obj/item/augment/l_arm
+				LIMB = new /obj/item/augment/l_arm (Loc)
 			if(LEG_RIGHT)
-				LIMB = /obj/item/augment/r_leg
+				LIMB = new /obj/item/augment/r_leg (Loc)
 			if(LEG_LEFT)
-				LIMB = /obj/item/augment/l_leg
+				LIMB = new /obj/item/augment/l_leg (Loc)
 
-	new LIMB (Loc)
-
-	var/direction = pick(cardinal) //Make the limb fly off
-	step(LIMB,direction)
+	var/direction = pick(cardinal)
+	step(LIMB,direction) //Make the limb fly off
 

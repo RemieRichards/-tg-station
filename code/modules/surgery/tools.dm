@@ -61,7 +61,7 @@
 	desc = "Cut, cut, and once more cut."
 	icon = 'icons/obj/surgery.dmi'
 	icon_state = "scalpel"
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	force = 10.0
 	w_class = 1.0
 	throwforce = 5.0
@@ -71,6 +71,7 @@
 	g_amt = 5000
 	origin_tech = "materials=1;biotech=1"
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 10
 
 	suicide_act(mob/user)
 		viewers(user) << pick("\red <b>[user] is slitting \his wrists with [src]! It looks like \he's trying to commit suicide.</b>", \
@@ -85,7 +86,7 @@
 	icon = 'icons/obj/surgery.dmi'
 	icon_state = "saw"
 	hitsound = 'sound/weapons/circsawhit.ogg'
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	force = 15.0
 	w_class = 3.0
 	throwforce = 9.0
@@ -95,6 +96,7 @@
 	g_amt = 10000
 	origin_tech = "materials=1;biotech=1"
 	attack_verb = list("attacked", "slashed", "sawed", "cut")
+	sharp_power = 25
 
 
 /obj/item/weapon/surgical_drapes

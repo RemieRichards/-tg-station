@@ -80,6 +80,8 @@
 	icon_state = "knife"
 	force = 10.0
 	throwforce = 10.0
+	flags = SHARP
+	sharp_power = 10
 
 	suicide_act(mob/user)
 		viewers(user) << pick("\red <b>[user] is slitting \his wrists with the [src.name]! It looks like \he's trying to commit suicide.</b>", \
@@ -103,7 +105,7 @@
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "knife"
 	desc = "A general purpose Chef's Knife made by SpaceCook Incorporated. Guaranteed to stay sharp for years to come."
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	force = 10.0
 	w_class = 3.0
 	throwforce = 6.0
@@ -112,6 +114,7 @@
 	m_amt = 12000
 	origin_tech = "materials=1"
 	attack_verb = list("slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 20
 
 	suicide_act(mob/user)
 		viewers(user) << pick("\red <b>[user] is slitting \his wrists with the [src.name]! It looks like \he's trying to commit suicide.</b>", \
@@ -133,7 +136,7 @@
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "butch"
 	desc = "A huge thing used for chopping and chopping up meat. This includes clowns and clown-by-products."
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	force = 15.0
 	w_class = 2.0
 	throwforce = 8.0
@@ -143,6 +146,7 @@
 	origin_tech = "materials=1"
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb = list("cleaved", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 30
 
 /*
  * Rolling Pins

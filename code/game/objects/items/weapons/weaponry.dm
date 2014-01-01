@@ -42,13 +42,14 @@
 	desc = "This thing is so unspeakably shitty you are having a hard time even holding it."
 	icon_state = "sord"
 	item_state = "sord"
-	flags = FPRINT | TABLEPASS
+	flags = FPRINT | TABLEPASS | SHARP
 	slot_flags = SLOT_BELT
 	force = 2
 	throwforce = 1
 	w_class = 3
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 20
 
 	suicide_act(mob/user)
 		viewers(user) << "\red <b>[user] is impaling \himself with the [src.name]! It looks like \he's trying to commit suicide.</b>"
@@ -59,12 +60,13 @@
 	desc = "What are you standing around staring at this for? Get to killing!"
 	icon_state = "claymore"
 	item_state = "claymore"
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	slot_flags = SLOT_BELT
 	force = 40
 	throwforce = 10
 	w_class = 3
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 35
 
 	IsShield()
 		return 1
@@ -82,13 +84,14 @@
 	desc = "Woefully underpowered in D20"
 	icon_state = "katana"
 	item_state = "katana"
-	flags = FPRINT | TABLEPASS | CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT | SHARP
 	slot_flags = SLOT_BELT | SLOT_BACK
 	force = 40
 	throwforce = 10
 	w_class = 3
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 25
 
 	suicide_act(mob/user)
 		viewers(user) << "\red <b>[user] is slitting \his stomach open with the [src.name]! It looks like \he's trying to commit seppuku.</b>"

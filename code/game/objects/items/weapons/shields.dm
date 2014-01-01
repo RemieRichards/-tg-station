@@ -99,17 +99,19 @@
 	src.active = !( src.active )
 	if (src.active)
 		user << "\blue The cloaking device is now active."
-		src.icon_state = "shield1"
+		icon_state = "shield1"
 	else
 		user << "\blue The cloaking device is now inactive."
-		src.icon_state = "shield0"
-	src.add_fingerprint(user)
-	user.update_icons()
-	return
+		icon_state = "shield0"
+	user.update_transform()
+	add_fingerprint(user)
+
 
 /obj/item/weapon/cloaking_device/emp_act(severity)
 	active = 0
 	icon_state = "shield0"
 	if(ismob(loc))
-		loc:update_icons()
+		var/mob/M = loc
+		M.update_transform()
 	..()
+

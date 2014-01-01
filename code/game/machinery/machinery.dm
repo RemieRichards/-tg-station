@@ -169,6 +169,7 @@ Class Procs:
 		return 1
 	if(usr.restrained() || usr.lying || usr.stat)
 		return 1
+
 	if(!(ishuman(usr) || issilicon(usr) || (ismonkey(usr) && ticker && ticker.mode.name == "monkey")))
 		usr << "<span class='notice'>You don't have the dexterity to do this!</span>"
 		return 1
@@ -180,6 +181,8 @@ Class Procs:
 			norange = 1
 		else if(istype(H.r_hand, /obj/item/tk_grab))
 			norange = 1
+		if(!(has_hands(H)))
+			return 1
 
 	if(!norange)
 		if(!issilicon(usr))

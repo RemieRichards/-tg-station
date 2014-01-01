@@ -132,6 +132,8 @@
 	if(!blinded)
 		flick("flash", flash)
 
+	var/obj/item/organ/limb/affecting = get_organ(ran_zone())
+
 // /obj/item/clothing/suit/bomb_suit(src)
 // /obj/item/clothing/head/bomb_hood(src)
 
@@ -175,6 +177,7 @@
 				ear_deaf += 120
 			if (prob(70) && !shielded)
 				Paralyse(10)
+				affecting.dismember(null,EXPLOSION)
 
 		if(3.0)
 			b_loss += 30

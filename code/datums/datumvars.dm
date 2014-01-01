@@ -256,6 +256,7 @@ client
 			if(ishuman(D))
 				body += "<option value>---</option>"
 				body += "<option value='?_src_=vars;setmutantrace=\ref[D]'>Set Mutantrace</option>"
+				body += "<option value='?_src_=vars;deusexmachina=\ref[D]'>Set Augments</option>"
 				body += "<option value='?_src_=vars;makeai=\ref[D]'>Make AI</option>"
 				body += "<option value='?_src_=vars;makerobot=\ref[D]'>Make cyborg</option>"
 				body += "<option value='?_src_=vars;makemonkey=\ref[D]'>Make monkey</option>"
@@ -754,6 +755,39 @@ client
 			H.dna.mutantrace = new_mutantrace
 			H.update_body()
 			H.update_hair()
+
+
+	else if(href_list["deusexmachina"])
+		if(!check_rights(0))	return
+
+		var/mob/living/carbon/human/H = locate(href_list["deusexmachina"])
+		if(!istype(H))
+			usr << "This can only be done to instances of type /mob/living/carbon/human"
+			return
+
+		var/augment = input("Please choose a limb to augment","Augmentation",null) as null|anything in list ("NONE","Head","Chest","Right arm","Left arm","Right leg","Left leg","ALL")
+		var/obj/item/organ/limb/L
+		switch(augment)
+			if(null)		return
+			if("NONE")		return
+			if("Head")
+				L = H.getlimb(/obj/item/organ/limb/head)
+			if("Chest")
+				L = H.getlimb(/obj/item/organ/limb/chest)
+			if("Right arm")
+				L = H.getlimb(/obj/item/organ/limb/r_arm)
+			if("Left arm")
+				L = H.getlimb(/obj/item/organ/limb/l_arm)
+			if("Right leg")
+				L = H.getlimb(/obj/item/organ/limb/r_leg)
+			if("Left leg")
+				L = H.getlimb(/obj/item/organ/limb/l_leg)
+			if("ALL")
+				H.Robotize_organs(1,1)
+				return
+
+		if(L)
+			L.Robotize()
 
 	else if(href_list["regenerateicons"])
 		if(!check_rights(0))	return

@@ -75,6 +75,7 @@
 		..()
 
 /obj/machinery/syndicatebomb/attack_hand(var/mob/user)
+
 	if(anchored)
 		if(open_panel)
 			wires.Interact(user)
