@@ -60,7 +60,6 @@
 		limb_part = ARM_LEFT
 
 
-
 /mob/living/carbon/human/proc/handle_augment_bonus()
 	for(var/obj/item/organ/limb/affecting in organs)
 		if(affecting.status == ORGAN_ROBOTIC)
@@ -81,22 +80,10 @@
 	set category = "Augments"
 	set desc = "Reveal a hidden blade from your arm"
 
-	var/active
 	var/obj/item/weapon/melee/aug_blade/AB = new()
 
-	if(!active)
-		if(!get_active_hand()&&!istype(get_inactive_hand(), /obj/item/weapon/melee/aug_blade))
-			put_in_hands(AB)
-			active = 1
-
-	else
-		active = 0
-		src << "<span class='notice'>Your [AB.name] retracts back into your arm.</span>"
-		drop_item()
-		del(AB)
-
-
-
+	if(!get_active_hand()&&!istype(get_inactive_hand(), /obj/item/weapon/melee/aug_blade))
+		put_in_hands(AB)
 
 
 /obj/item/weapon/melee/aug_blade
@@ -108,8 +95,9 @@
 	throw_speed = 1
 	throw_range = 1
 	w_class = 4.0//So you can't hide it in your pocket or some such.
-	flags = FPRINT | TABLEPASS | NOSHIELD | NOBLOODY
+	flags = FPRINT | TABLEPASS | NOSHIELD | NOBLOODY | SHARP
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
+	sharp_power = 30
 
 /obj/item/weapon/melee/aug_blade/dropped()
 	del(src)
@@ -125,25 +113,14 @@
 	set category = "Augments"
 	set desc = "Reveal a hidden gun from your arm"
 
-
-	var/active
 	var/obj/item/weapon/gun/energy/laser/captain/aug_gun/AG = new()
 
-	if(!active)
-		if(!get_active_hand()&&!istype(get_inactive_hand(), /obj/item/weapon/gun/energy/laser/captain/aug_gun))
-			put_in_hands(AG)
-			active = 1
-
-	else
-		active = 0
-		src << "<span class='notice'>Your [AG.name] retracts back into your arm.</span>"
-		drop_item()
-		del(AG)
+	if(!get_active_hand()&&!istype(get_inactive_hand(), /obj/item/weapon/gun/energy/laser/captain/aug_gun))
+		put_in_hands(AG)
 
 
 
-
-/obj/item/weapon/gun/energy/laser/captain/aug_gun //Sub class of Captain's so I don't have to copy paste all the captain laser recharge code.
+/obj/item/weapon/gun/energy/laser/captain/aug_gun //Sub class of Captain's fot the laser recharge code.
 	name = "Gun augment"
 	icon_state = "aug_gun"
 	desc = "A semi-powerful laser gun that recharges over time."

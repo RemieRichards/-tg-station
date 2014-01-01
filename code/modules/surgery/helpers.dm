@@ -20,7 +20,7 @@
 					if(affecting.status == ORGAN_ROBOTIC)
 						continue
 
-				if(affecting in H.organs) //if they actually have this limb - RR
+				if(affecting in H.organs && affecting.state != ORGAN_REMOVED) //if they actually have this limb - RR
 					if(affecting.status == ORGAN_ROBOTIC) //Cannot operate on Robotic organs - RR
 						continue
 

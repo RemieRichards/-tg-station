@@ -222,11 +222,11 @@
 			if(istype(affecting, /obj/item/organ/limb/head))
 				for(var/obj/item/organ/brain/B in owner.internal_organs)
 					owner.internal_organs -= B
-					affecting.contents += B //Put the brain in the head
-					owner.u_equip(owner.glasses) //Drop their head clothing
-					owner.u_equip(owner.head)
-					owner.u_equip(owner.ears)
-					owner.u_equip(owner.wear_mask)
+					B.loc = get_turf(owner)
+				owner.u_equip(owner.glasses) //Drop their head clothing
+				owner.u_equip(owner.head)
+				owner.u_equip(owner.ears)
+				owner.u_equip(owner.wear_mask)
 			if(istype(affecting, /obj/item/organ/limb/chest))
 				for(var/obj/item/organ/O in owner.internal_organs)
 					if(!istype(O, /obj/item/organ/brain))
