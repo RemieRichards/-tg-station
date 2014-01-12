@@ -209,7 +209,7 @@
 			dismember_chance = 45
 		if(GUN)
 			removal_word = "shot"
-		else //Spelling mistake or Melee
+		else //Spelling mistake in removal_type or Melee removal
 			removal_word = "chopped"
 
 	if(I)
@@ -218,32 +218,32 @@
 
 	if(affecting.brute_dam >= (affecting.max_damage / 2) && affecting.state != ORGAN_REMOVED) //if it has taken significant enough damage
 		if(prob(dismember_chance)) //Probaility can be a unique variable for each item.
-			owner.apply_damage(30,"brute","[affecting]")
+			var/Loc = get_turf(owner)
+
 			if(istype(affecting, /obj/item/organ/limb/head))
-				for(var/obj/item/organ/brain/B in owner.internal_organs)
-					owner.internal_organs -= B
-					B.loc = get_turf(owner)
-				owner.u_equip(owner.glasses) //Drop their head clothing
-				owner.u_equip(owner.head)
-				owner.u_equip(owner.ears)
-				owner.u_equip(owner.wear_mask)
+				return
+
 			if(istype(affecting, /obj/item/organ/limb/chest))
 				for(var/obj/item/organ/O in owner.internal_organs)
 					if(!istype(O, /obj/item/organ/brain))
 						owner.internal_organs -= O
-						O.loc = get_turf(owner)
+						O.loc = Loc
+
 			if(istype(affecting, /obj/item/organ/limb/r_arm) || istype(affecting, /obj/item/organ/limb/l_arm))
 				if(owner.handcuffed)
-					owner.handcuffed.loc = owner.loc
+					owner.handcuffed.loc = Loc
 					owner.handcuffed = null
 					owner.update_inv_handcuffed(0)
+
 			if(istype(affecting, /obj/item/organ/limb/r_leg) || istype(affecting, /obj/item/organ/limb/l_leg))
 				if(owner.legcuffed)
-					owner.legcuffed.loc = owner.loc
+					owner.legcuffed.loc = Loc
 					owner.legcuffed = null
 					owner.update_inv_legcuffed(0)
 
 			affecting.state = ORGAN_REMOVED
+
+			owner.apply_damage(30,"brute","[affecting]")
 
 			affecting.drop_limb(owner)
 
@@ -262,6 +262,7 @@
 /mob/living/carbon/human/proc/augmentation(var/obj/item/organ/limb/affecting, var/mob/user, var/obj/item/I)
 	if(affecting.state == ORGAN_REMOVED)
 		var/obj/item/augment/AUG = I
+
 		if(affecting.body_part == AUG.limb_part)
 			affecting.Robotize()
 			affecting.bonus = AUG.bonus
@@ -280,7 +281,6 @@
 		user.attack_log += "\[[time_stamp()]\]<font color='red'> Augmented [src.name]'s [parse_zone(user.zone_sel.selecting)] ([src.ckey]) INTENT: [uppertext(user.a_intent)])</font>"
 		src.attack_log += "\[[time_stamp()]\]<font color='orange'> Augmented by [user.name] ([user.ckey]) (INTENT: [uppertext(user.a_intent)])</font>"
 		log_attack("<font color='red'>[user.name] ([user.ckey]) augmented [src.name] ([src.ckey]) (INTENT: [uppertext(user.a_intent)])</font>")
-
 
 
 
@@ -358,9 +358,7 @@
 
 	if(status == ORGAN_ORGANIC)
 		switch(body_part)
-			if(HEAD)
-				LIMB = new /obj/item/organ/limb/head (Loc)
-			//No chests, they can't be removed
+			//No chests, heads, they can't be removed
 			if(ARM_RIGHT)
 				LIMB = new /obj/item/organ/limb/r_arm (Loc)
 			if(ARM_LEFT)
@@ -371,9 +369,7 @@
 				LIMB = new /obj/item/organ/limb/l_leg (Loc)
 	else if(status == ORGAN_ROBOTIC)
 		switch(body_part)
-			if(HEAD)
-				LIMB = new /obj/item/augment/head (Loc)
-			//No chests, they can't be removed
+			//No chests,heads, they can't be removed
 			if(ARM_RIGHT)
 				LIMB = new /obj/item/augment/r_arm (Loc)
 			if(ARM_LEFT)

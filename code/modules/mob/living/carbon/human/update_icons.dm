@@ -182,7 +182,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 	var/obj/item/organ/limb/head/HEAD_ORGAN = get_organ("head")
 
 	//mutants don't have hair. masks and helmets can obscure our hair too.
-	if( (HUSK in mutations) || (dna && dna.mutantrace) || (head && (head.flags & BLOCKHAIR)) || (wear_mask && (wear_mask.flags & BLOCKHAIR)) || HEAD_ORGAN.state == ORGAN_REMOVED)
+	if( (HUSK in mutations) || (dna && dna.mutantrace) || (head && (head.flags & BLOCKHAIR)) || (wear_mask && (wear_mask.flags & BLOCKHAIR)) || HEAD_ORGAN.state == ORGAN_REMOVED || HEAD_ORGAN.state == ORGAN_ROBOTIC)
 		return
 
 
@@ -198,7 +198,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 			facial_s.Blend("#[facial_hair_color]", ICON_ADD)
 			standing	+= image("icon"=facial_s, "layer"=-HAIR_LAYER)
 
-	//Applies the debrained overlay if there is no brain and the head is still there
+	//Applies the debrained overlay if there is no brain
 	if(!getorgan(/obj/item/organ/brain))
 		standing	+= image("icon"='icons/mob/human_face.dmi', "icon_state"="debrained_s", "layer"=-HAIR_LAYER)
 
@@ -307,6 +307,10 @@ Please contact me on #coderbus IRC. ~Carnie x
 				mutant_type = "plant"
 			if("skeleton")
 				mutant_type = "skeleton"
+			if("zombie")
+				mutant_type = "zombie"
+			if("jelly")
+				mutant_type = "jelly"
 			else
 				mutant_type = "normal"
 	else
@@ -318,25 +322,25 @@ Please contact me on #coderbus IRC. ~Carnie x
 
 	for(var/obj/item/organ/limb/affecting in organs)
 
-		if(affecting.body_part == HEAD || affecting.body_part == CHEST) // These body parts have genders
-			if(affecting.state != ORGAN_REMOVED || affecting.body_part == CHEST) //It's not been removed or it's a chest
-				if(affecting.status == ORGAN_ORGANIC)//if Organic check the necessary variables
-					if(mutant_type != "normal")	//Skin tone is irrelevant in Mutant races
-						if(stat == DEAD)
-							if(mutant_type == "plant") //Stupid Plant people
-								standing		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_dead_s", "layer"=-BODYPARTS_LAYER)
+		if(affecting.body_part == HEAD || affecting.body_part == CHEST) // These body parts have genders and are not removable
 
-							if(mutant_type == "husk")
-								standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+			if(affecting.status == ORGAN_ORGANIC)//if Organic check the necessary variables
+				if(mutant_type != "normal")	//Skin tone is irrelevant in Mutant races
+					if(stat == DEAD)
+						if(mutant_type == "plant") //Stupid Plant people
+							standing		+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_dead_s", "layer"=-BODYPARTS_LAYER)
 
-						else
-							standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
+						if(mutant_type == "husk")
+							standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
 
-					if(mutant_type == "normal") //Skin tone IS Relevant in "Normal" race humans
-						standing 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
+					else
+						standing	+= image("icon"=human_parts, "icon_state"="[mutant_type]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
 
-				if(affecting.status == ORGAN_ROBOTIC) //Otherwise ignore Race, skin tone, etc.
-					standing 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
+				if(mutant_type == "normal") //Skin tone IS Relevant in "Normal" race humans
+					standing 	+= image("icon"=human_parts, "icon_state"="[skin_tone]_[affecting.name]_[icon_gender]_s", "layer"=-BODYPARTS_LAYER)
+
+			if(affecting.status == ORGAN_ROBOTIC)
+				standing 	+= image("icon"=augment_parts, "icon_state"="[affecting.name]_s", "layer"=-BODYPARTS_LAYER)
 
 		else // These body parts have no gender, and do not use the gender variable in their icon names
 			if(affecting.state != ORGAN_REMOVED)

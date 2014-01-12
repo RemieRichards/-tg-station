@@ -182,7 +182,7 @@ emp_act
 	if(!I.force)	return 0
 	var/Iforce = I.force //to avoid runtimes on the forcesay checks at the bottom. Some items might delete themselves if you drop them. (stunning yourself, ninja swords)
 
-	if(I.flags & SHARP) //Not all dismemerment relies on Item sharpness
+	if(I.flags & SHARP) //Not all dismemerment relies on Item sharpness, hence the check being here and not in the proc.
 		affecting.dismember(I, MELEE) //DISMEMBERMENT - It's about time - RR
 
 	if(affecting && affecting.state != ORGAN_REMOVED) //if the body part still exists, and hasn't already been removed.
@@ -271,6 +271,6 @@ emp_act
 
 
 			src << "<span class='danger'>Your cybernetic limb refuses input for a second!</span>"
-			..()
+	..()
 
 

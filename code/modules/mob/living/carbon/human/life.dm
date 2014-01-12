@@ -81,7 +81,7 @@
 		handle_random_events()
 
 		//The bonuses certain augments give.
-		handle_augment_bonus()
+		handle_limb_bonus()
 
 	//Handle temperature/pressure differences between body and environment
 	handle_environment(environment)
