@@ -48,7 +48,7 @@
 /obj/item/augment/blade_arm
 	name = "blade arm"
 	desc = "A Robotic blade-arm"
-	icon_state = "blade_arm"
+	icon_state = "r_arm_s"
 	limb_part = ARM_RIGHT
 	bonus = BONUS_BLADE
 
@@ -59,14 +59,12 @@
 		limb_part = ARM_LEFT
 
 /mob/living/carbon/human/proc/handle_limb_bonus()
+	verbs -= /mob/living/carbon/human/verb/blade_arm
 	for(var/obj/item/organ/limb/affecting in organs)
 		if(affecting.status == ORGAN_ROBOTIC)
 			switch(affecting.bonus)
 				if(BONUS_BLADE)
 					verbs += /mob/living/carbon/human/verb/blade_arm
-
-		else
-			verbs -= /mob/living/carbon/human/verb/blade_arm
 
 
 //BLADE ARMS\\
@@ -100,23 +98,3 @@
 
 /obj/item/weapon/melee/aug_blade/proc/throw()
 	del(src)
-
-
-/obj/item/weapon/melee/aug_blade/pickup(mob/living/user as mob)
-	if(ishuman(user))
-		var/mob/living/carbon/human/H = user
-
-		var/obj/item/organ/limb/L
-
-		if(user.hand)
-			L = H.get_organ("l_arm")
-		else
-			L = H.get_organ("r_arm")
-
-		if(L)
-			if(L.bonus != BONUS_BLADE)//if their other hand is not also a blade arm
-				user.put_in_inactive_hand(L) //Send it back to the other blade arm
-
-
-
-
