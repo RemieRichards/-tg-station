@@ -324,7 +324,7 @@ Please contact me on #coderbus IRC. ~Carnie x
 
 		if(affecting.body_part == HEAD || affecting.body_part == CHEST) // These body parts have genders and are not removable
 
-			if(affecting.status == ORGAN_ORGANIC)//if Organic check the necessary variables
+			if(affecting.status == ORGAN_ORGANIC || affecting.body_part == HEAD)
 				if(mutant_type != "normal")	//Skin tone is irrelevant in Mutant races
 					if(stat == DEAD)
 						if(mutant_type == "plant") //Stupid Plant people

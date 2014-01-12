@@ -102,3 +102,21 @@
 	del(src)
 
 
+/obj/item/weapon/melee/aug_blade/pickup(mob/living/user as mob)
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+
+		var/obj/item/organ/limb/L
+
+		if(user.hand)
+			L = H.get_organ("l_arm")
+		else
+			L = H.get_organ("r_arm")
+
+		if(L)
+			if(L.bonus != BONUS_BLADE)//if their other hand is not also a blade arm
+				user.put_in_inactive_hand(L) //Send it back to the other blade arm
+
+
+
+
