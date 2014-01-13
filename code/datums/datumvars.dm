@@ -790,8 +790,6 @@ client
 		switch(new_organ_type)
 			if(null)
 				return
-			if("Camcel")
-				return
 			if("Robotic")
 				new_type = ORGAN_ROBOTIC
 			if("Organic")

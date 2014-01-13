@@ -315,7 +315,7 @@
 		return 0
 
 
-//////////////// Quick organ change Procs \\\\\\\\\\\\\\\\
+//////////////// QUICK ORGAN CHANGE PROCS \\\\\\\\\\\\\\\\
 
 /mob/living/carbon/human/proc/change_all_organs(var/type) //types are defined in
 
@@ -328,7 +328,6 @@
 				H.updatehealth()
 				H.update_body()
 
-
 /obj/item/organ/proc/change_organ(var/type)
 	status = type
 	state = ORGAN_FINE
@@ -337,6 +336,10 @@
 		var/obj/item/organ/limb/L = src
 		L.burn_dam = 0
 		L.brute_dam = 0
+		if(L.owner)
+			var/mob/living/carbon/human/H = L.owner
+			H.update_body()
+
 
 
 //////////////// DROP LIMB \\\\\\\\\\\\\\\\
