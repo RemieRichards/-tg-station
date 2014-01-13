@@ -2,8 +2,10 @@
 	if(..())	//to allow surgery to return properly.
 		return
 
+	if(!has_hands(M))
+		return
+
 	if((M != src) && check_shields(0, M.name))
-		add_logs(M, src, "attempted to touch")
 		visible_message("<span class='warning'>[M] attempted to touch [src]!</span>")
 		return 0
 
@@ -11,8 +13,6 @@
 		if("help")
 			if(health >= 0)
 				help_shake_act(M)
-				if(src != M)
-					add_logs(M, src, "shaked")
 				return 1
 
 			//CPR
@@ -24,7 +24,6 @@
 				return 0
 
 			if(cpr_time < world.time + 30)
-				add_logs(src, M, "CPRed")
 				visible_message("<span class='notice'>[M] is trying to perform CPR on [src]!</span>")
 				if(!do_mob(M, src))
 					return 0
@@ -39,9 +38,6 @@
 		if("grab")
 			if(M == src || anchored)
 				return 0
-
-			add_logs(M, src, "grabbed", addition="passively")
-
 			if(w_uniform)
 				w_uniform.add_fingerprint(M)
 
@@ -51,6 +47,7 @@
 			if(!G)	//the grab will delete itself in New if affecting is anchored
 				return
 			M.put_in_active_hand(G)
+			grabbed_by += G
 			G.synch()
 			LAssailant = M
 
@@ -59,7 +56,10 @@
 			return 1
 
 		if("harm")
-			add_logs(M, src, "punched")
+			M.attack_log += text("\[[time_stamp()]\] <font color='red'>Punched [src.name] ([src.ckey])</font>")
+			src.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been punched by [M.name] ([M.ckey])</font>")
+
+			log_attack("<font color='red'>[M.name] ([M.ckey]) punched [src.name] ([src.ckey])</font>")
 
 			var/attack_verb = "punch"
 			if(lying)
@@ -108,7 +108,9 @@
 				forcesay(hit_appends)
 
 		if("disarm")
-			add_logs(M, src, "disarmed")
+			M.attack_log += text("\[[time_stamp()]\] <font color='red'>Disarmed [src.name] ([src.ckey])</font>")
+			src.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been disarmed by [M.name] ([M.ckey])</font>")
+			log_attack("<font color='red'>[M.name] ([M.ckey]) disarmed [src.name] ([src.ckey])</font>")
 
 			if(w_uniform)
 				w_uniform.add_fingerprint(M)

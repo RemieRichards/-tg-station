@@ -7,7 +7,7 @@
 	icon = 'icons/obj/assemblies.dmi'
 	icon_state = "plastic-explosive0"
 	item_state = "plasticx"
-	flags = NOBLUDGEON
+	flags = FPRINT | TABLEPASS | NOBLUDGEON
 	w_class = 2.0
 	origin_tech = "syndicate=2"
 	var/datum/wires/explosive/plastic/wires = null
@@ -60,7 +60,8 @@
 		return
 	user << "Planting explosives..."
 	if(ismob(target))
-		add_logs(user, target, "tried to plant explosives on", object="[name]")
+		user.attack_log += "\[[time_stamp()]\] <font color='red'> [user.real_name] tried planting [name] on [target:real_name] ([target:ckey])</font>"
+		log_attack("<font color='red'> [user.real_name] ([user.ckey]) tried planting [name] on [target:real_name] ([target:ckey])</font>")
 		user.visible_message("\red [user.name] is trying to plant some kind of explosive on [target.name]!")
 
 
@@ -70,7 +71,7 @@
 		loc = null
 
 		if (ismob(target))
-			add_logs(user, target, "planted [name] on")
+			target:attack_log += "\[[time_stamp()]\]<font color='orange'> Had the [name] planted on them by [user.real_name] ([user.ckey])</font>"
 			user.visible_message("\red [user.name] finished planting an explosive on [target.name]!")
 
 		target.overlays += image('icons/obj/assemblies.dmi', "plastic-explosive2")

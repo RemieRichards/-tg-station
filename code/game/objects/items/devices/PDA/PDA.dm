@@ -11,6 +11,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 	icon_state = "pda"
 	item_state = "electronic"
 	w_class = 1.0
+	flags = FPRINT | TABLEPASS
 	slot_flags = SLOT_ID | SLOT_BELT
 
 	//Main variables
@@ -959,13 +960,20 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 /obj/item/device/pda/clown/Crossed(AM as mob|obj) //Clown PDA is slippery.
 	if (istype(AM, /mob/living/carbon))
-		var/mob/living/carbon/M = AM
-		if(M.slip(8, 5, src, NO_SLIP_WHEN_WALKING))
-			if (ishuman(M) && (M.real_name != src.owner))
-				if (istype(src.cartridge, /obj/item/weapon/cartridge/clown))
-					var/obj/item/weapon/cartridge/clown/cart = src.cartridge
-					if(cart.honk_charges < 5)
-						cart.honk_charges++
+		var/mob/M =	AM
+		if ((istype(M, /mob/living/carbon/human) && (istype(M:shoes, /obj/item/clothing/shoes) && M:shoes.flags&NOSLIP)) || M.m_intent == "walk")
+			return
+
+		if ((istype(M, /mob/living/carbon/human) && (M.real_name != src.owner) && (istype(src.cartridge, /obj/item/weapon/cartridge/clown))))
+			if (src.cartridge:honk_charges < 5)
+				src.cartridge:honk_charges++
+
+		M.stop_pulling()
+		M << "\blue You slipped on the PDA!"
+		playsound(src.loc, 'sound/misc/slip.ogg', 50, 1, -3)
+		M.Stun(8)
+		M.Weaken(5)
+
 
 //AI verb and proc for sending PDA messages.
 

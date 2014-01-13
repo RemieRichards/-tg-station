@@ -44,7 +44,4 @@
 		client.eye = src
 		client.perspective = MOB_PERSPECTIVE
 
-	if(isobj(loc))
-		var/obj/Loc=loc
-		Loc.on_log()
 

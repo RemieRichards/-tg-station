@@ -7,9 +7,9 @@
 
 /mob/living/carbon/alien/larva/Life()
 	set invisibility = 0
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
-	if (notransform)
+	if (monkeyizing)
 		return
 
 	..()

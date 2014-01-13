@@ -4,6 +4,7 @@
 	icon = 'icons/obj/storage.dmi'
 	icon_state = "deliverycloset"
 	density = 1
+	flags = FPRINT
 	mouse_drag_pointer = MOUSE_ACTIVE_POINTER
 	var/obj/wrapped = null
 	var/sortTag = 0
@@ -54,6 +55,7 @@
 	desc = "A small wrapped package."
 	icon = 'icons/obj/storage.dmi'
 	icon_state = "deliverycrateSmall"
+	flags = FPRINT
 	var/obj/item/wrapped = null
 	var/sortTag = 0
 
@@ -96,7 +98,7 @@
 	name = "package wrapper"
 	icon = 'icons/obj/items.dmi'
 	icon_state = "deliveryPaper"
-	flags = NOBLUDGEON
+	flags = FPRINT | NOBLUDGEON
 	w_class = 3.0
 	var/amount = 25.0
 
@@ -114,6 +116,7 @@
 			return
 
 		user.attack_log += text("\[[time_stamp()]\] <font color='blue'>Has used [name] on \ref[target]</font>")
+
 
 		if(istype(target, /obj/item) && !(istype(target, /obj/item/weapon/storage) && !istype(target,/obj/item/weapon/storage/box)))
 			var/obj/item/O = target
@@ -181,7 +184,7 @@
 
 	w_class = 1
 	item_state = "electronic"
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT
 	slot_flags = SLOT_BELT
 
 	proc/openwindow(mob/user as mob)
@@ -219,107 +222,105 @@
 	var/start_flush = 0
 	var/c_mode = 0
 
-/obj/machinery/disposal/deliveryChute/New()
-	..()
-	spawn(5)
-		trunk = locate() in loc
-		if(trunk)
-			trunk.linked = src	// link the pipe trunk to self
+	New()
+		..()
+		spawn(5)
+			trunk = locate() in loc
+			if(trunk)
+				trunk.linked = src	// link the pipe trunk to self
 
-/obj/machinery/disposal/deliveryChute/interact()
-	return
-
-/obj/machinery/disposal/deliveryChute/update()
-	return
-
-/obj/machinery/disposal/deliveryChute/Bumped(var/atom/movable/AM) //Go straight into the chute
-	if(istype(AM, /obj/item/projectile))	return
-	switch(dir)
-		if(NORTH)
-			if(AM.loc.y != loc.y+1) return
-		if(EAST)
-			if(AM.loc.x != loc.x+1) return
-		if(SOUTH)
-			if(AM.loc.y != loc.y-1) return
-		if(WEST)
-			if(AM.loc.x != loc.x-1) return
-
-	if(istype(AM, /obj))
-		var/obj/O = AM
-		O.loc = src
-	else if(istype(AM, /mob))
-		var/mob/M = AM
-		M.loc = src
-	flush()
-
-/obj/machinery/disposal/deliveryChute/flush()
-	flushing = 1
-	flick("intake-closing", src)
-	var/deliveryCheck = 0
-	var/obj/structure/disposalholder/H = new()	// virtual holder object which actually
-												// travels through the pipes.
-/*		for(var/obj/structure/bigDelivery/O in src)
-		deliveryCheck = 1
-		if(O.sortTag == 0)						//This auto-sorts package wrapped objects to disposals
-			O.sortTag = 1						//Cargo techs can do this themselves with their taggers
-	for(var/obj/item/smallDelivery/O in src)	//With this disabled packages will loop back round and come out the mail chute
-		deliveryCheck = 1
-		if(O.sortTag == 0)
-			O.sortTag = 1						*/
-	if(deliveryCheck == 0)
-		H.destinationTag = 1
-
-	sleep(10)
-	if((start_flush + 15) < world.time)
-		start_flush = world.time
-		playsound(src, 'sound/machines/disposalflush.ogg', 50, 0, 0)
-	sleep(5) // wait for animation to finish
-
-	H.init(src)	// copy the contents of disposer to holder
-	air_contents = new()		// new empty gas resv.
-
-	H.start(src) // start the holder processing movement
-	flushing = 0
-	// now reset disposal state
-	flush = 0
-	if(mode == 2)	// if was ready,
-		mode = 1	// switch to charging
-	update()
-	return
-
-/obj/machinery/disposal/deliveryChute/attackby(var/obj/item/I, var/mob/user)
-	if(!I || !user)
+	interact()
 		return
 
-	if(istype(I, /obj/item/weapon/screwdriver))
-		if(c_mode==0)
-			c_mode=1
-			playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
-			user << "<span class='notice'>You remove the screws around the power connection.</span>"
-			return
-		else if(c_mode==1)
-			c_mode=0
-			playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
-			user << "<span class='notice'>You attach the screws around the power connection.</span>"
-			return
-	else if(istype(I,/obj/item/weapon/weldingtool) && c_mode==1)
-		var/obj/item/weapon/weldingtool/W = I
-		if(W.remove_fuel(0,user))
-			playsound(loc, 'sound/items/Welder2.ogg', 100, 1)
-			user << "<span class='notice'>You start slicing the floorweld off the delivery chute.</span>"
-			if(do_after(user,20))
-				if(!src || !W.isOn()) return
-				user << "<span class='notice'>You sliced the floorweld off the delivery chute.</span>"
-				var/obj/structure/disposalconstruct/C = new (loc)
-				C.ptype = 8 // 8 =  Delivery chute
-				C.update()
-				C.anchored = 1
-				C.density = 1
-				del(src)
-			return
-		else
-			user << "<span class='notice'>You need more welding fuel to complete this task.</span>"
+	update()
+		return
+
+	Bumped(var/atom/movable/AM) //Go straight into the chute
+		if(istype(AM, /obj/item/projectile))	return
+		switch(dir)
+			if(NORTH)
+				if(AM.loc.y != loc.y+1) return
+			if(EAST)
+				if(AM.loc.x != loc.x+1) return
+			if(SOUTH)
+				if(AM.loc.y != loc.y-1) return
+			if(WEST)
+				if(AM.loc.x != loc.x-1) return
+
+		if(istype(AM, /obj))
+			var/obj/O = AM
+			O.loc = src
+		else if(istype(AM, /mob))
+			var/mob/M = AM
+			M.loc = src
+		flush()
+
+	flush()
+		flushing = 1
+		flick("intake-closing", src)
+		var/deliveryCheck = 0
+		var/obj/structure/disposalholder/H = new()	// virtual holder object which actually
+													// travels through the pipes.
+/*		for(var/obj/structure/bigDelivery/O in src)
+			deliveryCheck = 1
+			if(O.sortTag == 0)						//This auto-sorts package wrapped objects to disposals
+				O.sortTag = 1						//Cargo techs can do this themselves with their taggers
+		for(var/obj/item/smallDelivery/O in src)	//With this disabled packages will loop back round and come out the mail chute
+			deliveryCheck = 1
+			if(O.sortTag == 0)
+				O.sortTag = 1						*/
+		if(deliveryCheck == 0)
+			H.destinationTag = 1
+
+		air_contents = new()		// new empty gas resv.
+
+		sleep(10)
+		if((start_flush + 15) < world.time)
+			start_flush = world.time
+			playsound(src, 'sound/machines/disposalflush.ogg', 50, 0, 0)
+		sleep(5) // wait for animation to finish
+
+		H.init(src)	// copy the contents of disposer to holder
+
+		H.start(src) // start the holder processing movement
+		flushing = 0
+		// now reset disposal state
+		flush = 0
+		if(mode == 2)	// if was ready,
+			mode = 1	// switch to charging
+		update()
+		return
+
+	attackby(var/obj/item/I, var/mob/user)
+		if(!I || !user)
 			return
 
-/obj/machinery/disposal/deliveryChute/process()
-	return PROCESS_KILL
+		if(istype(I, /obj/item/weapon/screwdriver))
+			if(c_mode==0)
+				c_mode=1
+				playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
+				user << "<span class='notice'>You remove the screws around the power connection.</span>"
+				return
+			else if(c_mode==1)
+				c_mode=0
+				playsound(loc, 'sound/items/Screwdriver.ogg', 50, 1)
+				user << "<span class='notice'>You attach the screws around the power connection.</span>"
+				return
+		else if(istype(I,/obj/item/weapon/weldingtool) && c_mode==1)
+			var/obj/item/weapon/weldingtool/W = I
+			if(W.remove_fuel(0,user))
+				playsound(loc, 'sound/items/Welder2.ogg', 100, 1)
+				user << "<span class='notice'>You start slicing the floorweld off the delivery chute.</span>"
+				if(do_after(user,20))
+					if(!src || !W.isOn()) return
+					user << "<span class='notice'>You sliced the floorweld off the delivery chute.</span>"
+					var/obj/structure/disposalconstruct/C = new (loc)
+					C.ptype = 8 // 8 =  Delivery chute
+					C.update()
+					C.anchored = 1
+					C.density = 1
+					del(src)
+				return
+			else
+				user << "<span class='notice'>You need more welding fuel to complete this task.</span>"
+				return

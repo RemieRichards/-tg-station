@@ -50,8 +50,6 @@
 	user << "<span class='notice'>You fold [src] flat.</span>"
 	var/obj/item/I = new foldable(get_turf(src))
 	user.put_in_hands(I)
-	user.update_inv_l_hand()
-	user.update_inv_r_hand()
 	del(src)
 
 
@@ -88,7 +86,7 @@
 		new /obj/item/clothing/gloves/latex(src)
 
 /obj/item/weapon/storage/box/masks
-	name = "box of sterile masks"
+	name = "sterile masks"
 	desc = "This box contains masks of sterility."
 	icon_state = "sterile"
 
@@ -103,7 +101,7 @@
 		new /obj/item/clothing/mask/surgical(src)
 
 /obj/item/weapon/storage/box/syringes
-	name = "box of syringes"
+	name = "syringes"
 	desc = "A box full of syringes."
 	desc = "A biohazard alert warning is printed on the box"
 	icon_state = "syringe"
@@ -119,7 +117,7 @@
 		new /obj/item/weapon/reagent_containers/syringe( src )
 
 /obj/item/weapon/storage/box/beakers
-	name = "box of beakers"
+	name = "beaker box"
 	icon_state = "beaker"
 
 	New()
@@ -133,7 +131,7 @@
 		new /obj/item/weapon/reagent_containers/glass/beaker( src )
 
 /obj/item/weapon/storage/box/injectors
-	name = "box of DNA injectors"
+	name = "\improper DNA injectors"
 	desc = "This box contains injectors it seems."
 
 	New()
@@ -204,7 +202,7 @@
 		new /obj/item/weapon/grenade/chem_grenade/teargas(src)
 
 /obj/item/weapon/storage/box/emps
-	name = "box of emp grenades"
+	name = "emp grenades"
 	desc = "A box with 5 emp grenades."
 	icon_state = "flashbang"
 
@@ -217,7 +215,7 @@
 		new /obj/item/weapon/grenade/empgrenade(src)
 
 /obj/item/weapon/storage/box/trackimp
-	name = "boxed tracking implant kit"
+	name = "tracking implant kit"
 	desc = "Box full of scum-bag tracking utensils."
 	icon_state = "implant"
 
@@ -232,7 +230,7 @@
 		new /obj/item/weapon/locator(src)
 
 /obj/item/weapon/storage/box/chemimp
-	name = "boxed chemical implant kit"
+	name = "chemical implant kit"
 	desc = "Box of stuff used to implant chemicals."
 	icon_state = "implant"
 
@@ -247,7 +245,7 @@
 		new /obj/item/weapon/implantpad(src)
 
 /obj/item/weapon/storage/box/exileimp
-	name = "boxed exile implant kit"
+	name = "exile implant kit"
 	desc = "Box of exile implants. It has a picture of a clown being booted through the Gateway."
 	icon_state = "implant"
 
@@ -261,7 +259,7 @@
 		new /obj/item/weapon/implanter(src)
 
 /obj/item/weapon/storage/box/rxglasses
-	name = "box of prescription glasses"
+	name = "prescription glasses"
 	desc = "This box contains nerd glasses."
 	icon_state = "glasses"
 
@@ -341,7 +339,7 @@
 			new /obj/item/weapon/reagent_containers/food/snacks/monkeycube/wrapped(src)
 
 /obj/item/weapon/storage/box/ids
-	name = "box of spare IDs"
+	name = "spare IDs"
 	desc = "Has so many empty IDs."
 	icon_state = "id"
 
@@ -356,7 +354,7 @@
 		new /obj/item/weapon/card/id(src)
 
 /obj/item/weapon/storage/box/prisoner
-	name = "box of prisoner IDs"
+	name = "prisoner IDs"
 	desc = "Take away their last shred of dignity, their name."
 	icon_state = "id"
 
@@ -371,7 +369,7 @@
 		new /obj/item/weapon/card/id/prisoner/seven(src)
 
 /obj/item/weapon/storage/box/seccarts
-	name = "box of spare R.O.B.U.S.T. Cartridges"
+	name = "Spare R.O.B.U.S.T. Cartridges"
 	desc = "A box full of R.O.B.U.S.T. Cartridges, used by Security."
 	icon_state = "pda"
 
@@ -386,7 +384,7 @@
 		new /obj/item/weapon/cartridge/security(src)
 
 /obj/item/weapon/storage/box/handcuffs
-	name = "box of spare handcuffs"
+	name = "spare handcuffs"
 	desc = "A box full of handcuffs."
 	icon_state = "handcuff"
 
@@ -401,7 +399,7 @@
 		new /obj/item/weapon/handcuffs(src)
 
 /obj/item/weapon/storage/box/fakesyndiesuit
-	name = "boxed space suit and helmet"
+	name = "Space Suit and Helmet"
 	desc = "A sleek, sturdy box used to hold replica spacesuits."
 	icon_state = "box_of_doom"
 
@@ -411,7 +409,7 @@
 		new /obj/item/clothing/suit/syndicatefake(src)
 
 /obj/item/weapon/storage/box/mousetraps
-	name = "box of Pest-B-Gon mousetraps"
+	name = "box of Pest-B-Gon Mousetraps"
 	desc = "<B><FONT=red>WARNING:</FONT></B> <I>Keep out of reach of children</I>."
 	icon_state = "mousetraps"
 
@@ -458,6 +456,7 @@
 	item_state = "zippo"
 	storage_slots = 10
 	w_class = 1
+	flags = TABLEPASS
 	slot_flags = SLOT_BELT
 
 	New()
@@ -474,7 +473,7 @@
 		return
 
 /obj/item/weapon/storage/box/lights
-	name = "box of replacement bulbs"
+	name = "replacement bulbs"
 	icon = 'icons/obj/storage.dmi'
 	icon_state = "light"
 	desc = "This box is shaped on the inside so that only light tubes and bulbs fit."
@@ -491,7 +490,7 @@
 		new /obj/item/weapon/light/bulb(src)
 
 /obj/item/weapon/storage/box/lights/tubes
-	name = "box of replacement tubes"
+	name = "replacement tubes"
 	icon_state = "lighttube"
 
 /obj/item/weapon/storage/box/lights/tubes/New()
@@ -500,7 +499,7 @@
 		new /obj/item/weapon/light/tube(src)
 
 /obj/item/weapon/storage/box/lights/mixed
-	name = "box of replacement lights"
+	name = "replacement lights"
 	icon_state = "lightmixed"
 
 /obj/item/weapon/storage/box/lights/mixed/New()

@@ -5,7 +5,7 @@
 	icon_state = "mopbucket"
 	density = 1
 	pressure_resistance = 5
-	flags = OPENCONTAINER
+	flags = FPRINT | TABLEPASS | OPENCONTAINER
 	var/amount_per_transfer_from_this = 5	//shit I dunno, adding this so syringes stop runtime erroring. --NeoFite
 
 

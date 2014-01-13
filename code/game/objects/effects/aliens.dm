@@ -35,9 +35,10 @@
 	return
 
 /obj/structure/alien/resin/Move()
-	var/turf/T = loc
+	air_update_turf(1)
 	..()
-	move_update_air(T)
+	air_update_turf(1)
+	return
 
 /obj/structure/alien/resin/CanAtmosPass()
 	return !density
@@ -164,7 +165,7 @@
 
 
 /obj/structure/alien/weeds/proc/Life()
-	set background = BACKGROUND_ENABLED
+	set background = 1
 	var/turf/U = get_turf(src)
 
 	if(istype(U, /turf/space))

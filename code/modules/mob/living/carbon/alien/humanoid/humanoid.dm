@@ -59,7 +59,17 @@
 	..()
 
 /mob/living/carbon/alien/humanoid/ex_act(severity)
-	..()
+	if(!blinded)
+		flick("flash", flash)
+
+	if (stat == 2 && client)
+		gib()
+		return
+
+	else if (stat == 2 && !client)
+		xgibs(loc, viruses)
+		del(src)
+		return
 
 	var/shielded = 0
 
@@ -67,6 +77,7 @@
 	var/f_loss = null
 	switch (severity)
 		if (1.0)
+			b_loss += 500
 			gib()
 			return
 
@@ -246,6 +257,7 @@
 
 			M.put_in_active_hand(G)
 
+			grabbed_by += G
 			G.synch()
 
 			LAssailant = M

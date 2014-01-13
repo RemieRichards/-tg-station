@@ -15,9 +15,6 @@
 	var/obj/screen/inv2 = null
 	var/obj/screen/inv3 = null
 
-	var/shown_robot_modules = 0	//Used to determine whether they have the module menu shown or not
-	var/obj/screen/robot_modules_background
-
 //3 Modules can be activated at any one time.
 	var/obj/item/weapon/robot_module/module = null
 	var/module_active = null
@@ -63,16 +60,12 @@
 
 
 
-/mob/living/silicon/robot/New(loc)
+/mob/living/silicon/robot/New(loc,var/syndie = 0)
 	spark_system = new /datum/effect/effect/system/spark_spread()
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
 
 	wires = new(src)
-
-	robot_modules_background = new()
-	robot_modules_background.icon_state = "block"
-	robot_modules_background.layer = 19	//Objects that appear on screen are on layer 20, UI should be just below it.
 
 	ident = rand(1, 999)
 	updatename("Default")
@@ -83,6 +76,17 @@
 		cell.maxcharge = 7500
 		cell.charge = 7500
 
+	if(syndie)
+		laws = new /datum/ai_laws/antimov()
+		lawupdate = 0
+		scrambledcodes = 1
+		cell.maxcharge = 25000
+		cell.charge = 25000
+		module = new /obj/item/weapon/robot_module/syndicate(src)
+		hands.icon_state = "standard"
+		icon_state = "secborg"
+		modtype = "Synd"
+	else
 		laws = new /datum/ai_laws/asimov()
 		connected_ai = select_active_ai_with_fewest_borgs()
 		if(connected_ai)
@@ -288,12 +292,24 @@
 
 
 /mob/living/silicon/robot/ex_act(severity)
-	..()
+	if(!blinded)
+		flick("flash", flash)
+
+	if (stat == 2 && client)
+		gib()
+		return
+
+	else if (stat == 2 && !client)
+		del(src)
+		return
 
 	switch(severity)
 		if(1.0)
-			gib()
-			return
+			if (stat != 2)
+				adjustBruteLoss(100)
+				adjustFireLoss(100)
+				gib()
+				return
 		if(2.0)
 			if (stat != 2)
 				adjustBruteLoss(60)
@@ -302,7 +318,7 @@
 			if (stat != 2)
 				adjustBruteLoss(30)
 
-	return
+	updatehealth()
 
 
 /mob/living/silicon/robot/meteorhit(obj/O as obj)
@@ -587,6 +603,7 @@
 
 			M.put_in_active_hand(G)
 
+			grabbed_by += G
 			G.synch()
 			playsound(loc, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
 			for(var/mob/O in viewers(src, null))
@@ -702,7 +719,8 @@
 			playsound(loc, M.attack_sound, 50, 1, 1)
 		for(var/mob/O in viewers(src, null))
 			O.show_message("\red <B>[M]</B> [M.attacktext] [src]!", 1)
-		add_logs(M, src, "attacked", admin=0)
+		M.attack_log += text("\[[time_stamp()]\] <font color='red'>attacked [src.name] ([src.ckey])</font>")
+		src.attack_log += text("\[[time_stamp()]\] <font color='orange'>was attacked by [M.name] ([M.ckey])</font>")
 		var/damage = rand(M.melee_damage_lower, M.melee_damage_upper)
 		adjustBruteLoss(damage)
 		updatehealth()
@@ -783,9 +801,6 @@
 		if(icon_state =="Miner" || icon_state =="Miner+j")
 			overlays.Cut()
 			overlays += "eyes-Miner"
-		if(icon_state =="syndie_bloodhound")
-			overlays.Cut()
-			overlays+= "eyes-syndie_bloodhound"
 	else
 		overlays -= "eyes"
 
@@ -870,7 +885,31 @@
 
 	if (href_list["act"])
 		var/obj/item/O = locate(href_list["act"])
-		activate_module(O)
+		if(!(locate(O) in src.module.modules) && O != src.module.emag)
+			return
+		if(activated(O))
+			src << "Already activated"
+			return
+		if(!module_state_1)
+			module_state_1 = O
+			O.layer = 20
+			contents += O
+			if(istype(module_state_1,/obj/item/borg/sight))
+				sight_mode |= module_state_1:sight_mode
+		else if(!module_state_2)
+			module_state_2 = O
+			O.layer = 20
+			contents += O
+			if(istype(module_state_2,/obj/item/borg/sight))
+				sight_mode |= module_state_2:sight_mode
+		else if(!module_state_3)
+			module_state_3 = O
+			O.layer = 20
+			contents += O
+			if(istype(module_state_3,/obj/item/borg/sight))
+				sight_mode |= module_state_3:sight_mode
+		else
+			src << "You need to disable a module first!"
 		installed_modules()
 
 	if (href_list["deact"])
@@ -933,10 +972,6 @@
 		return
 
 /mob/living/silicon/robot/proc/self_destruct()
-	if(emagged)
-		explosion(src.loc,1,2,4,flame_range = 2)
-	else
-		explosion(src.loc,-1,0,2)
 	gib()
 	return
 
@@ -1037,18 +1072,3 @@
 		cell.loc = T
 		cell = null
 	del(src)
-
-/mob/living/silicon/robot/syndicate
-	icon_state = "syndie_bloodhound"
-	lawupdate = 0
-	scrambledcodes = 1
-	modtype = "Synd"
-
-/mob/living/silicon/robot/syndicate/New(loc)
-	..()
-	cell.maxcharge = 25000
-	cell.charge = 25000
-	updatename("Syndicate")
-	radio = new /obj/item/device/radio/borg/syndicate(src)
-	module = new /obj/item/weapon/robot_module/syndicate(src)
-	laws = new /datum/ai_laws/syndicate_override()

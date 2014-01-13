@@ -45,3 +45,7 @@
 #define HOSTILE_STANCE_ATTACKING	4
 #define HOSTILE_STANCE_TIRED		5
 
+//Dismemberment types
+#define MELEE	  1
+#define GUN		  2
+#define EXPLOSION 3

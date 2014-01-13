@@ -11,12 +11,14 @@ would spawn and follow the beaker, even if it is carried or thrown.
 	icon = 'icons/effects/effects.dmi'
 	mouse_opacity = 0
 	unacidable = 1//So effect are not targeted by alien acid.
+	flags = TABLEPASS
 
 /obj/effect/effect/water
 	name = "water"
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "extinguish"
 	var/life = 15.0
+	flags = TABLEPASS
 	mouse_opacity = 0
 
 /obj/effect/effect/smoke
@@ -843,8 +845,15 @@ steam.start() -- spawns the effect
 		return
 
 	if (istype(AM, /mob/living/carbon))
-		var/mob/living/carbon/M = AM
-		M.slip(5, 2, src)
+		var/mob/M =	AM
+		if (istype(M, /mob/living/carbon/human) && (istype(M:shoes, /obj/item/clothing/shoes) && M:shoes.flags&NOSLIP))
+			return
+
+		M.stop_pulling()
+		M << "\blue You slipped on the foam!"
+		playsound(src.loc, 'sound/misc/slip.ogg', 50, 1, -3)
+		M.Stun(5)
+		M.Weaken(2)
 
 
 /datum/effect/effect/system/foam_spread
@@ -906,7 +915,7 @@ steam.start() -- spawns the effect
 	name = "foamed metal"
 	desc = "A lightweight foamed metal wall."
 	gender = PLURAL
-	var/metal = 1		// 1=aluminium, 2=iron
+	var/metal = 1		// 1=aluminum, 2=iron
 
 	New()
 		..()
@@ -921,9 +930,9 @@ steam.start() -- spawns the effect
 		..()
 
 	Move()
-		var/turf/T = loc
+		air_update_turf(1)
 		..()
-		move_update_air(T)
+		air_update_turf(1)
 
 	proc/updateicon()
 		if(metal == 1)

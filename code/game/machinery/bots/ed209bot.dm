@@ -220,7 +220,7 @@ Auto Patrol: []"},
 		mode = SECBOT_IDLE
 
 /obj/machinery/bot/ed209/process()
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	if (!src.on)
 		return

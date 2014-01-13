@@ -137,7 +137,7 @@ var/list/uplink_items = list()
 
 /datum/uplink_item/dangerous/emp
 	name = "EMP Kit"
-	desc = "A box that contains two EMP grenades, an EMP implant and a short ranged recharging device disguised as a flashlight. Useful to disrupt communication and silicon lifeforms."
+	desc = "A box that contains an EMP grenade, an EMP implant and a short ranged device disguised as a flashlight. Useful to disrupt communication and silicon lifeforms."
 	item = /obj/item/weapon/storage/box/syndie_kit/emp
 	cost = 3
 
@@ -176,17 +176,8 @@ var/list/uplink_items = list()
 	item = /obj/mecha/combat/marauder/mauler/loaded
 	cost = 70
 	gamemodes = list(/datum/game_mode/nuclear)
-/datum/uplink_item/dangerous/syndieborg
-	name = "Syndicate Cyborg"
-	desc = "A cyborg designed and programmed for systematic extermination of non-Syndicate personnel."
-	item = /obj/item/weapon/antag_spawner/borg_tele
-	cost = 25
-	gamemodes = list(/datum/game_mode/nuclear)
-//for refunding the syndieborg teleporter
-/datum/uplink_item/dangerous/syndieborg/spawn_item()
-	var/obj/item/weapon/antag_spawner/borg_tele/T = ..()
-	if(istype(T))
-		T.TC_cost = cost
+
+
 
 // AMMUNITION
 
@@ -382,19 +373,10 @@ var/list/uplink_items = list()
 
 /datum/uplink_item/device_tools/syndicate_bomb
 	name = "Syndicate Bomb"
-	desc = "The Syndicate Bomb has an adjustable timer with a minimum setting of 60 seconds. Ordering the bomb sends you a small beacon, which will teleport the explosive to your location when you activate it. \
-	You can wrench the bomb down to prevent removal. The crew may attempt to defuse the bomb."
+	desc = "The Syndicate Bomb has an adjustable timer with a minimum setting of 30 seconds. Ordering the bomb sends you a small beacon, which will teleport the explosive to your location when you activate it. \
+	You can wrench the bomb down to prevent removal. The crew may defuse the bomb."
 	item = /obj/item/device/sbeacondrop/bomb
 	cost = 5
-	excludefrom = list(/datum/game_mode/traitor/double_agents)
-
-/datum/uplink_item/device_tools/syndicate_detonator
-	name = "Syndicate Detonator"
-	desc = "The Syndicate Detonator is a companion device to the Syndicate Bomb. Simply press the included button and an encrypted radio frequency will instruct all live syndicate bombs to detonate. \
-	Useful for when speed matters or you wish to synchronize multiple bomb blasts. Be sure to stand clear of the blast radius before using the detonator."
-	item = /obj/item/device/syndicatedetonator
-	cost = 1
-	gamemodes = list(/datum/game_mode/nuclear)
 
 /datum/uplink_item/device_tools/teleporter
 	name = "Teleporter Circuit Board"

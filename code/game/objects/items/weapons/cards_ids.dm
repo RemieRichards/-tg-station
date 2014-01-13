@@ -34,14 +34,14 @@
 	set src in usr
 
 	if (t)
-		src.name = text("data disk- '[]'", t)
+		src.name = text("Data Disk- '[]'", t)
 	else
-		src.name = "data disk"
+		src.name = "Data Disk"
 	src.add_fingerprint(usr)
 	return
 
 /obj/item/weapon/card/data/clown
-	name = "\proper the coordinates to clown planet"
+	name = "coordinates to clown planet"
 	icon_state = "data"
 	item_state = "card-id"
 	layer = 3

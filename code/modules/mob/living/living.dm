@@ -5,22 +5,15 @@
 		cur_area.mob_activate(src)
 
 
-/mob/living/verb/succumb(var/whispered as null)
+/mob/living/verb/succumb()
 	set hidden = 1
-	if (InCritical())
-		src.attack_log += "[src] has [whispered ? "whispered his final words" : "succumbed to death"] with [round(health, 0.1)] points of health!"
+	if ((src.health < 0 && src.health > -95.0))
+		src.attack_log += "[src] has succumbed to death with [health] points of health!"
 		src.adjustOxyLoss(src.health + 200)
 		src.health = 100 - src.getOxyLoss() - src.getToxLoss() - src.getFireLoss() - src.getBruteLoss()
-		if(!whispered)
-			src << "\blue You have given up life and succumbed to death."
+		src << "\blue You have given up life and succumbed to death."
 		death()
 
-/mob/living/proc/InCritical()
-	return (src.health < 0 && src.health > -95.0 && stat == UNCONSCIOUS)
-
-/mob/living/ex_act(severity)
-	if(client && !blinded)
-		flick("flash", src.flash)
 
 /mob/living/proc/updatehealth()
 	if(status_flags & GODMODE)
@@ -218,9 +211,6 @@
 		O.emp_act(severity)
 	..()
 
-/mob/living/proc/can_inject()
-	return 1
-
 /mob/living/proc/get_organ_target()
 	var/mob/shooter = src
 	var/t = shooter:zone_sel.selecting
@@ -275,7 +265,6 @@
 	heal_overall_damage(1000, 1000)
 	ExtinguishMob()
 	fire_stacks = 0
-	suiciding = 0
 	buckled = initial(src.buckled)
 	if(iscarbon(src))
 		var/mob/living/carbon/C = src
@@ -288,7 +277,7 @@
 	if(stat == 2)
 		dead_mob_list -= src
 		living_mob_list += src
-	if(!isanimal(src))	stat = CONSCIOUS
+	stat = CONSCIOUS
 	update_fire()
 	regenerate_icons()
 	..()
@@ -561,7 +550,3 @@
 						CM.legcuffed.loc = usr.loc
 						CM.legcuffed = null
 						CM.update_inv_legcuffed(0)
-
-
-/mob/living/proc/get_visible_name()
-	return name

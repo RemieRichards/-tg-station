@@ -1,9 +1,9 @@
 /obj/item/stack/rods
-	name = "metal rod"
+	name = "metal rods"
 	desc = "Some rods. Can be used for building, or something."
 	singular_name = "metal rod"
 	icon_state = "rods"
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS| CONDUCT
 	w_class = 3.0
 	force = 9.0
 	throwforce = 15.0

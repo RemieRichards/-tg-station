@@ -108,7 +108,6 @@ Class Procs:
 	var/uid
 	var/manual = 0
 	var/global/gl_uid = 1
-	var/panel_open = 0
 
 /obj/machinery/New()
 	..()
@@ -170,6 +169,7 @@ Class Procs:
 		return 1
 	if(usr.restrained() || usr.lying || usr.stat)
 		return 1
+
 	if(!(ishuman(usr) || issilicon(usr) || (ismonkey(usr) && ticker && ticker.mode.name == "monkey")))
 		usr << "<span class='notice'>You don't have the dexterity to do this!</span>"
 		return 1
@@ -181,6 +181,8 @@ Class Procs:
 			norange = 1
 		else if(istype(H.r_hand, /obj/item/tk_grab))
 			norange = 1
+		if(!(has_hands(H)))
+			return 1
 
 	if(!norange)
 		if(!issilicon(usr))
@@ -205,6 +207,7 @@ Class Procs:
 	return src.attack_hand(user)
 
 /obj/machinery/attack_hand(mob/user as mob)
+
 	if(stat & (NOPOWER|BROKEN|MAINT))
 		return 1
 	if(user.lying || user.stat)
@@ -212,7 +215,7 @@ Class Procs:
 	if ( ! (istype(usr, /mob/living/carbon/human) || \
 			istype(usr, /mob/living/silicon) || \
 			istype(usr, /mob/living/carbon/monkey) && ticker && ticker.mode.name == "monkey") )
-		usr << "<span class='danger'>You don't have the dexterity to do this!</span>"
+		usr << "\red You don't have the dexterity to do this!"
 		return 1
 /*
 	//distance checks are made by atom/proc/DblClick
@@ -225,7 +228,10 @@ Class Procs:
 			visible_message("\red [H] stares cluelessly at [src] and drools.")
 			return 1
 		else if(prob(H.getBrainLoss()))
-			user << "<span class='danger'>You momentarily forget how to use [src].</span>"
+			user << "\red You momentarily forget how to use [src]."
+			return 1
+
+		if(!(has_hands(H)))
 			return 1
 
 	src.add_fingerprint(user)
@@ -239,23 +245,3 @@ Class Procs:
 	uid = gl_uid
 	gl_uid++
 
-/obj/machinery/proc/default_deconstruction_crowbar()
-	playsound(src.loc, 'sound/items/Crowbar.ogg', 50, 1)
-	var/obj/machinery/constructable_frame/machine_frame/M = new /obj/machinery/constructable_frame/machine_frame(src.loc)
-	M.state = 2
-	M.icon_state = "box_1"
-	for(var/obj/I in component_parts)
-		if(I.reliability != 100 && crit_fail)
-			I.crit_fail = 1
-		I.loc = src.loc
-	del(src)
-
-/obj/machinery/proc/default_deconstruction_screwdriver(var/mob/user, var/icon_state_open, var/icon_state_closed)
-	if (!panel_open)
-		panel_open = 1
-		icon_state = icon_state_open
-		user << "<span class='notice'>You open the maintenance hatch of [src].</span>"
-	else
-		panel_open = 0
-		icon_state = icon_state_closed
-		user << "<span class='notice'>You close the maintenance hatch of [src].</span>"

@@ -5,7 +5,7 @@
 	item_state = "shotgun"
 	w_class = 4.0
 	force = 10
-	flags =  CONDUCT
+	flags =  FPRINT | TABLEPASS | CONDUCT
 	slot_flags = SLOT_BACK
 	origin_tech = "combat=4;materials=2"
 	ammo_type = /obj/item/ammo_casing/shotgun/beanbag
@@ -35,10 +35,21 @@
 		update_icon()
 
 /obj/item/weapon/gun/projectile/shotgun/process_chambered()
-	return ..(0, 0)
+	var/obj/item/ammo_casing/AC = chambered //Find chambered round
+	if(isnull(AC) || !istype(AC))
+		return 0
+	if(AC.BB)
+		if(AC.reagents && AC.BB.reagents)
+			var/datum/reagents/casting_reagents = AC.reagents
+			casting_reagents.trans_to(AC.BB, casting_reagents.total_volume) //For chemical darts
+			casting_reagents.delete()
+		in_chamber = AC.BB //Load projectile into chamber.
+		AC.BB.loc = src //Set projectile loc to gun.
+		AC.BB = null
+		AC.update_icon()
+		return 1
+	return 0
 
-/obj/item/weapon/gun/projectile/shotgun/chamber_round()
-	return
 
 /obj/item/weapon/gun/projectile/shotgun/attack_self(mob/living/user)
 	if(recentpump)	return
@@ -83,7 +94,7 @@
 	item_state = "shotgun"
 	w_class = 4.0
 	force = 10
-	flags =  CONDUCT
+	flags =  FPRINT | TABLEPASS | CONDUCT
 	slot_flags = SLOT_BACK
 	origin_tech = "combat=3;materials=1"
 	ammo_type = /obj/item/ammo_casing/shotgun/beanbag

@@ -113,7 +113,7 @@
 
 
 /obj/machinery/computer/gravity_control_computer/Topic(href, href_list)
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	if(..())
 		return

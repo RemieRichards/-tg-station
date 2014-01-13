@@ -2,7 +2,7 @@
 // Contains various borg upgrades.
 
 /obj/item/borg/upgrade
-	name = "borg upgrade module."
+	name = "A borg upgrade module."
 	desc = "Protected by FRM."
 	icon = 'icons/obj/module.dmi'
 	icon_state = "cyborg_upgrade"
@@ -78,7 +78,7 @@
 
 
 /obj/item/borg/upgrade/vtec
-	name = "cyborg VTEC module"
+	name = "cyborg VTEC Module"
 	desc = "Used to kick in a cyborg's VTEC systems, increasing their speed."
 	construction_cost = list("metal"=80000 , "glass"=6000 , "gold"= 5000)
 	icon_state = "cyborg_upgrade2"
@@ -95,7 +95,7 @@
 
 
 /obj/item/borg/upgrade/tasercooler
-	name = "cyborg rapid taser cooling module"
+	name = "cyborg Rapid Taser Cooling Module"
 	desc = "Used to cool a mounted taser, increasing the potential current in it and thus its recharge rate."
 	construction_cost = list("metal"=80000 , "glass"=6000 , "gold"= 2000, "diamond" = 500)
 	icon_state = "cyborg_upgrade3"
@@ -152,7 +152,7 @@
 
 
 /obj/item/borg/upgrade/syndicate/
-	name = "illegal equipment module"
+	name = "Illegal Equipment Module"
 	desc = "Unlocks the hidden, deadlier functions of a cyborg"
 	construction_cost = list("metal"=10000,"glass"=15000,"diamond" = 10000)
 	icon_state = "cyborg_upgrade3"

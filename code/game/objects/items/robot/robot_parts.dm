@@ -3,41 +3,41 @@
 	icon = 'icons/obj/robot_parts.dmi'
 	item_state = "buildpipe"
 	icon_state = "blank"
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT
 	slot_flags = SLOT_BELT
 	var/construction_time = 100
 	var/list/construction_cost = list("metal"=20000,"glass"=5000)
 
 /obj/item/robot_parts/l_arm
-	name = "cyborg left arm"
+	name = "Cyborg Left Arm"
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	icon_state = "l_arm"
 	construction_time = 200
 	construction_cost = list("metal"=18000)
 
 /obj/item/robot_parts/r_arm
-	name = "cyborg right arm"
+	name = "Cyborg Right Arm"
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	icon_state = "r_arm"
 	construction_time = 200
 	construction_cost = list("metal"=18000)
 
 /obj/item/robot_parts/l_leg
-	name = "cyborg left leg"
+	name = "Cyborg Left Leg"
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	icon_state = "l_leg"
 	construction_time = 200
 	construction_cost = list("metal"=15000)
 
 /obj/item/robot_parts/r_leg
-	name = "cyborg right leg"
+	name = "Cyborg Right Leg"
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	icon_state = "r_leg"
 	construction_time = 200
 	construction_cost = list("metal"=15000)
 
 /obj/item/robot_parts/chest
-	name = "cyborg torso"
+	name = "Cyborg Torso"
 	desc = "A heavily reinforced case containing cyborg logic boards, with space for a standard power cell."
 	icon_state = "chest"
 	construction_time = 350
@@ -46,7 +46,7 @@
 	var/obj/item/weapon/cell/cell = null
 
 /obj/item/robot_parts/head
-	name = "cyborg head"
+	name = "Cyborg Head"
 	desc = "A standard reinforced braincase, with spine-plugged neural socket and sensor gimbals."
 	icon_state = "head"
 	construction_time = 350
@@ -55,7 +55,7 @@
 	var/obj/item/device/flash/flash2 = null
 
 /obj/item/robot_parts/robot_suit
-	name = "cyborg endoskeleton"
+	name = "Cyborg Endoskeleton"
 	desc = "A complex metal backbone with standard limb sockets and pseudomuscle anchors."
 	icon_state = "robo_suit"
 	construction_time = 500

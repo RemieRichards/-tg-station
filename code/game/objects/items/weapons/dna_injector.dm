@@ -44,7 +44,10 @@
 	if(!ishuman(user))
 		user << "<span class='notice'>You don't have the dexterity to do this!</span>"
 		return
-	add_logs(user, target, "attempted to inject", object="[name]")
+
+	target.attack_log += "\[[time_stamp()]\] <font color='orange'>[user.name] ([user.ckey]) attempted to inject with [name]</font>"
+	user.attack_log += "\[[time_stamp()]\] <font color='red'>Used the [name] to attempt to inject [target.name] ([target.ckey])</font>"
+	log_attack("<font color='red'>[user.name] ([user.ckey]) used the [name] to attempt to inject [target.name] ([target.ckey])</font>")
 
 	if(target != user)
 		target.visible_message("<span class='danger'>[user] is trying to inject [target] with [src]!</span>", "<span class='userdanger'>[user] is trying to inject [target] with [src]!</span>")
@@ -55,7 +58,9 @@
 	else
 		user << "<span class='notice'>You inject yourself with [src].</span>"
 
-	add_logs(user, target, "injected", object="[name]")
+	target.attack_log += "\[[time_stamp()]\] <font color='orange'>Has been injected with [name] by [user.name] ([user.ckey])</font>"
+	user.attack_log += "\[[time_stamp()]\] <font color='red'>Used the [name] to inject [target.name] ([target.ckey])</font>"
+	log_attack("<font color='red'>[user.name] ([user.ckey]) used the [name] to inject [target.name] ([target.ckey])</font>")
 
 	user.drop_item()
 	inject(target, user)	//Now we actually do the heavy lifting.

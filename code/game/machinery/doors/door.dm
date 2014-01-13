@@ -67,9 +67,9 @@
 	return
 
 /obj/machinery/door/Move()
-	var/turf/T = loc
+	air_update_turf(1)
 	..()
-	move_update_air(T)
+	air_update_turf(1)
 
 /obj/machinery/door/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if(air_group) return 0

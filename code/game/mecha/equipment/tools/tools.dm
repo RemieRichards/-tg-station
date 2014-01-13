@@ -35,7 +35,7 @@
 							cargo_holder.cargo += O
 							O.loc = chassis
 							O.anchored = 0
-							occupant_message("<font color='blue'>[target] successfully loaded.</font>")
+							occupant_message("<font color='blue'>[target] succesfully loaded.</font>")
 							log_message("Loaded [O]. Cargo compartment capacity: [cargo_holder.cargo_capacity - cargo_holder.cargo.len]")
 						else
 							occupant_message("<font color='red'>You must hold still while handling objects.</font>")
@@ -54,7 +54,9 @@
 				M.updatehealth()
 				occupant_message("\red You squeeze [target] with [src.name]. Something cracks.")
 				chassis.visible_message("\red [chassis] squeezes [target].")
-				add_logs(chassis.occupant, M, "attacked", object="[name]", addition="(INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])")
+				chassis.occupant.attack_log += "\[[time_stamp()]\]<font color='red'> Attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+				M.attack_log += "\[[time_stamp()]\]<font color='orange'> Attacked by [chassis.occupant.name] ([chassis.occupant.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+				log_attack("<font color='red'>[chassis.occupant.name] ([chassis.occupant.ckey]) attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(src.damtype)])</font>" )
 			else
 				step_away(M,chassis)
 				occupant_message("You push [target] out of the way.")
@@ -113,7 +115,9 @@
 					log_message("Drilled through [target]")
 					if(ismob(target))
 						var/mob/M = target
-						add_logs(chassis.occupant, M, "attacked", object="[name]", addition="(INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])")
+						chassis.occupant.attack_log += "\[[time_stamp()]\]<font color='red'> Attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+						M.attack_log += "\[[time_stamp()]\]<font color='orange'> Attacked by [chassis.occupant.name] ([chassis.occupant.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+						log_attack("<font color='red'>[chassis.occupant.name] ([chassis.occupant.ckey]) attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(src.damtype)])</font>" )
 					target.ex_act(2)
 		return 1
 
@@ -173,7 +177,9 @@
 					log_message("Drilled through [target]")
 					if(ismob(target))
 						var/mob/M = target
-						add_logs(chassis.occupant, M, "attacked", object="[name]", addition="(INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])")
+						chassis.occupant.attack_log += "\[[time_stamp()]\]<font color='red'> Attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+						M.attack_log += "\[[time_stamp()]\]<font color='orange'> Attacked by [chassis.occupant.name] ([chassis.occupant.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
+						log_attack("<font color='red'>[chassis.occupant.name] ([chassis.occupant.ckey]) attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(chassis.occupant.a_intent)]) (DAMTYE: [uppertext(src.damtype)])</font>" )
 					target.ex_act(2)
 		return 1
 
@@ -1040,7 +1046,7 @@
 							cargo_holder.cargo += O
 							O.loc = chassis
 							O.anchored = 0
-							chassis.occupant_message("<font color='blue'>[target] successfully loaded.</font>")
+							chassis.occupant_message("<font color='blue'>[target] succesfully loaded.</font>")
 							chassis.log_message("Loaded [O]. Cargo compartment capacity: [cargo_holder.cargo_capacity - cargo_holder.cargo.len]")
 						else
 							chassis.occupant_message("<font color='red'>You must hold still while handling objects.</font>")

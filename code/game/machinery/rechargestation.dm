@@ -13,31 +13,11 @@
 	var/circuitboard = "/obj/item/weapon/circuitboard/cyborgrecharger"
 	var/locked = 1
 	req_access = list(access_robotics)
-	var/recharge_speed
-	var/repairs
 
 
 /obj/machinery/recharge_station/New()
 	..()
-	component_parts = list()
-	component_parts += new /obj/item/weapon/circuitboard/cyborgrecharger(null)
-	component_parts += new /obj/item/weapon/stock_parts/capacitor(null)
-	component_parts += new /obj/item/weapon/stock_parts/capacitor(null)
-	component_parts += new /obj/item/weapon/stock_parts/manipulator(null)
-	component_parts += new /obj/item/weapon/cell/high(null)
-	RefreshParts()
 	build_icon()
-
-/obj/machinery/recharge_station/RefreshParts()
-	recharge_speed = 0
-	repairs = 0
-	for(var/obj/item/weapon/stock_parts/capacitor/C in component_parts)
-		recharge_speed += C.rating * 100
-	for(var/obj/item/weapon/stock_parts/manipulator/M in component_parts)
-		repairs += M.rating - 1
-	for(var/obj/item/weapon/cell/C in component_parts)
-		recharge_speed *= C.maxcharge / 10000
-
 
 /obj/machinery/recharge_station/process()
 	if(!(NOPOWER|BROKEN))
@@ -250,25 +230,22 @@
 /obj/machinery/recharge_station/proc/process_occupant()
 	if(occupant)
 		restock_modules()
-		if(repairs)
-			occupant.heal_organ_damage(repairs, repairs - 1)
 		if(occupant.cell)
 			if(occupant.cell.charge >= occupant.cell.maxcharge)
 				occupant.cell.charge = occupant.cell.maxcharge
 			else
-				occupant.cell.charge = min(occupant.cell.charge + recharge_speed, occupant.cell.maxcharge)
+				occupant.cell.charge = min(occupant.cell.charge + 200, occupant.cell.maxcharge)
 
 /obj/machinery/recharge_station/proc/restock_modules()
 	if(occupant)
 		if(occupant.module && occupant.module.modules)
 			var/list/um = occupant.contents|occupant.module.modules
 			// ^ makes sinle list of active (occupant.contents) and inactive modules (occupant.module.modules)
-			var/coeff = recharge_speed / 200
 			for(var/obj/O in um)
 				// Engineering
 				if(istype(O,/obj/item/stack/sheet/metal) || istype(O,/obj/item/stack/sheet/rglass) || istype(O,/obj/item/stack/rods) || istype(O,/obj/item/weapon/cable_coil)|| istype(O,/obj/item/stack/tile/plasteel))
 					if(O:amount < 50)
-						O:amount += coeff
+						O:amount += 1
 				// Security
 				if(istype(O,/obj/item/device/flash))
 					if(O:broken)
@@ -277,7 +254,7 @@
 						O:icon_state = "flash"
 				if(istype(O,/obj/item/weapon/gun/energy/taser/cyborg))
 					if(O:power_supply.charge < O:power_supply.maxcharge)
-						O:power_supply.give(O:charge_cost * coeff)
+						O:power_supply.give(O:charge_cost)
 						O:update_icon()
 					else
 						O:charge_tick = 0
@@ -288,18 +265,16 @@
 				//Service
 				if(istype(O,/obj/item/weapon/reagent_containers/food/condiment/enzyme))
 					if(O.reagents.get_reagent_amount("enzyme") < 50)
-						O.reagents.add_reagent("enzyme", 2 * coeff)
+						O.reagents.add_reagent("enzyme", 2)
 				//Medical
 				if(istype(O,/obj/item/weapon/reagent_containers/glass/bottle/robot))
 					var/obj/item/weapon/reagent_containers/glass/bottle/robot/B = O
 					if(B.reagent && (B.reagents.get_reagent_amount(B.reagent) < B.volume))
-						B.reagents.add_reagent(B.reagent, 2 * coeff)
+						B.reagents.add_reagent(B.reagent, 2)
 				//Janitor
 				if(istype(O, /obj/item/device/lightreplacer))
 					var/obj/item/device/lightreplacer/LR = O
-					var/i = 1
-					for(1, i < coeff, i++)
-						LR.Charge(occupant)
+					LR.Charge(occupant)
 
 			if(occupant)
 				if(occupant.module)
@@ -310,6 +285,6 @@
 				if(istype(occupant.module.emag, /obj/item/weapon/reagent_containers/spray))
 					var/obj/item/weapon/reagent_containers/spray/S = occupant.module.emag
 					if(S.name == "polyacid spray")
-						S.reagents.add_reagent("pacid", 2 * coeff)
+						S.reagents.add_reagent("pacid", 2)
 					else if(S.name == "lube spray")
-						S.reagents.add_reagent("lube", 2 * coeff)
+						S.reagents.add_reagent("lube", 2)

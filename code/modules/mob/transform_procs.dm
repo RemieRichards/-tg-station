@@ -1,5 +1,5 @@
 /mob/living/carbon/proc/monkeyize(tr_flags = (TR_KEEPITEMS | TR_KEEPVIRUS | TR_DEFAULTMSG), newname = null)
-	if (notransform)
+	if (monkeyizing)
 		return
 	//Handle items on mob
 
@@ -9,13 +9,14 @@
 		for(var/obj/item/weapon/implant/W in src)
 			implants += W
 
-	if(tr_flags & TR_KEEPITEMS)
+	//now the rest
+	if (tr_flags & TR_KEEPITEMS)
 		for(var/obj/item/W in (src.contents-implants))
 			drop_from_inventory(W)
 
 	//Make mob invisible and spawn animation
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	stunned = 1
 	icon = null
@@ -29,8 +30,6 @@
 	//animation = null
 	var/mob/living/carbon/monkey/O = new /mob/living/carbon/monkey( loc )
 	del(animation)
-
-
 
 	// hash the original name?
 	if	(tr_flags & TR_HASHNAME)
@@ -86,7 +85,7 @@
 //Could probably be merged with monkeyize but other transformations got their own procs, too
 
 /mob/living/carbon/proc/humanize(tr_flags = (TR_KEEPITEMS | TR_KEEPVIRUS | TR_DEFAULTMSG), newname = null)
-	if (notransform)
+	if (monkeyizing)
 		return
 	//Handle items on mob
 
@@ -112,7 +111,7 @@
 
 	//Make mob invisible and spawn animation
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	stunned = 1
 	icon = null
@@ -124,8 +123,6 @@
 	flick("monkey2h", animation)
 	sleep(22)
 	var/mob/living/carbon/human/O = new( loc )
-	for(var/obj/item/C in O.loc)
-		O.equip_to_appropriate_slot(C)
 	del(animation)
 
 
@@ -184,7 +181,7 @@
 	return ..()
 
 /mob/living/carbon/human/AIize()
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/t in organs)
 		del(t)
@@ -192,12 +189,12 @@
 	return ..()
 
 /mob/living/carbon/AIize()
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		drop_from_inventory(W)
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
@@ -265,7 +262,7 @@
 
 //human -> robot
 /mob/living/carbon/human/proc/Robotize(var/delete_items = 0)
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		if(delete_items)
@@ -273,7 +270,7 @@
 		else
 			drop_from_inventory(W)
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
@@ -310,12 +307,12 @@
 
 //human -> alien
 /mob/living/carbon/human/proc/Alienize()
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		drop_from_inventory(W)
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
@@ -340,12 +337,12 @@
 	del(src)
 
 /mob/living/carbon/human/proc/slimeize(adult as num, reproduce as num)
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		drop_from_inventory(W)
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
@@ -375,12 +372,12 @@
 	del(src)
 
 /mob/living/carbon/human/proc/corgize()
-	if (notransform)
+	if (monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		drop_from_inventory(W)
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101
@@ -404,13 +401,13 @@
 		usr << "\red Sorry but this mob type is currently unavailable."
 		return
 
-	if(notransform)
+	if(monkeyizing)
 		return
 	for(var/obj/item/W in src)
 		drop_from_inventory(W)
 
 	regenerate_icons()
-	notransform = 1
+	monkeyizing = 1
 	canmove = 0
 	icon = null
 	invisibility = 101

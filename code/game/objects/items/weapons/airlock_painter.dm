@@ -11,7 +11,7 @@
 	g_amt = 50
 	origin_tech = "engineering=1"
 
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS| CONDUCT
 	slot_flags = SLOT_BELT
 
 	var/obj/item/device/toner/ink = null

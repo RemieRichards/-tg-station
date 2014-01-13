@@ -13,15 +13,14 @@
 				if(S.target_must_be_fat && !(FAT in M.mutations))
 					continue
 
-				if(istype(M, /mob/living/carbon/human))
-					var/mob/living/carbon/human/H = M //So we can use get_organ and not some terriblly long Switch or something worse - RR
+				var/mob/living/carbon/human/H = M //So we can use get_organ and not some terriblly long Switch or something worse - RR
+				var/obj/item/organ/limb/affecting = H.get_organ(user.zone_sel.selecting)
 
-					if(S.requires_organic_chest && H.getlimb(/obj/item/organ/limb/robot/chest)) //This a seperate case to below, see "***" in surgery.dm - RR
+				if(S.requires_organic_chest && affecting.body_part == CHEST) //This a seperate case to below, see "***" in surgery.dm - RR
+					if(affecting.status == ORGAN_ROBOTIC)
 						continue
 
-
-					var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
-
+				if(affecting in H.organs && affecting.state != ORGAN_REMOVED) //if they actually have this limb - RR
 					if(affecting.status == ORGAN_ROBOTIC) //Cannot operate on Robotic organs - RR
 						continue
 
@@ -41,7 +40,9 @@
 						M.surgeries += procedure
 						user.visible_message("<span class='notice'>[user] drapes [I] over [M]'s [parse_zone(procedure.location)] to prepare for \an [procedure.name].</span>")
 
-						add_logs(user, M, "operated", addition="Operation type: [procedure.name]")
+						user.attack_log += "\[[time_stamp()]\]<font color='red'>Initiated a [procedure.name] on [M.name] ([M.ckey])</font>"
+						M.attack_log += "\[[time_stamp()]\]<font color='red'>[user.name] ([user.ckey]) initiated a [procedure.name]</font>"
+						log_attack("<font color='red'>[user.name] ([user.ckey]) initiated a [procedure.name] on [M.name] ([M.ckey])</font>")
 						return 1
 					else
 						user << "<span class='notice'>You need to expose [M]'s [procedure.location] first.</span>"

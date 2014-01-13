@@ -11,6 +11,8 @@
 	var/set_temperature = 50		// in celcius, add T0C for kelvin
 	var/heating_power = 40000
 
+	flags = FPRINT
+
 
 	New()
 		..()

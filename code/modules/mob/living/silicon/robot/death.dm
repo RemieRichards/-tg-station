@@ -1,22 +1,47 @@
-/mob/living/silicon/robot/gib(var/animation = 1)
-	..()
+/mob/living/silicon/robot/gib()
+	//robots don't die when gibbed. instead they drop their MMI'd brain
+	var/atom/movable/overlay/animation = null
+	monkeyizing = 1
+	canmove = 0
+	icon = null
+	invisibility = 101
 
-/mob/living/silicon/robot/spawn_gibs()
+	animation = new(loc)
+	animation.icon_state = "blank"
+	animation.icon = 'icons/mob/mob.dmi'
+	animation.master = src
+
+	flick("gibbed-r", animation)
 	robogibs(loc, viruses)
 
-/mob/living/silicon/robot/gib_animation(var/animate)
-	..(animate, "gibbed-r")
+	living_mob_list -= src
+	dead_mob_list -= src
+	spawn(15)
+		if(animation)	del(animation)
+		if(src)			del(src)
 
-/mob/living/silicon/robot/dust(var/animation = 1)
-	if(mmi)
-		del(mmi)
-	..()
+/mob/living/silicon/robot/dust()
+	death(1)
+	var/atom/movable/overlay/animation = null
+	monkeyizing = 1
+	canmove = 0
+	icon = null
+	invisibility = 101
 
-/mob/living/silicon/robot/spawn_dust()
+	animation = new(loc)
+	animation.icon_state = "blank"
+	animation.icon = 'icons/mob/mob.dmi'
+	animation.master = src
+
+	flick("dust-r", animation)
 	new /obj/effect/decal/remains/robot(loc)
+	if(mmi)		del(mmi)	//Delete the MMI first so that it won't go popping out.
 
-/mob/living/silicon/robot/dust_animation(var/animate)
-	..(animate, "dust-r")
+	dead_mob_list -= src
+	spawn(15)
+		if(animation)	del(animation)
+		if(src)			del(src)
+
 
 /mob/living/silicon/robot/death(gibbed)
 	if(stat == DEAD)	return

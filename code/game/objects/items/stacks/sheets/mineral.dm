@@ -22,7 +22,7 @@ Mineral Sheets
 	icon = 'icons/obj/mining.dmi'
 
 /obj/item/stack/sheet/mineral/sandstone
-	name = "sandstone brick"
+	name = "sandstone bricks"
 	desc = "This appears to be a combination of both sand and stone."
 	singular_name = "sandstone brick"
 	icon_state = "sheet-sandstone"

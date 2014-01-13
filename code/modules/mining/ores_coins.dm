@@ -22,12 +22,10 @@
 
 	attack_self(mob/living/user as mob) //It's magic I ain't gonna explain how instant conversion with no tool works. -- Urist
 		var/location = get_turf(user)
-		var/sandAmt = 1 // The sand we're holding
-		for(var/obj/item/weapon/ore/glass/sandToConvert in location) // The sand on the floor
-			sandAmt += 1
+		for(var/obj/item/weapon/ore/glass/sandToConvert in location)
+			new /obj/item/stack/sheet/mineral/sandstone(location)
 			del(sandToConvert)
-		var/obj/item/stack/sheet/mineral/newSandstone = new /obj/item/stack/sheet/mineral/sandstone(location)
-		newSandstone.amount = sandAmt
+		new /obj/item/stack/sheet/mineral/sandstone(location)
 		del(src)
 
 /obj/item/weapon/ore/plasma
@@ -71,7 +69,7 @@
 	icon = 'icons/obj/economy.dmi'
 	name = "coin"
 	icon_state = "coin"
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS | CONDUCT
 	force = 1
 	throwforce = 3
 	w_class = 1.0

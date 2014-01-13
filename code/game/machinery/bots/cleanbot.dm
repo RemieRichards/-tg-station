@@ -9,6 +9,7 @@
 	throw_speed = 2
 	throw_range = 5
 	w_class = 3.0
+	flags = TABLEPASS
 	var/created_name = "Cleanbot"
 
 
@@ -158,7 +159,7 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 		src.screwloose = 1
 
 /obj/machinery/bot/cleanbot/process()
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	if(!src.on)
 		return

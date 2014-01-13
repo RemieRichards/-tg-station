@@ -9,9 +9,9 @@
 
 /mob/living/carbon/slime/Life()
 	set invisibility = 0
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
-	if (src.notransform)
+	if (src.monkeyizing)
 		return
 
 	..()

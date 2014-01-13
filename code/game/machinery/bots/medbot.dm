@@ -232,7 +232,7 @@
 		src.icon_state = "medibot[src.on]"
 
 /obj/machinery/bot/medbot/process()
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	if(!src.on)
 		src.stunned = 0

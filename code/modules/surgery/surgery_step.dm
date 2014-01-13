@@ -77,7 +77,7 @@
 	if(ishuman(target))
 		var/mob/living/carbon/human/H = target
 		H.apply_damage(75,"brute","[target_zone]")
-		user.visible_message("<span class='notice'>[user] saws [target]'s [target_zone] open!")
+		user.visible_message("<span class='notice'>[user] saws [target]'s [parse_zone(target_zone)] open!")
 	return 1
 
 /datum/surgery_step/proc/failure(mob/user, mob/living/carbon/target, target_zone, obj/item/tool, datum/surgery/surgery)

@@ -1,7 +1,7 @@
 /atom
 	layer = 2
 	var/level = 2
-	var/flags = null
+	var/flags = FPRINT
 	var/list/fingerprints
 	var/list/fingerprintshidden
 	var/fingerprintslast = null
@@ -94,8 +94,8 @@
 /atom/proc/emp_act(var/severity)
 	return
 
-/atom/proc/bullet_act(obj/item/projectile/P, def_zone)
-	P.on_hit(src, 0, def_zone)
+/atom/proc/bullet_act(obj/item/projectile/P)
+	P.on_hit(src,0)
 	. = 0
 
 /atom/proc/in_contents_of(container)//can take class or object instance as argument
@@ -239,35 +239,27 @@ var/list/blood_splatter_icons = list()
 /atom/proc/blood_splatter_index()
 	return "\ref[initial(icon)]-[initial(icon_state)]"
 
-/atom/proc/add_blood_list(mob/living/carbon/M)
-	// Returns 1 if we had blood already
-	if(!istype(blood_DNA, /list))	//if our list of DNA doesn't exist yet (or isn't a list) initialise it.
-		blood_DNA = list()
-	//if this blood isn't already in the list, add it
-	if(blood_DNA[M.dna.unique_enzymes])
-		return 0 //already bloodied with this blood. Cannot add more.
-	blood_DNA[M.dna.unique_enzymes] = M.dna.blood_type
-	return 1
-
 //returns 1 if made bloody, returns 0 otherwise
 /atom/proc/add_blood(mob/living/carbon/M)
-	if(rejects_blood())
+	if(flags & NOBLOODY)
+		return 0
+	if(!initial(icon) || !initial(icon_state))
 		return 0
 	if(!istype(M))
 		return 0
 	if(!check_dna_integrity(M))		//check dna is valid and create/setup if necessary
 		return 0					//no dna!
+	if(!(flags & FPRINT))
+		return 0
+	if(!istype(blood_DNA, /list))	//if our list of DNA doesn't exist yet (or isn't a list) initialise it.
+		blood_DNA = list()
 	return
 
-/obj/add_blood(mob/living/carbon/M)
-	if(..() == 0)   return 0
-	return add_blood_list(M)
-
 /obj/item/add_blood(mob/living/carbon/M)
-	var/blood_count = blood_DNA == null ? 0 : blood_DNA.len
 	if(..() == 0)	return 0
+
 	//apply the blood-splatter overlay if it isn't already in there
-	if(!blood_count && initial(icon) && initial(icon_state))
+	if(!blood_DNA.len)
 		//try to find a pre-processed blood-splatter. otherwise, make a new one
 		var/index = blood_splatter_index()
 		var/icon/blood_splatter_icon = blood_splatter_icons[index]
@@ -278,6 +270,11 @@ var/list/blood_splatter_icons = list()
 			blood_splatter_icon = fcopy_rsc(blood_splatter_icon)
 			blood_splatter_icons[index] = blood_splatter_icon
 		overlays += blood_splatter_icon
+
+	//if this blood isn't already in the list, add it
+	if(blood_DNA[M.dna.unique_enzymes])
+		return 0 //already bloodied with this blood. Cannot add more.
+	blood_DNA[M.dna.unique_enzymes] = M.dna.blood_type
 	return 1 //we applied blood to the item
 
 /turf/simulated/add_blood(mob/living/carbon/M)
@@ -285,17 +282,18 @@ var/list/blood_splatter_icons = list()
 
 	var/obj/effect/decal/cleanable/blood/B = locate() in contents	//check for existing blood splatter
 	if(!B)	B = new /obj/effect/decal/cleanable/blood(src)			//make a bloood splatter if we couldn't find one
-	B.add_blood_list(M)
+	B.blood_DNA[M.dna.unique_enzymes] = M.dna.blood_type
 	return 1 //we bloodied the floor
 
 /mob/living/carbon/human/add_blood(mob/living/carbon/M)
 	if(..() == 0)	return 0
-	add_blood_list(M)
+
+	if(blood_DNA[M.dna.unique_enzymes])
+		return 0 //already bloodied with this blood. Cannot add more.
+	blood_DNA[M.dna.unique_enzymes] = M.dna.blood_type
 	update_inv_gloves()	//handles bloody hands overlays and updating
 	return 1 //we applied blood to the item
 
-/atom/proc/rejects_blood()
-	return 0
 
 /atom/proc/add_vomit_floor(mob/living/carbon/M as mob, var/toxvomit = 0)
 	if( istype(src, /turf/simulated) )
@@ -355,3 +353,18 @@ var/list/blood_splatter_icons = list()
 		return 1
 	else
 		return 0
+
+
+/atom/proc/has_hands(mob/user as mob) //checks that whomever is using this atom has hands if they are human - RR
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		var/obj/item/organ/limb/L
+		if(user.hand)
+			L = H.get_organ("l_arm")
+		else
+			L = H.get_organ("r_arm")
+		if(L && L.state == ORGAN_REMOVED)
+			user << "<span class='notice'>You look at your stump.</span>"
+			return 0
+		else
+			return 1

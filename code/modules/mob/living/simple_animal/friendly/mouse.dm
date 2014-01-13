@@ -36,10 +36,9 @@
 
 /mob/living/simple_animal/mouse/Die()
 	..()
-	if(!ckey)
-		var/obj/item/trash/deadmouse/M = new(src.loc)
-		M.icon_state = src.icon_dead
-		del (src)
+	var/obj/item/trash/deadmouse/M = new(src.loc)
+	M.icon_state = src.icon_dead
+	del (src)
 
 /mob/living/simple_animal/mouse/Crossed(AM as mob|obj)
 	if( ishuman(AM) )

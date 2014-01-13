@@ -72,12 +72,8 @@ var/list/wireColours = list("red", "blue", "green", "black", "orange", "brown", 
 		html = GetInteractWindow()
 	if(html)
 		user.set_machine(holder)
-	else
-		user.unset_machine()
-		// No content means no window.
-		user << browse(null, "window=wires")
-		return
-
+	//user << browse(html, "window=wires;size=[window_x]x[window_y]")
+	//onclose(user, "wires")
 	var/datum/browser/popup = new(user, "wires", holder.name, window_x, window_y)
 	popup.set_content(html)
 	popup.set_title_image(user.browse_rsc_icon(holder.icon, holder.icon_state))
@@ -283,11 +279,3 @@ var/const/POWER = 8
 	if(wires_status == (1 << wire_count) - 1)
 		return 1
 	return 0
-
-//
-//Shuffle and Mend
-//
-
-/datum/wires/proc/Shuffle()
-	wires_status = 0
-	GenerateWires()

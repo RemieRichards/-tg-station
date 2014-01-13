@@ -9,6 +9,7 @@
 	throw_speed = 2
 	throw_range = 5
 	w_class = 3.0
+	flags = TABLEPASS
 	var/created_name = "Floorbot"
 
 /obj/item/weapon/toolbox_tiles_sensor
@@ -21,6 +22,7 @@
 	throw_speed = 2
 	throw_range = 5
 	w_class = 3.0
+	flags = TABLEPASS
 	var/created_name = "Floorbot"
 
 //Floorbot
@@ -163,7 +165,7 @@
 			src.updateUsrDialog()
 
 /obj/machinery/bot/floorbot/process()
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	if(!src.on)
 		return

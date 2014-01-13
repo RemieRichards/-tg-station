@@ -8,7 +8,7 @@
 /obj/effect/spawner/lootdrop/initialize()
 	if(loot && loot.len)
 		for(var/i = lootcount, i > 0, i--)
-			if(!loot.len) break
+			if(!loot.len) return
 			var/lootspawn = pick(loot)
 			if(!lootdoubles)
 				loot.Remove(lootspawn)

@@ -6,6 +6,7 @@
 	desc = "A shield adept at blocking blunt objects from connecting with the torso of the shield wielder."
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "riot"
+	flags = FPRINT | TABLEPASS| CONDUCT
 	slot_flags = SLOT_BACK
 	force = 5.0
 	throwforce = 5.0
@@ -39,6 +40,7 @@
 	desc = "A shield capable of stopping most projectile and melee attacks. Energy projectiles are reflected. It can be retracted, expanded, and stored anywhere."
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "eshield0" // eshield1 for expanded
+	flags = FPRINT | TABLEPASS| CONDUCT
 	force = 3.0
 	throwforce = 5.0
 	throw_speed = 1
@@ -84,7 +86,7 @@
 	icon = 'icons/obj/device.dmi'
 	icon_state = "shield0"
 	var/active = 0.0
-	flags = CONDUCT
+	flags = FPRINT | TABLEPASS| CONDUCT
 	item_state = "electronic"
 	throwforce = 10.0
 	throw_speed = 2
@@ -97,17 +99,19 @@
 	src.active = !( src.active )
 	if (src.active)
 		user << "\blue The cloaking device is now active."
-		src.icon_state = "shield1"
+		icon_state = "shield1"
 	else
 		user << "\blue The cloaking device is now inactive."
-		src.icon_state = "shield0"
-	src.add_fingerprint(user)
-	user.update_icons()
-	return
+		icon_state = "shield0"
+	user.update_transform()
+	add_fingerprint(user)
+
 
 /obj/item/weapon/cloaking_device/emp_act(severity)
 	active = 0
 	icon_state = "shield0"
 	if(ismob(loc))
-		loc:update_icons()
+		var/mob/M = loc
+		M.update_transform()
 	..()
+

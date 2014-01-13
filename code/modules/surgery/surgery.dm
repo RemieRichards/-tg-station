@@ -1,14 +1,14 @@
 /datum/surgery
 	var/name = "surgery"
 	var/status = 1
-	var/list/steps = list()										//Steps in a surgery
-	var/step_in_progress = 0									//Actively performing a Surgery
-	var/list/species = list(/mob/living/carbon/human)			//Acceptable Species
-	var/location = "chest"										//Surgery location
-	var/target_must_be_dead = 0									//Needs to be dead
-	var/target_must_be_fat = 0									//Needs to be fat
-	var/requires_organic_chest = 0								//Prevents you from performing an operation on Robotic chests***
-	var/has_multi_loc = 0 										//Multiple locations - RR
+	var/list/steps = list()								//Steps in a surgery
+	var/step_in_progress = 0							//Actively performing a Surgery
+	var/list/species = list(/mob/living/carbon/human)	//Acceptable Species
+	var/location = "chest"								//Surgery location
+	var/target_must_be_dead = 0							//Needs to be dead
+	var/target_must_be_fat = 0							//Needs to be fat
+	var/requires_organic_chest = 0						//Prevents you from performing an operation on Robotic chests***
+	var/has_multi_loc = 0 								//Multiple locations - RR
 
 
 

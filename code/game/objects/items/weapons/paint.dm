@@ -3,8 +3,7 @@
 var/global/list/cached_icons = list()
 
 /obj/item/weapon/paint
-	gender= PLURAL
-	name = "paint"
+	name = "Paint Can"
 	desc = "Used to recolor floors and walls. Can not be removed by the janitor."
 	icon = 'icons/obj/items.dmi'
 	icon_state = "paint_neutral"
@@ -14,44 +13,43 @@ var/global/list/cached_icons = list()
 	var/paintleft = 10
 
 /obj/item/weapon/paint/red
-	name = "red paint"
+	name = "Red paint"
 	item_color = "C73232" //"FF0000"
 	icon_state = "paint_red"
 
 /obj/item/weapon/paint/green
-	name = "green paint"
+	name = "Green paint"
 	item_color = "2A9C3B" //"00FF00"
 	icon_state = "paint_green"
 
 /obj/item/weapon/paint/blue
-	name = "blue paint"
+	name = "Blue paint"
 	item_color = "5998FF" //"0000FF"
 	icon_state = "paint_blue"
 
 /obj/item/weapon/paint/yellow
-	name = "yellow paint"
+	name = "Yellow paint"
 	item_color = "CFB52B" //"FFFF00"
 	icon_state = "paint_yellow"
 
 /obj/item/weapon/paint/violet
-	name = "violet paint"
+	name = "Violet paint"
 	item_color = "AE4CCD" //"FF00FF"
 	icon_state = "paint_violet"
 
 /obj/item/weapon/paint/black
-	name = "black paint"
+	name = "Black paint"
 	item_color = "333333"
 	icon_state = "paint_black"
 
 /obj/item/weapon/paint/white
-	name = "white paint"
+	name = "White paint"
 	item_color = "FFFFFF"
 	icon_state = "paint_white"
 
 
 /obj/item/weapon/paint/anycolor
-	gender= PLURAL
-	name = "any color"
+	name = "Any color"
 	icon_state = "paint_neutral"
 
 	attack_self(mob/user as mob)
@@ -99,8 +97,7 @@ var/global/list/cached_icons = list()
 	return
 
 /obj/item/weapon/paint/paint_remover
-	gender =  PLURAL
-	name = "paint remover"
+	name = "Paint remover"
 	icon_state = "paint_neutral"
 
 	afterattack(turf/target, mob/user as mob,proximity)

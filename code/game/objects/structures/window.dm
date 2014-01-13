@@ -55,6 +55,7 @@
 	if(reinf) new /obj/item/stack/rods( loc)
 	del(src)
 
+
 /obj/structure/window/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if(istype(mover) && mover.checkpass(PASSGLASS))
 		return 1
@@ -97,7 +98,6 @@
 
 /obj/structure/window/attack_tk(mob/user as mob)
 	user.visible_message("<span class='notice'>Something knocks on [src].</span>")
-	add_fingerprint(user)
 	playsound(loc, 'sound/effects/Glasshit.ogg', 50, 1)
 
 /obj/structure/window/attack_hand(mob/user as mob)
@@ -106,15 +106,11 @@
 	if(HULK in user.mutations)
 		user.say(pick(";RAAAAAAAARGH!", ";HNNNNNNNNNGGGGGGH!", ";GWAAAAAAAARRRHHH!", "NNNNNNNNGGGGGGGGHH!", ";AAAAAAARRRGH!"))
 		user.visible_message("<span class='danger'>[user] smashes through [src]!</span>")
-		var/obj/item/weapon/shard/S = new (loc)
-		S.add_fingerprint(user)
-		if(reinf)
-			var/obj/item/stack/rods/R = new (loc)
-			R.add_fingerprint(user)
+		new /obj/item/weapon/shard(loc)
+		if(reinf) new /obj/item/stack/rods(loc)
 		del(src)
 	else
 		user.visible_message("<span class='notice'>[user] knocks on [src].</span>")
-		add_fingerprint(user)
 		playsound(loc, 'sound/effects/Glasshit.ogg', 50, 1)
 
 
@@ -155,7 +151,6 @@
 /obj/structure/window/attackby(obj/item/I, mob/user)
 	if(!can_be_reached(user))
 		return 1 //returning 1 will skip the afterattack()
-	add_fingerprint(user)
 	if(istype(I, /obj/item/weapon/screwdriver))
 		if(reinf && state >= 1)
 			state = 3 - state
@@ -176,18 +171,14 @@
 		playsound(loc, 'sound/items/Crowbar.ogg', 75, 1)
 		user << (state ? "<span class='notice'>You have pried the window into the frame.</span>" : "<span class='notice'>You have pried the window out of the frame.</span>")
 	else if(istype(I, /obj/item/weapon/wrench) && !anchored)
+		var/glass_type
 		if(reinf)
-			var/obj/item/stack/sheet/rglass/RG = new (user.loc)
-			RG.add_fingerprint(user)
-			if(is_fulltile()) //fulltiles drop two panes
-				RG = new (user.loc)
-				RG.add_fingerprint(user)
+			glass_type = /obj/item/stack/sheet/rglass
 		else
-			var/obj/item/stack/sheet/glass/G = new (user.loc)
-			G.add_fingerprint(user)
-			if(is_fulltile())
-				G = new (user.loc)
-				G.add_fingerprint(user)
+			glass_type = /obj/item/stack/sheet/glass
+		new glass_type(user.loc)
+		if(is_fulltile())//fulltiles drop two panes
+			new glass_type(user.loc)
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		src.Del(1)
 	else
@@ -243,7 +234,6 @@
 //	updateSilicate()
 	air_update_turf(1)
 	ini_dir = dir
-	add_fingerprint(usr)
 	return
 
 
@@ -260,7 +250,6 @@
 //	updateSilicate()
 	air_update_turf(1)
 	ini_dir = dir
-	add_fingerprint(usr)
 	return
 
 
@@ -312,10 +301,10 @@
 
 
 /obj/structure/window/Move()
-	var/turf/T = loc
+	air_update_turf(1)
 	..()
 	dir = ini_dir
-	move_update_air(T)
+	air_update_turf(1)
 
 /obj/structure/window/CanAtmosPass(turf/T)
 	if(get_dir(loc, T) == dir)

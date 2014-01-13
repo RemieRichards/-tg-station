@@ -12,7 +12,7 @@ var/const/SAFETY_COOLDOWN = 100
 	var/grinding = 0
 	var/icon_name = "grinder-o"
 	var/blood = 0
-	var/eat_dir = WEST
+	var/eat_from = WEST
 
 /obj/machinery/recycler/New()
 	// On us
@@ -30,7 +30,6 @@ var/const/SAFETY_COOLDOWN = 100
 	..()
 	update_icon()
 
-
 /obj/machinery/recycler/attackby(var/obj/item/I, var/mob/user)
 	if(istype(I, /obj/item/weapon/card/emag) && !emagged)
 		emagged = 1
@@ -38,14 +37,8 @@ var/const/SAFETY_COOLDOWN = 100
 			safety_mode = 0
 			update_icon()
 		playsound(src.loc, "sparks", 75, 1, -1)
-	else if(istype(I, /obj/item/weapon/screwdriver) && emagged)
-		emagged = 0
-		update_icon()
-		user << "<span class='notice'>You reset the crusher to its default factory settings.</span>"
 	else
 		..()
-		return
-	add_fingerprint(user)
 
 /obj/machinery/recycler/update_icon()
 	..()
@@ -54,15 +47,9 @@ var/const/SAFETY_COOLDOWN = 100
 		is_powered = 0
 	icon_state = icon_name + "[is_powered]" + "[(blood ? "bld" : "")]" // add the blood tag at the end
 
-// This is purely for admin possession !FUN!.
-/obj/machinery/recycler/Bump(var/atom/movable/AM)
-	..()
-	if(AM)
-		Bumped(AM)
-
-
 /obj/machinery/recycler/Bumped(var/atom/movable/AM)
 
+	// Crossed didn't like people lying down.
 	if(stat & (BROKEN|NOPOWER))
 		return
 	if(safety_mode)
@@ -76,7 +63,7 @@ var/const/SAFETY_COOLDOWN = 100
 		return
 
 	var/move_dir = get_dir(loc, AM.loc)
-	if(move_dir == eat_dir)
+	if(move_dir == eat_from)
 		if(isliving(AM))
 			if(emagged)
 				eat(AM)
@@ -88,7 +75,7 @@ var/const/SAFETY_COOLDOWN = 100
 			playsound(src.loc, 'sound/machines/buzz-sigh.ogg', 50, 0)
 			AM.loc = src.loc
 
-/obj/machinery/recycler/proc/recycle(var/obj/item/I, var/sound = 1)
+/obj/machinery/recycler/proc/recycle(var/obj/item/I)
 	I.loc = src.loc
 	if(!istype(I, /obj/item/weapon/disk/nuclear))
 		del(I)
@@ -100,8 +87,7 @@ var/const/SAFETY_COOLDOWN = 100
 			new /obj/item/stack/sheet/plasteel(loc)
 		if(prob(1))
 			new /obj/item/stack/sheet/rglass(loc)
-		if(sound)
-			playsound(src.loc, 'sound/items/Welder.ogg', 50, 1)
+		playsound(src.loc, 'sound/items/Welder.ogg', 50, 1)
 
 
 /obj/machinery/recycler/proc/stop(var/mob/living/L)
@@ -118,38 +104,19 @@ var/const/SAFETY_COOLDOWN = 100
 /obj/machinery/recycler/proc/eat(var/mob/living/L)
 
 	L.loc = src.loc
-
 	if(issilicon(L))
 		playsound(src.loc, 'sound/items/Welder.ogg', 50, 1)
 	else
 		playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
 
-	var/gib = 1
-	// By default, the emagged recycler will gib all non-carbons. (human simple animal mobs don't count)
-	if(iscarbon(L))
-		gib = 0
-		if(L.stat == CONSCIOUS)
-			L.say("ARRRRRRRRRRRGH!!!")
-		add_blood(L)
+	if(ishuman(L))
+		L.say("ARRRRRRRRRRRGH!!!")
 
-	if(!blood && !issilicon(L))
+	L.gib()
+
+	if(!blood)
 		blood = 1
 		update_icon()
-
-	// Remove and recycle the equipped items.
-	for(var/obj/item/I in L.get_equipped_items())
-		L.drop_from_inventory(I)
-		recycle(I, 0)
-
-	// Instantly lie down, also go unconscious from the pain, before you die.
-	L.Paralyse(5)
-
-	// For admin fun, var edit emagged to 2.
-	if(gib || emagged == 2)
-		L.gib()
-	else if(emagged == 1)
-		L.adjustBruteLoss(1000)
-
 
 
 /obj/item/weapon/paper/recycler

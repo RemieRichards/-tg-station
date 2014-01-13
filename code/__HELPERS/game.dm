@@ -42,16 +42,7 @@
 
 	return heard
 
-/proc/alone_in_area(var/area/the_area, var/mob/must_be_alone, var/check_type = /mob/living/carbon)
-	var/area/our_area = get_area_master(the_area)
-	for(var/C in living_mob_list)
-		if(!istype(C, check_type))
-			continue
-		if(C == must_be_alone)
-			continue
-		if(our_area == get_area_master(C))
-			return 0
-	return 1
+
 
 
 //Magic constants obtained by using linear regression on right-angled triangles of sides 0<x<1, 0<y<1
@@ -195,7 +186,7 @@
 
 /proc/get_mobs_in_radio_ranges(var/list/obj/item/device/radio/radios)
 
-	set background = BACKGROUND_ENABLED
+	set background = 1
 
 	. = list()
 	// Returns a list of mobs who can hear any of the radios given in @radios

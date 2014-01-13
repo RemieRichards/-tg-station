@@ -179,10 +179,6 @@
 				var/mob/living/carbon/human/H = usr
 				H.quick_equip()
 
-		if("current sting")
-			var/mob/living/carbon/U = usr
-			U.unset_sting()
-
 		if("resist")
 			if(isliving(usr))
 				var/mob/living/L = usr
@@ -263,12 +259,10 @@
 			usr.drop_item_v()
 
 		if("module")
-			if(isrobot(usr))
-				var/mob/living/silicon/robot/R = usr
-				if(R.module)
-					R.hud_used.toggle_show_robot_modules()
+			if(issilicon(usr))
+				if(usr:module)
 					return 1
-				R.pick_module()
+				usr:pick_module()
 
 		if("radio")
 			if(issilicon(usr))
@@ -278,10 +272,8 @@
 				usr:installed_modules()
 
 		if("store")
-			if(isrobot(usr))
-				var/mob/living/silicon/robot/R = usr
-				R.uneq_active()
-				R.hud_used.update_robot_modules_display()
+			if(issilicon(usr))
+				usr:uneq_active()
 
 		if("module1")
 			if(istype(usr, /mob/living/silicon/robot))

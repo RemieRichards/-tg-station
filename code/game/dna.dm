@@ -35,7 +35,7 @@
 			var/mob/living/carbon/human/H = character
 			L[DNA_HAIR_STYLE_BLOCK] = construct_block(hair_styles_list.Find(H.hair_style), hair_styles_list.len)
 			L[DNA_HAIR_COLOR_BLOCK] = sanitize_hexcolor(H.hair_color)
-			L[DNA_FACIAL_HAIR_STYLE_BLOCK] = construct_block(facial_hair_styles_list.Find(H.facial_hair_style), facial_hair_styles_list.len)
+			L[DNA_FACIAL_HAIR_STYLE_BLOCK] = construct_block(hair_styles_list.Find(H.facial_hair_style), facial_hair_styles_list.len)
 			L[DNA_FACIAL_HAIR_COLOR_BLOCK] = sanitize_hexcolor(H.facial_hair_color)
 			L[DNA_SKIN_TONE_BLOCK] = construct_block(skin_tones.Find(H.skin_tone), skin_tones.len)
 			L[DNA_EYE_COLOR_BLOCK] = sanitize_hexcolor(H.eye_color)
@@ -240,54 +240,54 @@
 
 	if(blocks[NEARSIGHTEDBLOCK])
 		M.disabilities |= NEARSIGHTED
-		M << "<span class='danger'>Your eyes feel strange.</span>"
+		M << "\red Your eyes feel strange."
 	if(blocks[EPILEPSYBLOCK])
 		M.disabilities |= EPILEPSY
-		M << "<span class='danger'>You get a headache.</span>"
+		M << "\red You get a headache."
 	if(blocks[STRANGEBLOCK])
-		M << "<span class='danger'>You feel strange.</span>"
+		M << "\red You feel strange."
 		if(prob(95))
 			if(prob(50))	randmutb(M)
 			else			randmuti(M)
 		else				randmutg(M)
 	if(blocks[COUGHBLOCK])
 		M.disabilities |= COUGHING
-		M << "<span class='danger'>You start coughing.</span>"
+		M << "\red You start coughing."
 	if(blocks[CLUMSYBLOCK])
-		M << "<span class='danger'>You feel lightheaded.</span>"
+		M << "\red You feel lightheaded."
 		M.mutations |= CLUMSY
 	if(blocks[TOURETTESBLOCK])
 		M.disabilities |= TOURETTES
-		M << "<span class='danger'>You twitch.</span>"
+		M << "\red You twitch."
 	if(blocks[NERVOUSBLOCK])
 		M.disabilities |= NERVOUS
-		M << "<span class='danger'>You feel nervous.</span>"
+		M << "\red You feel nervous."
 	if(blocks[DEAFBLOCK])
 		M.sdisabilities |= DEAF
 		M.ear_deaf = 1
-		M << "<span class='danger'>You can't seem to hear anything.</span>"
+		M << "\red You can't seem to hear anything..."
 	if(blocks[BLINDBLOCK])
 		M.sdisabilities |= BLIND
-		M << "<span class='danger'>You can't seem to see anything.</span>"
+		M << "\red You can't seem to see anything."
 	if(blocks[HULKBLOCK])
 		if(inj || prob(10))
 			M.mutations |= HULK
-			M << "<span class='notice'>Your muscles hurt.</span>"
+			M << "\blue Your muscles hurt."
 	if(blocks[XRAYBLOCK])
 		if(inj || prob(30))
 			M.mutations |= XRAY
-			M << "<span class='notice'>The walls suddenly disappear.</span>"
+			M << "\blue The walls suddenly disappear."
 			M.sight |= SEE_MOBS|SEE_OBJS|SEE_TURFS
 			M.see_in_dark = 8
 			M.see_invisible = SEE_INVISIBLE_LEVEL_TWO
 	if(blocks[FIREBLOCK])
 		if(inj || prob(30))
 			M.mutations |= COLD_RESISTANCE
-			M << "<span class='notice'>Your body feels warm.</span>"
+			M << "\blue Your body feels warm."
 	if(blocks[TELEBLOCK])
 		if(inj || prob(25))
 			M.mutations |= TK
-			M << "<span class='notice'>You feel smarter.</span>"
+			M << "\blue You feel smarter."
 
 
 	/* If you want the new mutations to work, UNCOMMENT THIS.
@@ -336,39 +336,23 @@
 	use_power = 1
 	idle_power_usage = 50
 	active_power_usage = 300
-	var/damage_coeff
-	var/scan_level
-	var/precision_coeff
 
 /obj/machinery/dna_scannernew/New()
 	..()
-	component_parts = list()
-	component_parts += new /obj/item/weapon/circuitboard/clonescanner(null)
-	component_parts += new /obj/item/weapon/stock_parts/scanning_module(null)
-	component_parts += new /obj/item/weapon/stock_parts/manipulator(null)
-	component_parts += new /obj/item/weapon/stock_parts/micro_laser(null)
-	component_parts += new /obj/item/weapon/stock_parts/console_screen(null)
-	component_parts += new /obj/item/weapon/cable_coil(null, 1)
-	component_parts += new /obj/item/weapon/cable_coil(null, 1)
+	component_parts = newlist(
+		/obj/item/weapon/circuitboard/clonescanner,
+		/obj/item/weapon/stock_parts/scanning_module,
+		/obj/item/weapon/stock_parts/manipulator,
+		/obj/item/weapon/stock_parts/micro_laser,
+		/obj/item/weapon/stock_parts/console_screen,
+		/obj/item/weapon/cable_coil,
+		/obj/item/weapon/cable_coil
+		)
 	RefreshParts()
 
-
-/obj/machinery/dna_scannernew/RefreshParts()
-	scan_level = 0
-	damage_coeff = 0
-	precision_coeff = 0
-	for(var/obj/item/weapon/stock_parts/scanning_module/P in component_parts)
-		scan_level += P.rating
-	for(var/obj/item/weapon/stock_parts/manipulator/P in component_parts)
-		precision_coeff = P.rating
-	for(var/obj/item/weapon/stock_parts/micro_laser/P in component_parts)
-		damage_coeff = P.rating
-
-/obj/machinery/dna_scannernew/proc/toggle_open(mob/user=usr)
-	if(!user)
-		return
-	if(open)	return close(user)
-	else		return open(user)
+/obj/machinery/dna_scannernew/proc/toggle_open()
+	if(open)	return close()
+	else		return open()
 
 /obj/machinery/dna_scannernew/container_resist()
 	var/mob/living/user = usr
@@ -379,7 +363,8 @@
 	user.next_move = world.time + 100
 	user.last_special = world.time + 100
 	user << "<span class='notice'>You lean on the back of [src] and start pushing the door open. (this will take about [breakout_time] minutes.)</span>"
-	user.visible_message("<span class='warning'>You hear a metallic creaking from [src]!</span>")
+	for(var/mob/O in viewers(src))
+		O << "<span class='warning'>You hear a metallic creaking from [src]!</span>"
 
 	if(do_after(user,(breakout_time*60*10))) //minutes * 60seconds * 10deciseconds
 		if(!user || user.stat != CONSCIOUS || user.loc != src || open || !locked)
@@ -389,13 +374,10 @@
 		visible_message("<span class='danger'>[user] successfully broke out of [src]!</span>")
 		user << "<span class='notice'>You successfully break out of [src]!</span>"
 
-		open(user)
+		open()
 
-/obj/machinery/dna_scannernew/proc/close(mob/user)
+/obj/machinery/dna_scannernew/proc/close()
 	if(open)
-		if(panel_open)
-			user << "<span class='notice'>Close the maintenance panel first.</span>"
-			return 0
 		open = 0
 		density = 1
 		for(var/mob/living/carbon/C in loc)
@@ -425,13 +407,10 @@
 
 		return 1
 
-/obj/machinery/dna_scannernew/proc/open(mob/user)
+/obj/machinery/dna_scannernew/proc/open()
 	if(!open)
-		if(panel_open)
-			user << "<span class='notice'>Close the maintenance panel first.</span>"
-			return
 		if(locked)
-			user << "<span class='notice'>The bolts are locked down, securing the door shut.</span>"
+			usr << "<span class='notice'>The bolts are locked down, securing the door shut.</span>"
 			return
 		var/turf/T = get_turf(src)
 		if(T)
@@ -449,35 +428,10 @@
 /obj/machinery/dna_scannernew/relaymove(mob/user as mob)
 	if(user.stat)
 		return
-	open(user)
+	open()
 	return
 
 /obj/machinery/dna_scannernew/attackby(obj/item/weapon/grab/G, mob/user)
-
-	if(istype(G, /obj/item/weapon/screwdriver))
-		if(occupant)
-			user << "<span class='notice'>The maintenance panel is locked.</span>"
-			return
-		playsound(src.loc, 'sound/items/Screwdriver.ogg', 50, 1)
-		panel_open = !panel_open
-		if(panel_open)
-			icon_state = "[icon_state]_maintenance"
-			user << "<span class='notice'>You open the maintenance panel of [src].</span>"
-		else
-			if(open)
-				icon_state = "[initial(icon_state)]_open"
-			else
-				icon_state = "[initial(icon_state)]"
-			user << "<span class='notice'>You close the maintenance panel of [src].</span>"
-		return
-
-	if(istype(G, /obj/item/weapon/crowbar))
-		if(panel_open)
-			for(var/obj/I in contents) // in case there is something in the scanner
-				I.loc = src.loc
-			default_deconstruction_crowbar()
-		return
-
 	if(!istype(G, /obj/item/weapon/grab) || !ismob(G.affecting))
 		return
 	if(!open)
@@ -489,9 +443,8 @@
 	del(G)
 
 /obj/machinery/dna_scannernew/attack_hand(mob/user)
-	if(..())
-		return
-	toggle_open(user)
+	if(..())	return
+	toggle_open()
 	add_fingerprint(user)
 
 
@@ -529,7 +482,6 @@
 		del(src)
 
 
-//DNA COMPUTER
 /obj/machinery/computer/scan_consolenew
 	name = "\improper DNA scanner access console"
 	desc = "Scan DNA."
@@ -557,7 +509,7 @@
 			user.drop_item()
 			I.loc = src
 			src.diskette = I
-			user << "<span class='notice'>You insert [I].</span>"
+			user << "You insert [I]."
 			src.updateUsrDialog()
 			return
 	else
@@ -597,7 +549,7 @@
 	if(connected)
 		if(connected.occupant)	//set occupant_status message
 			viable_occupant = connected.occupant
-			if(check_dna_integrity(viable_occupant) && (!(NOCLONE in viable_occupant.mutations) || (connected.scan_level == 3)))	//occupent is viable for dna modification
+			if(check_dna_integrity(viable_occupant) && !(NOCLONE in viable_occupant.mutations))	//occupent is viable for dna modification
 				occupant_status += "[viable_occupant.name] => "
 				switch(viable_occupant.stat)
 					if(CONSCIOUS)	occupant_status += "<span class='good'>Conscious</span>"
@@ -639,7 +591,7 @@
 	var/stddev = radstrength*RADIATION_STRENGTH_MULTIPLIER
 	status += "<div class='line'><div class='statusLabel'>Output Level:</div><div class='statusValue'>[radstrength]</div></div>"
 	status += "<div class='line'><div class='statusLabel'>&nbsp;&nbsp;\> Mutation:</div><div class='statusValue'>(-[stddev] to +[stddev] = 68%) (-[2*stddev] to +[2*stddev] = 95%)</div></div>"
-	stddev = RADIATION_ACCURACY_MULTIPLIER/(radduration + (connected.precision_coeff ** 2))
+	stddev = RADIATION_ACCURACY_MULTIPLIER/radduration
 	var/chance_to_hit
 	switch(stddev)	//hardcoded values from a z-table for a normal distribution
 		if(0 to 0.25)			chance_to_hit = ">95%"
@@ -797,7 +749,7 @@
 		if("togglelock")
 			if(connected)	connected.locked = !connected.locked
 		if("toggleopen")
-			if(connected)	connected.toggle_open(usr)
+			if(connected)	connected.toggle_open()
 		if("setduration")
 			if(!num)
 				num = round(input(usr, "Choose pulse duration:", "Input an Integer", null) as num|null)
@@ -843,9 +795,9 @@
 			if(num && viable_occupant)
 				num = Clamp(num, 1, NUMBER_OF_BUFFERS)
 				var/list/buffer_slot = buffer[num]
-				if(istype(buffer_slot))                                                                                  //15 and 40 are just magic numbers that were here before so i didnt touch them, they are initial boundaries of damage
-					viable_occupant.radiation += rand(15/(connected.damage_coeff ** 2),40/(connected.damage_coeff ** 2)) //Each laser level reduces damage by lvl^2, so no effect on 1 lvl, 4 times less damage on 2 and 9 times less damage on 3
-					switch(href_list["text"])                                                                            //Numbers are this high because other way upgrading laser is just not worth the hassle, and i cant think of anything better to inmrove
+				if(istype(buffer_slot))
+					viable_occupant.radiation += rand(15,40)
+					switch(href_list["text"])
 						if("se")
 							if(buffer_slot["SE"])
 								viable_occupant.dna.struc_enzymes = buffer_slot["SE"]
@@ -914,13 +866,13 @@
 				current_screen = "mainmenu"
 
 				if(viable_occupant && connected && connected.occupant==viable_occupant)
-					viable_occupant.radiation += (RADIATION_IRRADIATION_MULTIPLIER*radduration*radstrength)/(connected.damage_coeff ** 2) //Read comment in "transferbuffer" section above for explanation
-					switch(href_list["task"])                                                                                             //Same thing as there but values are even lower, on best part they are about 0.0*, effectively no damage
+					viable_occupant.radiation += RADIATION_IRRADIATION_MULTIPLIER*radduration*radstrength
+					switch(href_list["task"])
 						if("pulseui")
 							var/len = length(viable_occupant.dna.uni_identity)
 							num = Wrap(num, 1, len+1)
-							num = randomize_radiation_accuracy(num, radduration + (connected.precision_coeff ** 2), len) //Each manipulator level above 1 makes randomization as accurate as selected time + manipulator lvl^2
-                                                                                                                         //Value is this high for the same reason as with laser - not worth the hassle of upgrading if the bonus is low
+							num = randomize_radiation_accuracy(num, radduration, len)
+
 							var/block = round((num-1)/DNA_BLOCK_SIZE)+1
 							var/subblock = num - block*DNA_BLOCK_SIZE
 							last_change = "UI #[block]-[subblock]; "

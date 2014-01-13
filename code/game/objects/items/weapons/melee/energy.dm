@@ -1,13 +1,12 @@
 /obj/item/weapon/melee/energy
 	var/active = 0
+	flags = FPRINT | TABLEPASS | NOBLOODY | SHARP
+	sharp_power = 20
 
-/obj/item/weapon/melee/energy/suicide_act(mob/user)
-	viewers(user) << pick("\red <b>[user] is slitting \his stomach open with the [src.name]! It looks like \he's trying to commit seppuku.</b>", \
-						"\red <b>[user] is falling on the [src.name]! It looks like \he's trying to commit suicide.</b>")
-	return (BRUTELOSS|FIRELOSS)
-
-/obj/item/weapon/melee/energy/rejects_blood()
-	return 1
+	suicide_act(mob/user)
+		viewers(user) << pick("\red <b>[user] is slitting \his stomach open with the [src.name]! It looks like \he's trying to commit seppuku.</b>", \
+							"\red <b>[user] is falling on the [src.name]! It looks like \he's trying to commit suicide.</b>")
+		return (BRUTELOSS|FIRELOSS)
 
 /obj/item/weapon/melee/energy/axe
 	name = "energy axe"
@@ -18,7 +17,8 @@
 	throw_speed = 1
 	throw_range = 5
 	w_class = 3.0
-	flags = CONDUCT | NOSHIELD
+	flags = FPRINT | CONDUCT | NOSHIELD | TABLEPASS | NOBLOODY | SHARP
+	sharp_power = 35
 	origin_tech = "combat=3"
 	attack_verb = list("attacked", "chopped", "cleaved", "torn", "cut")
 
@@ -52,7 +52,7 @@
 	throw_speed = 1
 	throw_range = 5
 	w_class = 2.0
-	flags = NOSHIELD
+	flags = FPRINT | TABLEPASS | NOSHIELD | NOBLOODY | SHARP
 	origin_tech = "magnets=3;syndicate=4"
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	var/hacked = 0
@@ -129,18 +129,6 @@
 		else
 			user << "<span class='warning'>It's already fabulous!</span>"
 
-/obj/item/weapon/melee/energy/sword/cyborg
-	var/hitcost = 500
-
-/obj/item/weapon/melee/energy/sword/cyborg/attack(mob/M, var/mob/living/silicon/robot/R)
-	if(R.cell)
-		var/obj/item/weapon/cell/C = R.cell
-		if(active && !(C.use(hitcost)))
-			attack_self(R)
-			R << "<span class='notice'>It's out of charge!</span>"
-			return
-		..()
-	return
 
 /obj/item/weapon/melee/energy/sword/pirate
 	name = "energy cutlass"
@@ -155,6 +143,8 @@
 	New()
 		item_color = "red"
 
+
+
 /obj/item/weapon/melee/energy/blade
 	name = "energy blade"
 	desc = "A concentrated beam of energy in the shape of a blade. Very stylish... and lethal."
@@ -164,7 +154,8 @@
 	throw_speed = 1
 	throw_range = 1
 	w_class = 4.0//So you can't hide it in your pocket or some such.
-	flags = NOSHIELD
+	flags = FPRINT | TABLEPASS | NOSHIELD | NOBLOODY | SHARP
+	sharp_power = 45
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	var/datum/effect/effect/system/spark_spread/spark_system
 

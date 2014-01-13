@@ -5,7 +5,6 @@
 	icon_state = "closed"
 	explosion_resistance = 25
 	var/id = 1
-	var/auto_close = 0 // Time in seconds to automatically close when opened, 0 if it doesn't.
 
 /obj/machinery/door/poddoor/preopen
 	icon_state = "open"
@@ -53,11 +52,6 @@
 	air_update_turf(1)
 	update_freelook_sight()
 	operating = 0
-
-	if(auto_close)
-		spawn(auto_close)
-			// Checks for being able to close are in close().
-			close()
 
 	return 1
 

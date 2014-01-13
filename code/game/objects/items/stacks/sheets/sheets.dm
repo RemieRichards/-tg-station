@@ -1,5 +1,6 @@
 /obj/item/stack/sheet
 	name = "sheet"
+	flags = FPRINT | TABLEPASS
 	w_class = 3.0
 	force = 5
 	throwforce = 5

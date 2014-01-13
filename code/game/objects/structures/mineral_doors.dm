@@ -30,9 +30,9 @@
 		return
 
 	Move()
-		var/turf/T = loc
+		air_update_turf(1)
 		..()
-		move_update_air(T)
+		air_update_turf(1)
 
 	Bumped(atom/user)
 		..()
