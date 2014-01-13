@@ -47,7 +47,6 @@
 	var/burn_dam = 0
 	var/max_damage = 0
 	var/dam_icon = "chest" //So damage icons are not tied to the icon_state of the obj - RR
-	var/bonus = BONUS_NONE
 
 
 /obj/item/organ/limb/chest
@@ -264,8 +263,7 @@
 		var/obj/item/augment/AUG = I
 
 		if(affecting.body_part == AUG.limb_part)
-			affecting.Robotize()
-			affecting.bonus = AUG.bonus
+			affecting.change_organ(ORGAN_ROBOTIC)
 			visible_message("<span class='notice'>[user] has attached [src]'s new limb!</span>")
 		else
 			user << "<span class='notice'>You can't attach a [AUG.name] where [src]'s [affecting.getDisplayName()] should be!</span>"
@@ -317,32 +315,28 @@
 		return 0
 
 
-//////////////// ROBOTIZE \\\\\\\\\\\\\\\\
+//////////////// Quick organ change Procs \\\\\\\\\\\\\\\\
 
-/mob/living/carbon/human/proc/Robotize_organs(var/internal, var/limbs)
-	if(limbs)
-		for(var/obj/item/organ/limb/L in organs)
-			L.Robotize()
+/mob/living/carbon/human/proc/change_all_organs(var/type) //types are defined in
 
-	if(internal)
-		for(var/obj/item/organ/O in internal_organs)
-			O.Robotize()
+	for(var/obj/item/organ/O in organs)
+		O.change_organ(type)
+		if(istype(O, /obj/item/organ/limb))
+			var/obj/item/organ/limb/L = O
+			if(L.owner)
+				var/mob/living/carbon/human/H = L.owner //Only humans have limbs
+				H.updatehealth()
+				H.update_body()
 
 
-/obj/item/organ/proc/Robotize()
-
+/obj/item/organ/proc/change_organ(var/type)
+	status = type
 	state = ORGAN_FINE
-	status = ORGAN_ROBOTIC
 
-	if(istype(src,/obj/item/organ/limb))
+	if(istype(src, /obj/item/organ/limb))
 		var/obj/item/organ/limb/L = src
 		L.burn_dam = 0
 		L.brute_dam = 0
-
-		if(L.owner)
-			var/mob/living/carbon/human/H = L.owner //Only humans have Organs and Organ/limbs.
-			H.updatehealth()
-			H.update_body()
 
 
 //////////////// DROP LIMB \\\\\\\\\\\\\\\\

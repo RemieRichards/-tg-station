@@ -6,7 +6,6 @@
 	desc = "You should never be seeing this!"
 	icon = 'icons/mob/augments.dmi'
 	var/limb_part = null
-	var/bonus = BONUS_NONE
 
 /obj/item/augment/chest
 	name = "chest"

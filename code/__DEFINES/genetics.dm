@@ -88,8 +88,3 @@
 #define ORGAN_FINE      3
 #define ORGAN_DAMAGED   4
 #define ORGAN_REMOVED   5
-
-//Augment/Organ Bonuses
-#define BONUS_NONE		1
-#define BONUS_BLADE		2
-#define BONUS_GUN		3
