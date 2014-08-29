@@ -22,15 +22,18 @@
 	file_icon_state = "SOS"
 	extensions = list(".txt",".exe",".synd")
 
+/////////////////////
+// File priviliges //
+/////////////////////
+// Desc: Checks if the user has the priviliges for the file
+// Used: can_use()
+
 /datum/file/program/OS/file_priviliges(var/mob/living/user)
 	if(logged_in && !OS_locked)
 		return 1
 	if(!logged_in || OS_locked && logged_in)
 		if(login(user))
 			return 1
-
-	if(login(user))
-		return 1
 
 	return 0
 
@@ -81,12 +84,8 @@
 // Used: Called by Hrefs
 
 /datum/file/program/OS/Topic(href, href_list)
-/*	if(..(href,href_list))
+	if(..(href,href_list))
 		return
-	if(!parent_computer)
-		return
-	if(!can_use(usr))
-		return*/
 
 	if(href_list["login"])
 		login(usr)
@@ -116,15 +115,7 @@
 		update_comp()
 
 
-	if(href_list["backbutton"])
-		world << "Back button pressed, Hrefs work"
-		if(program) //Active program preferred over OS
-			pokeFile(program,usr)
-			return 0
 
-		program = null //OS is active, No active program
-		pokeFile(src,usr)
-		return 0
 
 ///////////////
 // Poke File //
@@ -137,10 +128,12 @@
 
 	if(istype(poke) && istype(user))
 		if(poke.can_use(user))
-			program = poke //make active program
+			if(poke != src)
+				program = poke //make active program if not the active OS
 			poke.interact(user)
 		else
-			output2popup(user,"You cannot use interact with this file!")
+			output2popup(user,"You cannot interact with this file!")
+			Crash(user,"SHIT")
 	update_comp()
 
 ///////////

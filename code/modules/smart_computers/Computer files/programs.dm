@@ -38,19 +38,8 @@
 // Used: Called by Hrefs
 
 /datum/file/program/Topic(href,href_list)
-	if(!can_use(usr))
-		return 1
-
-	if(href_list["backbutton"])
-		if(parent_computer)
-			if(parent_computer.OS)
-				if(parent_computer.OS.program) //Active program preferred over OS
-					parent_computer.OS.pokeFile(parent_computer.OS.program,usr)
-					return 0
-
-				parent_computer.OS.program = null
-				parent_computer.OS.pokeFile(parent_computer.OS,usr)
-				return 0
+	if(..(href,href_list))
+		return
 
 	if(href_list["execute"])
 		execute(usr)

@@ -169,16 +169,18 @@
 // Used: Called by Hrefs
 
 /datum/file/Topic(href,href_list)
-	if(!can_use(usr))
-		return 1
-
+//back button above checks to prevent users being trapped in a file they can't access's warning.
 	if(href_list["backbutton"])
 		if(parent_computer)
 			if(parent_computer.OS)
 				if(parent_computer.OS.program) //Active program preferred over OS
 					parent_computer.OS.pokeFile(parent_computer.OS.program,usr)
-					return 0
+					return 1
 
 				parent_computer.OS.program = null
 				parent_computer.OS.pokeFile(parent_computer.OS,usr)
 				return 0
+
+	if(!can_use(usr))
+		return 1
+

@@ -25,3 +25,4 @@
 /obj/machinery/smart_computer/CORRUPT_OS/New()
 	..()
 	OS.file_stats |= FILE_CORRUPT
+	OS.file_stats = FILE_CORRUPT

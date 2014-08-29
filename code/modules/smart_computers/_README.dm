@@ -24,6 +24,4 @@ Todo/Ideas:
 
 Issues:
 - Popup window references first user to open it, this allows users to use the same computer at the same time, BAD.
-- can_use() is failing on file_priveleges, despite it only returning 1, WTF BUG
-
 */
