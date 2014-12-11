@@ -15,9 +15,6 @@
 	..()
 
 	if(stat != DEAD)
-		//Chemicals in the body
-		handle_chemicals_in_body()
-
 		handle_nutrition()
 
 		handle_targets()
@@ -25,20 +22,7 @@
 		if (!ckey)
 			handle_speech_and_mood()
 
-	var/datum/gas_mixture/environment
-	if(src.loc)
-		environment = loc.return_air()
 
-	//Apparently, the person who wrote this code designed it so that
-	//blinded get reset each cycle and then get activated later in the
-	//code. Very ugly. I dont care. Moving this stuff here so its easy
-	//to find it.
-	src.blinded = null
-
-	if(environment)
-		handle_environment(environment) // Handle temperature/pressure differences between body and environment
-
-	handle_regular_status_updates() // Status updates, death etc.
 
 /mob/living/carbon/slime/proc/AIprocess()  // the master AI process
 

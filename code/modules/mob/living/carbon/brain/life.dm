@@ -1,38 +1,7 @@
-/mob/living/carbon/brain/Life()
-	set invisibility = 0
-	set background = BACKGROUND_ENABLED
-	..()
-
-	if(stat != DEAD)
-		//Mutations and radiation
-		handle_mutations_and_radiation()
-
-		//Chemicals in the body
-		handle_chemicals_in_body()
-
-	var/datum/gas_mixture/environment // Added to prevent null location errors
-	if(loc)
-		environment = loc.return_air()
-
-	//Apparently, the person who wrote this code designed it so that
-	//blinded get reset each cycle and then get activated later in the
-	//code. Very ugly. I dont care. Moving this stuff here so its easy
-	//to find it.
-	blinded = null
-
-	//Handle temperature/pressure differences between body and environment
-	if(environment)	// More error checking
-		handle_environment(environment)
-
-	//Status updates, death etc.
-	handle_regular_status_updates()
-	update_canmove()
-
-	if(client)
-		handle_regular_hud_updates()
 
 
-/mob/living/carbon/brain/proc/handle_mutations_and_radiation()
+
+/mob/living/carbon/brain/handle_mutations_and_radiation()
 
 	if (radiation)
 		if (radiation > 100)
@@ -66,7 +35,7 @@
 				updatehealth()
 
 
-/mob/living/carbon/brain/proc/handle_environment(datum/gas_mixture/environment)
+/mob/living/carbon/brain/handle_environment(datum/gas_mixture/environment)
 	if(!environment)
 		return
 	var/environment_heat_capacity = environment.heat_capacity()
@@ -100,22 +69,6 @@
 		//adjustFireLoss(2.5*discomfort)
 		adjustFireLoss(5.0*discomfort)
 
-
-
-/mob/living/carbon/brain/proc/handle_chemicals_in_body()
-
-	if(reagents) reagents.metabolize(src)
-
-	confused = max(0, confused - 1)
-	// decrement dizziness counter, clamped to 0
-	if(resting)
-		dizziness = max(0, dizziness - 5)
-	else
-		dizziness = max(0, dizziness - 1)
-
-	updatehealth()
-
-	return //TODO: DEFERRED
 
 
 /mob/living/carbon/brain/proc/handle_regular_status_updates()	//TODO: comment out the unused bits >_>
@@ -184,102 +137,7 @@
 					src << "<span class='danger'>All systems restored.</span>"
 					emp_damage -= 1
 
-		//Other
-		/* commented out because none of these should happen
-		if(stunned)
-			AdjustStunned(-1)
-
-		if(weakened)
-			weakened = max(weakened-1,0)
-
-		if(stuttering)
-			stuttering = max(stuttering-1, 0)
-
-		if(silent)
-			silent = max(silent-1, 0)
-
-		if(druggy)
-			druggy = max(druggy-1, 0)
-		*/
 	return 1
 
 
-/mob/living/carbon/brain/proc/handle_regular_hud_updates()
 
-	if (stat == 2 || (XRAY in src.mutations))
-		sight |= SEE_TURFS
-		sight |= SEE_MOBS
-		sight |= SEE_OBJS
-		see_in_dark = 8
-		see_invisible = SEE_INVISIBLE_LEVEL_TWO
-	else if (stat != 2)
-		sight &= ~SEE_TURFS
-		sight &= ~SEE_MOBS
-		sight &= ~SEE_OBJS
-		see_in_dark = 2
-		see_invisible = SEE_INVISIBLE_LIVING
-		if(see_override)
-			see_invisible = see_override
-
-	if (healths)
-		if (stat != 2)
-			switch(health)
-				if(100 to INFINITY)
-					healths.icon_state = "health0"
-				if(80 to 100)
-					healths.icon_state = "health1"
-				if(60 to 80)
-					healths.icon_state = "health2"
-				if(40 to 60)
-					healths.icon_state = "health3"
-				if(20 to 40)
-					healths.icon_state = "health4"
-				if(0 to 20)
-					healths.icon_state = "health5"
-				else
-					healths.icon_state = "health6"
-		else
-			healths.icon_state = "health7"
-
-	if(pullin)	pullin.icon_state = "pull[pulling ? 1 : 0]"
-
-	client.screen.Remove(global_hud.blurry,global_hud.druggy,global_hud.vimpaired)
-
-	if ((blind && stat != 2))
-		if ((blinded))
-			blind.layer = 18
-		else
-			blind.layer = 0
-
-			if (disabilities & NEARSIGHTED)
-				client.screen += global_hud.vimpaired
-
-			if (eye_blurry)
-				client.screen += global_hud.blurry
-
-			if (druggy)
-				client.screen += global_hud.druggy
-
-	if (stat != 2)
-		if (machine)
-			if (!( machine.check_eye(src) ))
-				reset_view(null)
-		else
-			if(!client.adminobs)
-				reset_view(null)
-
-	return 1
-
-
-/*/mob/living/carbon/brain/emp_act(severity)
-	if(!(container && istype(container, /obj/item/device/mmi)))
-		return
-	else
-		switch(severity)
-			if(1)
-				emp_damage += rand(20,30)
-			if(2)
-				emp_damage += rand(10,20)
-			if(3)
-				emp_damage += rand(0,10)
-	..()*/
