@@ -272,9 +272,8 @@
 		return
 	last_attack = world.time
 	OB.expand(T, 0)
-	for(var/atom/movable/A in T)
-		if(ismob(A) && A != src)
-			blob_reagent_datum.reaction_mob(A, TOUCH)
+	for(var/mob/living/L in T)
+		blob_reagent_datum.reaction_mob(L, TOUCH)
 	OB.color = blob_reagent_datum.color
 	return
 

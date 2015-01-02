@@ -78,7 +78,7 @@ datum/reagent/blob/skin_melter/reaction_mob(var/mob/living/M as mob, var/method=
 
 datum/reagent/blob/lung_destroying_toxin
 	name = "Lung Destroying Toxin"
-	id = "boiling_oil"
+	id = "lung_destroying_toxin"
 	description = ""
 	color = "#00FFC5"
 
