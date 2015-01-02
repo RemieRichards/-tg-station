@@ -14,7 +14,6 @@
 	processing_objects.Add(src)
 	if(!overmind)
 		create_overmind(new_overmind)
-		color = overmind.blob_reagent_datum.color
 	if(overmind)
 		color = overmind.blob_reagent_datum.color
 	point_rate = new_rate
