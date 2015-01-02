@@ -56,6 +56,7 @@ datum/reagent/blob/stamina_drainer
 datum/reagent/blob/stamina_drainer/reaction_mob(var/mob/living/M as mob, var/method=TOUCH, var/volume)
 	if(method == TOUCH)
 		M.apply_damage(30, STAMINA)
+		M.apply_damage(10, BRUTE)
 		M << "You feel incredibly tired!"
 
 // Combo Reagents
@@ -70,6 +71,8 @@ datum/reagent/blob/skin_melter/reaction_mob(var/mob/living/M as mob, var/method=
 	if(method == TOUCH)
 		M.apply_damage(10, BRUTE)
 		M.apply_damage(10, BURN)
+		M.adjust_fire_stacks(2)
+		M.IgniteMob()
 		M << "You feel your skin burning and melting!"
 		M.emote("scream")
 
@@ -94,6 +97,7 @@ datum/reagent/blob/acid
 datum/reagent/blob/acid/reaction_mob(var/mob/living/M as mob, var/method=TOUCH, var/volume)
 	if(method == TOUCH)
 		M.acid_act(20,1,10)
+		M.apply_damage(10, BRUTE)
 		M << "You feel your skin and equipment melting off!"
 
 datum/reagent/blob/radioactive_liquid
@@ -104,6 +108,7 @@ datum/reagent/blob/radioactive_liquid
 
 datum/reagent/blob/radioactive_liquid/reaction_mob(var/mob/living/M as mob, var/method=TOUCH, var/volume)
 	if(method == TOUCH)
+		M.apply_damage(10, BRUTE)
 		M.apply_effect(10,IRRADIATE,0)
 		if(prob(33))
 			randmuti(M)
@@ -123,20 +128,20 @@ datum/reagent/blob/dark_matter
 
 datum/reagent/blob/dark_matter/reaction_mob(var/mob/living/M as mob, var/method=TOUCH, var/volume)
 	if(method == TOUCH)
-		if(prob(20))
-			var/turf/pull = get_turf(M)
-			for(var/atom/movable/X in orange(7,pull))
-				if(istype(X, /atom/movable))
-					if((X) && (!istype(X,/mob/living/carbon/human)))
-						X.throw_at(pull)
-					else if(istype(X,/mob/living/carbon/human))
-						var/mob/living/carbon/human/H = X
-						if(istype(H.shoes,/obj/item/clothing/shoes/magboots))
-							var/obj/item/clothing/shoes/magboots/S = H.shoes
-							if(S.magpulse)
-								continue
-						X.throw_at(pull)
-			M << "Everything flies at you!"
+		M.apply_damage(15, BRUTE)
+		var/turf/pull = get_turf(M)
+		for(var/atom/movable/X in orange(7,pull))
+			if(istype(X, /atom/movable))
+				if((X) && (!istype(X,/mob/living/carbon/human)))
+					X.throw_at(pull)
+				else if(istype(X,/mob/living/carbon/human))
+					var/mob/living/carbon/human/H = X
+					if(istype(H.shoes,/obj/item/clothing/shoes/magboots))
+						var/obj/item/clothing/shoes/magboots/S = H.shoes
+						if(S.magpulse)
+							continue
+					X.throw_at(pull)
+		M << "Everything flies at you!"
 
 datum/reagent/blob/sorium
 	name = "Sorium"
@@ -146,7 +151,8 @@ datum/reagent/blob/sorium
 
 datum/reagent/blob/sorium/reaction_mob(var/mob/living/M as mob, var/method=TOUCH, var/volume)
 	if(method == TOUCH)
-		if(prob(35))
+		M.apply_damage(15, BRUTE)
+		if(prob(70))
 			var/end_dir
 			if(M.dir == NORTH && !end_dir)
 				end_dir = SOUTH
