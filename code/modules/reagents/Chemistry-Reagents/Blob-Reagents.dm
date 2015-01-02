@@ -130,7 +130,7 @@ datum/reagent/blob/dark_matter/reaction_mob(var/mob/living/M as mob, var/method=
 	if(method == TOUCH)
 		M.apply_damage(15, BRUTE)
 		var/turf/pull = get_turf(M)
-		for(var/atom/movable/X in orange(7,pull))
+		for(var/atom/movable/X in orange(4,pull))
 			if(istype(X, /atom/movable))
 				if((X) && (!istype(X,/mob/living/carbon/human)))
 					X.throw_at(pull)
