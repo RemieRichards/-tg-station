@@ -6,10 +6,10 @@
 	var/difficulty = 9001							//vaguely how hard it is to do this objective
 	var/list/excludefromjob = list()				//If you don't want a job to get a certain objective (no captain stealing his own medal, etcetc)
 	var/list/altitems = list()				//Items which can serve as an alternative to the objective (darn you blueprints)
+	var/list/special_equipment = list()
 
 /datum/proc/check_special_completion() //for objectives with special checks (is that slime extract unused? does that intellicard have an ai in it? etcetc)
 	return 1
-
 
 /datum/objective_item/steal/caplaser
 	name = "the captain's antique laser gun"
@@ -47,12 +47,6 @@
 	difficulty = 5
 	excludefromjob = list("Chief Engineer")
 
-/datum/objective_item/steal/corgimeat
-	name = "a piece of corgi meat"
-	targetitem = /obj/item/weapon/reagent_containers/food/snacks/meat/slab/corgi
-	difficulty = 5
-	excludefromjob = list("Head of Personnel", "Quartermaster", "Cargo Technician") //>hurting your little buddy ever
-
 /datum/objective_item/steal/capmedal
 	name = "the medal of captaincy"
 	targetitem = /obj/item/clothing/tie/medal/gold/captain
@@ -87,6 +81,14 @@
 	name = "any set of secret documents of any organization"
 	targetitem = /obj/item/documents //Any set of secret documents. Doesn't have to be NT's
 	difficulty = 5
+
+/datum/objective_item/steal/nuke_core
+	name = "the plutonium core from the onboard self-destruct"
+	targetitem = /obj/item/nuke_core
+	difficulty = 15
+
+/datum/objective_item/steal/nuke_core/New()
+	special_equipment += new /obj/item/weapon/storage/box/syndie_kit/nuke()
 
 //Items with special checks!
 /datum/objective_item/steal/plasma
@@ -180,6 +182,11 @@
 /datum/objective_item/special/laserpointer
 	name = "a laser pointer"
 	targetitem = /obj/item/device/laser_pointer
+	difficulty = 5
+
+/datum/objective_item/special/corgimeat
+	name = "a piece of corgi meat"
+	targetitem = /obj/item/weapon/reagent_containers/food/snacks/meat/slab/corgi
 	difficulty = 5
 
 //Stack objectives get their own subtype

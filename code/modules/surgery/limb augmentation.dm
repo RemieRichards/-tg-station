@@ -53,6 +53,8 @@
 			return 0
 
 		if(ishuman(target))
+			if(!user.drop_item())
+				return
 			var/mob/living/carbon/human/H = target
 			var/turf/Hloc = get_turf(H)
 			user.visible_message("[user] successfully augments [target]'s [parse_zone(target_zone)]!", "<span class='notice'>You successfully augment [target]'s [parse_zone(target_zone)].</span>")
@@ -76,7 +78,6 @@
 				for(var/datum/disease/appendicitis/A in H.viruses)
 					A.cure(1)
 
-			user.drop_item()
 			qdel(tool)
 			H.update_damage_overlays(0)
 			H.update_augments()
