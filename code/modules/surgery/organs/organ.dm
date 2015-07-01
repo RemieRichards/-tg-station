@@ -191,7 +191,7 @@
 			L.embedded_objects -= I
 			I.loc = T
 
-
+	clear_alert("embeddedobject")
 
 /obj/item/organ/limb/proc/copy_organ(var/obj/item/organ/limb/L)
 	//Part info
@@ -208,3 +208,9 @@
 	burn_dam = L.burn_dam
 	max_damage = L.max_damage
 	embedded_objects = L.embedded_objects.Copy()
+
+/mob/living/carbon/human/proc/has_embedded_objects()
+	. = 0
+	for(var/obj/item/organ/limb/L in organs)
+		for(var/obj/item/I in L.embedded_objects)
+			return 1

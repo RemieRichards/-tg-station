@@ -10,6 +10,7 @@ var/list/admin_verbs_default = list(
 	/client/proc/deadchat,				/*toggles deadchat on/off*/
 	/client/proc/dsay,					/*talk in deadchat using our ckey/fakekey*/
 	/client/proc/toggleprayers,			/*toggles prayers on/off*/
+	/client/verb/toggleprayersounds,	/*Toggles prayer sounds (HALLELUJAH!)*/
 	/client/proc/toggle_hear_radio,		/*toggles whether we hear the radio*/
 	/client/proc/investigate_show,		/*various admintools for investigation. Such as a singulo grief-log*/
 	/client/proc/secrets,
@@ -85,7 +86,9 @@ var/list/admin_verbs_fun = list(
 	/client/proc/set_ooc,
 	/client/proc/reset_ooc,
 	/client/proc/forceEvent,
-	/client/proc/bluespace_artillery
+	/client/proc/bluespace_artillery,
+	/client/proc/admin_change_sec_level,
+	/client/proc/toggle_nuke
 	)
 var/list/admin_verbs_spawn = list(
 	/datum/admins/proc/spawn_atom,		/*allows us to spawn instances*/
@@ -120,7 +123,10 @@ var/list/admin_verbs_debug = list(
 	/client/proc/SDQL2_query,
 	/client/proc/test_movable_UI,
 	/client/proc/test_snap_UI,
-	/client/proc/debugNatureMapGenerator
+	/client/proc/debugNatureMapGenerator,
+	/client/proc/check_bomb_impacts,
+	/proc/machine_upgrade,
+	/client/proc/populate_world
 	)
 var/list/admin_verbs_possess = list(
 	/proc/possess,
@@ -195,7 +201,9 @@ var/list/admin_verbs_hideable = list(
 	/proc/release,
 	/client/proc/reload_admins,
 	/client/proc/reset_all_tcs,
-	/client/proc/panicbunker
+	/client/proc/panicbunker,
+	/client/proc/admin_change_sec_level,
+	/client/proc/toggle_nuke
 	)
 
 /client/proc/add_admin_verbs()
@@ -253,7 +261,7 @@ var/list/admin_verbs_hideable = list(
 		/client/proc/fps,
 		/client/proc/cmd_admin_grantfullaccess,
 		/client/proc/cmd_admin_areatest,
-		/client/proc/readmin
+		/client/proc/readmin,
 		)
 	if(holder)
 		verbs.Remove(holder.rank.adds)
@@ -456,13 +464,18 @@ var/list/admin_verbs_hideable = list(
 	set category = "Fun"
 	set name = "Give Spell"
 	set desc = "Gives a spell to a mob."
-	var/obj/effect/proc_holder/spell/S = input("Choose the spell to give to that guy", "ABRAKADABRA") as null|anything in spells
+
+	var/list/spell_list = list()
+	var/type_length = length("/obj/effect/proc_holder/spell") + 2
+	for(var/A in spells)
+		spell_list[copytext("[A]", type_length)] = A
+	var/obj/effect/proc_holder/spell/S = input("Choose the spell to give to that guy", "ABRAKADABRA") as null|anything in spell_list
 	if(!S)
 		return
+	S = spell_list[S]
 	feedback_add_details("admin_verb","GS") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 	log_admin("[key_name(usr)] gave [key_name(T)] the spell [S].")
 	message_admins("<span class='adminnotice'>[key_name_admin(usr)] gave [key_name(T)] the spell [S].</span>")
-
 	if(T.mind)
 		T.mind.AddSpell(new S)
 	else
@@ -547,7 +560,7 @@ var/list/admin_verbs_hideable = list(
 		var/list/Lines = file2list("config/admins.txt")
 		for(var/line in Lines)
 			var/list/splitline = text2list(line, " = ")
-			if(splitline[1] == ckey)
+			if(lowertext(splitline[1]) == ckey)
 				if(splitline.len >= 2)
 					rank = ckeyEx(splitline[2])
 				break
@@ -583,3 +596,38 @@ var/list/admin_verbs_hideable = list(
 		verbs -= /client/proc/readmin
 		deadmins -= ckey
 		return
+
+/client/proc/populate_world(var/amount = 50 as num)
+	set name = "Populate World"
+	set category = "Debug"
+	set desc = "(\"Amount of mobs to create\") Populate the world with test mobs."
+
+	if (amount > 0)
+		var/area/area
+		var/list/candidates
+		var/turf/simulated/floor/tile
+		var/j,k
+		var/mob/living/carbon/human/mob
+
+		for (var/i = 1 to amount)
+			j = 100
+
+			do
+				area = pick(the_station_areas)
+
+				if (area)
+
+					candidates = get_area_turfs(area)
+
+					if (candidates.len)
+						k = 100
+
+						do
+							tile = pick(candidates)
+						while ((!tile || !istype(tile)) && --k > 0)
+
+						if (tile)
+							mob = new/mob/living/carbon/human/interactive(tile)
+
+							testing("Spawned test mob with name \"[mob.name]\" at [tile.x],[tile.y],[tile.z]")
+			while (!area && --j > 0)
