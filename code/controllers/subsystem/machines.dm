@@ -6,6 +6,7 @@ var/datum/subsystem/machines/SSmachine
 
 	var/list/processing = list()
 	var/list/powernets = list()
+	var/powernet_builds = 0
 
 
 /datum/subsystem/machines/Initialize()
@@ -20,16 +21,14 @@ var/datum/subsystem/machines/SSmachine
 
 	for(var/obj/structure/cable/PC in cable_list)
 		if(!PC.powernet)
-			var/datum/powernet/NewPN = new()
-			NewPN.add_cable(PC)
-			propagate_network(PC,PC.powernet)
+			PC.rebuild_my_powernet()
 
 /datum/subsystem/machines/New()
 	NEW_SS_GLOBAL(SSmachine)
 
 
 /datum/subsystem/machines/stat_entry()
-	..("M:[processing.len]|PN:[powernets.len]")
+	..("M:[processing.len]|PN:[powernets.len]|PB:[powernet_builds]")
 
 
 /datum/subsystem/machines/fire()

@@ -35,6 +35,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	layer = 2.44 //Just below unary stuff, which is at 2.45 and above pipes, which are at 2.4
 	var/cable_color = "red"
 	var/obj/item/stack/cable_coil/stored
+	var/scheduled_powernet_rebuild = null
 
 /obj/structure/cable/yellow
 	cable_color = "yellow"
@@ -406,11 +407,35 @@ By design, d1 is the smallest direction and d2 is the highest
 
 	var/list/powerlist = power_list(T1,src,0,0) //find the other cables that ended in the centre of the turf, with or without a powernet
 	if(powerlist.len>0)
+
+		/* SCHEDULING TEST
 		var/datum/powernet/PN = new()
 		propagate_network(powerlist[1],PN) //propagates the new powernet beginning at the source cable
 
 		if(PN.is_empty()) //can happen with machines made nodeless when smoothing cables
 			qdel(PN)
+		*/
+
+		var/obj/O = powerlist[1]
+		if(scheduled_powernet_rebuild)
+			deltimer(scheduled_powernet_rebuild)
+		scheduled_powernet_rebuild = addtimer(O,"rebuild_my_powernet",POWERNET_REBUILD_SCHEDULING)
+
+
+//Usually called after POWERNET_REBUILD_SCHEDULING deciseconds by the cut_cable_from_powernet() proc of another cable
+//Also called in SSmachine.make_powernets()
+/obj/structure/cable/proc/rebuild_my_powernet()
+	if(SSmachine) //log the build if possible, debug info is nice
+		SSmachine.powernet_builds++
+	var/datum/powernet/newPN = new()
+	propagate_network(src, newPN)
+
+	if(newPN.is_empty())
+		qdel(newPN)
+		return
+
+	return newPN
+
 
 // cut the cable's powernet at this cable and updates the powergrid
 /obj/structure/cable/proc/cut_cable_from_powernet()
@@ -436,14 +461,23 @@ By design, d1 is the smallest direction and d2 is the highest
 	loc = null
 	powernet.remove_cable(src) //remove the cut cable from its powernet
 
+
+	/* SCHEDULING TEST
 	var/datum/powernet/newPN = new()// creates a new powernet...
 	propagate_network(P_list[1], newPN)//... and propagates it to the other side of the cable
+	*/
+	var/obj/O = P_list[1]
+	if(scheduled_powernet_rebuild)
+		deltimer(scheduled_powernet_rebuild)
+	scheduled_powernet_rebuild = addtimer(O,"rebuild_my_powernet",POWERNET_REBUILD_SCHEDULING)
 
 	// Disconnect machines connected to nodes
 	if(d1 == 0) // if we cut a node (O-X) cable
 		for(var/obj/machinery/power/P in T1)
 			if(!P.connect_to_network()) //can't find a node cable on a the turf to connect to
 				P.disconnect_from_network() //remove from current network
+
+
 
 ///////////////////////////////////////////////
 // The cable coil object, used for laying cable

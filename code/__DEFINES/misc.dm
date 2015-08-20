@@ -244,3 +244,8 @@
 #define FACING_EACHOTHER										2
 #define FACING_INIT_FACING_TARGET_TARGET_FACING_PERPENDICULAR	3 //Do I win the most informative but also most stupid define award?
 
+
+#define POWERNET_REBUILD_SCHEDULING 20
+//A value in deciseconds between a request to rebuild a powernet by cut_cable_from_powernet() and the actual rebuilding
+//If this value is too low: the system is meaningless
+//If this value is too high: the longer invalid powernets (cable sections no longer connected) will last
