@@ -31,56 +31,54 @@ Notes:
 
 
 /datum/tooltip
-	var
-		client/owner
-		control = "mainwindow.tooltip"
-		file = 'code/modules/tooltip/tooltip.html'
-		showing = 0
-		queueHide = 0
+	var/client/owner
+	var/control = "mainwindow.tooltip"
+	var/file = 'code/modules/tooltip/tooltip.html'
+	var/showing = 0
+	var/queueHide = 0
 
 
-	New(client/C)
-		if (C)
-			src.owner = C
-			src.owner << browse(src.file, "window=[src.control]")
-
-		..()
-
-
-	proc/show(params = null, title = null, content = null, theme = "default")
-		if (!params || (!title && !content) || !src.owner) return 0
-		src.showing = 1
-
-		//Format contents
-		if (title && content)
-			title = "<h1>[title]</h1>"
-			content = "<p>[content]</p>"
-		else if (title && !content)
-			title = "<p>[title]</p>"
-		else if (!title && content)
-			content = "<p>[content]</p>"
-
-		//Send stuff to the tooltip
-		src.owner << output(list2params(list(src.control, params, src.owner.view, "[title][content]", theme)), "[src.control]:tooltip.update")
-
-		//If a hide() was hit while we were showing, run hide() again to avoid stuck tooltips
-		src.showing = 0
-		if (src.queueHide)
-			src.hide()
-
-		return 1
+/datum/tooltip/New(client/C)
+	if (C)
+		src.owner = C
+		src.owner << browse(src.file, "window=[src.control]")
+	..()
 
 
-	proc/hide()
-		if (src.queueHide)
-			spawn(1)
-				winshow(src.owner, src.control, 0)
-		else
+/datum/tooltip/proc/show(params = null, title = null, content = null, theme = "default")
+	if (!params || (!title && !content) || !src.owner) return 0
+	src.showing = 1
+
+	//Format contents
+	if (title && content)
+		title = "<h1>[title]</h1>"
+		content = "<p>[content]</p>"
+	else if (title && !content)
+		title = "<p>[title]</p>"
+	else if (!title && content)
+		content = "<p>[content]</p>"
+
+	//Send stuff to the tooltip
+	src.owner << output(list2params(list(src.control, params, src.owner.view, "[title][content]", theme)), "[src.control]:tooltip.update")
+
+	//If a hide() was hit while we were showing, run hide() again to avoid stuck tooltips
+	src.showing = 0
+	if (src.queueHide)
+		src.hide()
+
+	return 1
+
+
+/datum/tooltip/proc/hide()
+	if (src.queueHide)
+		spawn(1)
 			winshow(src.owner, src.control, 0)
+	else
+		winshow(src.owner, src.control, 0)
 
-		src.queueHide = src.showing ? 1 : 0
+	src.queueHide = src.showing ? 1 : 0
 
-		return 1
+	return 1
 
 
 
