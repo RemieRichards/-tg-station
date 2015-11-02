@@ -1,10 +1,10 @@
-/mob/living/carbon/human/gib_animation(animate)
+/mob/living/carbon/human/gib_animation(var/animate)
 	..(animate, "gibbed-h")
 
-/mob/living/carbon/human/dust_animation(animate)
+/mob/living/carbon/human/dust_animation(var/animate)
 	..(animate, "dust-h")
 
-/mob/living/carbon/human/dust(animation = 1)
+/mob/living/carbon/human/dust(var/animation = 1)
 	..()
 
 /mob/living/carbon/human/spawn_gibs()
@@ -14,14 +14,11 @@
 	new /obj/effect/decal/remains/human(loc)
 
 /mob/living/carbon/human/death(gibbed)
-	if(stat == DEAD)
-		return
-	if(healths)
-		healths.icon_state = "health5"
+	if(stat == DEAD)	return
+	if(healths)		healths.icon_state = "health5"
 	stat = DEAD
 	dizziness = 0
 	jitteriness = 0
-	heart_attack = 0
 
 	if(istype(loc, /obj/mecha))
 		var/obj/mecha/M = loc
@@ -34,8 +31,6 @@
 		update_canmove()
 		if(client) blind.layer = 0
 
-	dna.species.spec_death(gibbed,src)
-
 	tod = worldtime2text()		//weasellos time of death patch
 	if(mind)	mind.store_memory("Time of death: [tod]", 0)
 	if(ticker && ticker.mode)
@@ -45,13 +40,16 @@
 	return ..(gibbed)
 
 /mob/living/carbon/human/proc/makeSkeleton()
+	if(!check_dna_integrity(src) || (dna.mutantrace == "skeleton"))	return
+	dna.mutantrace = "skeleton"
 	status_flags |= DISFIGURED
-	set_species(/datum/species/skeleton)
+	update_hair()
+	update_body()
 	return 1
 
 /mob/living/carbon/proc/ChangeToHusk()
-	if(disabilities & HUSK)	return
-	disabilities |= HUSK
+	if(HUSK in mutations)	return
+	mutations.Add(HUSK)
 	status_flags |= DISFIGURED	//makes them unknown without fucking up other stuff like admintools
 	return 1
 
@@ -63,5 +61,5 @@
 
 /mob/living/carbon/proc/Drain()
 	ChangeToHusk()
-	disabilities |= NOCLONE
+	mutations |= NOCLONE
 	return 1

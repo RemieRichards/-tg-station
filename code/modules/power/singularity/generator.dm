@@ -12,22 +12,22 @@
 /obj/machinery/the_singularitygen/process()
 	var/turf/T = get_turf(src)
 	if(src.energy >= 200)
-		new /obj/singularity/(T, 50)
-		if(src) qdel(src)
+		new /obj/machinery/singularity/(T, 50)
+		if(src) del(src)
 
-/obj/machinery/the_singularitygen/attackby(obj/item/W, mob/user, params)
+/obj/machinery/the_singularitygen/attackby(obj/item/W, mob/user)
 	if(istype(W, /obj/item/weapon/wrench))
 
 		if(!anchored && !isinspace())
 			user.visible_message("[user.name] secures [src.name] to the floor.", \
-				"<span class='notice'>You secure the [src.name] to the floor.</span>", \
-				"<span class='italics'>You hear a ratchet.</span>")
+				"You secure the [src.name] to the floor.", \
+				"You hear a ratchet")
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
 			anchored = 1
 		else if(anchored)
 			user.visible_message("[user.name] unsecures [src.name] from the floor.", \
-				"<span class='notice'>You unsecure the [src.name] from the floor.</span>", \
-				"<span class='italics'>You hear a ratchet.</span>")
+				"You unsecure the [src.name] from the floor.", \
+				"You hear a ratchet")
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
 			anchored = 0
 		return

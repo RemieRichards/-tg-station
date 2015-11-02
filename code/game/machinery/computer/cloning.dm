@@ -1,9 +1,8 @@
 
 /obj/machinery/computer/cloning
 	name = "cloning console"
-	desc = "Used to clone people and manage DNA."
-	icon_screen = "dna"
-	icon_keyboard = "med_key"
+	icon = 'icons/obj/computer.dmi'
+	icon_state = "dna"
 	circuit = /obj/item/weapon/circuitboard/cloning
 	req_access = list(access_heads) //Only used for record deletion right now.
 	var/obj/machinery/dna_scannernew/scanner = null //Linked scanner. For scanning.
@@ -35,7 +34,7 @@
 	if(!(pod1.occupant || pod1.mess) && (pod1.efficiency > 5))
 		for(var/datum/data/record/R in records)
 			if(!(pod1.occupant || pod1.mess))
-				if(pod1.growclone(R.fields["ckey"], R.fields["name"], R.fields["UI"], R.fields["SE"], R.fields["mind"], R.fields["mrace"], R.fields["features"], R.fields["factions"]))
+				if(pod1.growclone(R.fields["ckey"], R.fields["name"], R.fields["UI"], R.fields["SE"], R.fields["mind"], R.fields["mrace"]))
 					records -= R
 
 /obj/machinery/computer/cloning/proc/updatemodules()
@@ -54,12 +53,12 @@
 		// Try to find a scanner in that direction
 		scannerf = locate(/obj/machinery/dna_scannernew, get_step(src, dir))
 
-		// If found and operational, return the scanner
-		if (!isnull(scannerf) && scannerf.is_operational())
-			return scannerf
+		// If found, then we break, and return the scanner
+		if (!isnull(scannerf))
+			break
 
 	// If no scanner was found, it will return null
-	return null
+	return scannerf
 
 /obj/machinery/computer/cloning/proc/findcloner()
 	var/obj/machinery/clonepod/podf = null
@@ -68,31 +67,25 @@
 
 		podf = locate(/obj/machinery/clonepod, get_step(src, dir))
 
-		if (!isnull(podf) && podf.is_operational())
-			return podf
+		if (!isnull(podf))
+			break
 
-	return null
+	return podf
 
-/obj/machinery/computer/cloning/attackby(obj/item/W, mob/user, params)
+/obj/machinery/computer/cloning/attackby(obj/item/W as obj, mob/user as mob)
 	if (istype(W, /obj/item/weapon/disk/data)) //INSERT SOME DISKETTES
 		if (!src.diskette)
-			if(!user.drop_item())
-				return ..()
+			user.drop_item()
 			W.loc = src
 			src.diskette = W
-			user << "<span class='notice'>You insert [W].</span>"
+			user << "You insert [W]."
 			src.updateUsrDialog()
 			return
 	else
 		..()
 	return
 
-/obj/machinery/computer/cloning/attack_hand(mob/user)
-	if(..())
-		return
-	interact(user)
-
-/obj/machinery/computer/cloning/interact(mob/user)
+/obj/machinery/computer/cloning/attack_hand(mob/user as mob)
 	user.set_machine(src)
 	add_fingerprint(user)
 
@@ -234,25 +227,25 @@
 			if("stopautoprocess")
 				autoprocess = 0
 
-	else if ((href_list["scan"]) && !isnull(scanner) && scanner.is_operational())
+	else if ((href_list["scan"]) && (!isnull(src.scanner)))
 		scantemp = ""
 
 		loading = 1
 		src.updateUsrDialog()
 
 		spawn(20)
-			src.scan_mob(scanner.occupant)
+			src.scan_mob(src.scanner.occupant)
 
 			loading = 0
 			src.updateUsrDialog()
 
 
 		//No locking an open scanner.
-	else if ((href_list["lock"]) && !isnull(scanner) && scanner.is_operational())
-		if ((!scanner.locked) && (scanner.occupant))
-			scanner.locked = 1
+	else if ((href_list["lock"]) && (!isnull(src.scanner)))
+		if ((!src.scanner.locked) && (src.scanner.occupant))
+			src.scanner.locked = 1
 		else
-			scanner.locked = 0
+			src.scanner.locked = 0
 
 	else if(href_list["view_rec"])
 		src.active_record = find_record("id", href_list["view_rec"], records)
@@ -330,7 +323,7 @@
 				temp = "<font class='bad'>Clonepod malfunction.</font>"
 			else if(!config.revival_cloning)
 				temp = "<font class='bad'>Unable to initiate cloning cycle.</font>"
-			else if(pod1.growclone(C.fields["ckey"], C.fields["name"], C.fields["UI"], C.fields["SE"], C.fields["mind"], C.fields["mrace"], C.fields["features"], C.fields["factions"]))
+			else if(pod1.growclone(C.fields["ckey"], C.fields["name"], C.fields["UI"], C.fields["SE"], C.fields["mind"], C.fields["mrace"]))
 				temp = "[C.fields["name"]] => <font class='good'>Cloning cycle in progress...</font>"
 				records.Remove(C)
 				if(active_record == C)
@@ -349,17 +342,17 @@
 	src.updateUsrDialog()
 	return
 
-/obj/machinery/computer/cloning/proc/scan_mob(mob/living/carbon/human/subject)
-	if (!istype(subject))
+/obj/machinery/computer/cloning/proc/scan_mob(mob/living/carbon/human/subject as mob)
+	if (!check_dna_integrity(subject) || !istype(subject))
 		scantemp = "<font class='bad'>Unable to locate valid genetic data.</font>"
 		return
-	if (!subject.getorgan(/obj/item/organ/internal/brain))
+	if (!subject.getorgan(/obj/item/organ/brain))
 		scantemp = "<font class='bad'>No signs of intelligence detected.</font>"
 		return
 	if (subject.suiciding == 1)
 		scantemp = "<font class='bad'>Subject's brain is not responding to scanning stimuli.</font>"
 		return
-	if ((subject.disabilities & NOCLONE) && (src.scanner.scan_level < 2))
+	if (NOCLONE in subject.mutations && src.scanner.scan_level < 2)
 		scantemp = "<font class='bad'>Subject no longer contains the fundamental materials required to create a living clone.</font>"
 		return
 	if ((!subject.ckey) || (!subject.client))
@@ -370,10 +363,10 @@
 		return
 
 	var/datum/data/record/R = new()
-	if(subject.dna.species)
-		R.fields["mrace"] = subject.dna.species.type
+	if(subject.dna)
+		R.fields["mrace"] = subject.dna.mutantrace
 	else
-		R.fields["mrace"] = /datum/species/human
+		R.fields["mrace"] = null
 	R.fields["ckey"] = subject.ckey
 	R.fields["name"] = subject.real_name
 	R.fields["id"] = copytext(md5(subject.real_name), 2, 6)
@@ -381,8 +374,7 @@
 	R.fields["UI"] = subject.dna.uni_identity
 	R.fields["SE"] = subject.dna.struc_enzymes
 	R.fields["blood_type"] = subject.dna.blood_type
-	R.fields["features"] = subject.dna.features
-	R.fields["factions"] = subject.faction
+
 	//Add an implant if needed
 	var/obj/item/weapon/implant/health/imp = locate(/obj/item/weapon/implant/health, subject)
 	if(!imp)
@@ -398,3 +390,15 @@
 
 	src.records += R
 	scantemp = "Subject successfully scanned."
+
+/obj/machinery/computer/cloning/update_icon()
+
+	if(stat & BROKEN)
+		icon_state = "commb"
+	else
+		if(stat & NOPOWER)
+			src.icon_state = "c_unpowered"
+			stat |= NOPOWER
+		else
+			icon_state = initial(icon_state)
+			stat &= ~NOPOWER

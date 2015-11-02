@@ -5,8 +5,7 @@
 	name = "atmospheric alert console"
 	desc = "Used to access the station's atmospheric sensors."
 	circuit = /obj/item/weapon/circuitboard/atmos_alert
-	icon_screen = "alert:0"
-	icon_keyboard = "atmos_key"
+	icon_state = "alert:0"
 	var/list/priority_alarms = list()
 	var/list/minor_alarms = list()
 	var/receive_frequency = 1437
@@ -16,11 +15,6 @@
 /obj/machinery/computer/atmos_alert/initialize()
 	..()
 	set_frequency(receive_frequency)
-
-/obj/machinery/computer/atmos_alert/Destroy()
-	if(radio_controller)
-		radio_controller.remove_object(src, receive_frequency)
-	return ..()
 
 /obj/machinery/computer/atmos_alert/receive_signal(datum/signal/signal)
 	if(!signal || signal.encryption) return
@@ -49,9 +43,9 @@
 /obj/machinery/computer/atmos_alert/attack_hand(mob/user)
 	if(..(user))
 		return
-	interact(user) //UpdateDialog() is calling /interact each tick, not attack_hand()
-
-/obj/machinery/computer/atmos_alert/interact(mob/user)
+	user.set_machine(src)
+	//user << browse(return_text(),"window=computer")
+	//onclose(user, "computer")
 	var/datum/browser/popup = new(user, "computer", name)
 	popup.set_content(return_text())
 	popup.set_title_image(user.browse_rsc_icon(src.icon, src.icon_state))
@@ -62,13 +56,21 @@
 		src.updateDialog()
 
 /obj/machinery/computer/atmos_alert/update_icon()
-	..()
-	if(stat & (NOPOWER|BROKEN))
+	if(stat & BROKEN)
+		icon_state = "alert:b"
 		return
-	if(priority_alarms.len)
-		overlays += "alert:2"
+	else if (stat & NOPOWER)
+		icon_state = "alert:O"
+		return
+	else if(priority_alarms.len)
+		icon_state = "alert:2"
+
 	else if(minor_alarms.len)
-		overlays += "alert:1"
+		icon_state = "alert:1"
+
+	else
+		icon_state = "alert:0"
+	return
 
 
 /obj/machinery/computer/atmos_alert/proc/return_text()
@@ -106,14 +108,14 @@
 		var/removing_zone = href_list["priority_clear"]
 		for(var/zone in priority_alarms)
 			if(ckey(zone) == removing_zone)
-				usr << "\green Priority Alert for [format_text(zone)] cleared."
+				usr << "\green Priority Alert for area [] cleared."
 				priority_alarms -= zone
 
 	if(href_list["minor_clear"])
 		var/removing_zone = href_list["minor_clear"]
 		for(var/zone in minor_alarms)
 			if(ckey(zone) == removing_zone)
-				usr << "\green Minor Alert for [format_text(zone)] cleared."
+				usr << "\green Minor Alert for area [] cleared."
 				minor_alarms -= zone
 	update_icon()
 	return

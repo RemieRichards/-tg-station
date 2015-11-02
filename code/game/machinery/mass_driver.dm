@@ -23,7 +23,8 @@
 		if(!O.anchored || istype(O, /obj/mecha))	//Mechs need their launch platforms.
 			O_limit++
 			if(O_limit >= 20)
-				audible_message("<span class='notice'>[src] lets out a screech, it doesn't seem to be able to handle the load.</span>")
+				for(var/mob/M in hearers(src, null))
+					M << "<span class='notice'>[src] lets out a screech, it doesn't seem to be able to handle the load.</span>"
 				break
 			use_power(500)
 			spawn(0)

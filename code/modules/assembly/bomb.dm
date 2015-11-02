@@ -3,7 +3,7 @@
 	icon = 'icons/obj/tank.dmi'
 	item_state = "assembly"
 	throwforce = 5
-	w_class = 3
+	w_class = 3.0
 	throw_speed = 2
 	throw_range = 4
 	flags = CONDUCT
@@ -11,9 +11,9 @@
 	var/obj/item/device/assembly_holder/bombassembly = null   //The first part of the bomb is an assembly holder, holding an igniter+some device
 	var/obj/item/weapon/tank/bombtank = null //the second part of the bomb is a plasma tank
 
-/obj/item/device/onetankbomb/examine(mob/user)
+/obj/item/device/onetankbomb/examine()
 	..()
-	user.examinate(bombtank)
+	bombtank.examine()
 
 /obj/item/device/onetankbomb/update_icon()
 	if(bombtank)
@@ -23,7 +23,7 @@
 		overlays += bombassembly.overlays
 		overlays += "bomb_assembly"
 
-/obj/item/device/onetankbomb/attackby(obj/item/weapon/W, mob/user, params)
+/obj/item/device/onetankbomb/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/device/analyzer))
 		bombtank.attackby(W, user)
 		return
@@ -39,7 +39,7 @@
 		bombtank.master = null
 		bombtank = null
 
-		qdel(src)
+		del(src)
 		return
 	if((istype(W, /obj/item/weapon/weldingtool) && W:welding))
 		if(!status)
@@ -54,7 +54,7 @@
 	add_fingerprint(user)
 	..()
 
-/obj/item/device/onetankbomb/attack_self(mob/user) //pressing the bomb accesses its assembly
+/obj/item/device/onetankbomb/attack_self(mob/user as mob) //pressing the bomb accesses its assembly
 	bombassembly.attack_self(user, 1)
 	add_fingerprint(user)
 	return
@@ -77,9 +77,13 @@
 	if(bombassembly)
 		bombassembly.Crossed(AM)
 
-/obj/item/device/onetankbomb/on_found(mob/finder) //for mousetraps
+/obj/item/device/onetankbomb/on_found(mob/finder as mob) //for mousetraps
 	if(bombassembly)
 		bombassembly.on_found(finder)
+
+/obj/item/device/onetankbomb/hear_talk(mob/living/M as mob, msg)
+	if(bombassembly)
+		bombassembly.hear_talk(M, msg)
 
 
 // ---------- Procs below are for tanks that are used exclusively in 1-tank bombs ----------
@@ -87,13 +91,14 @@
 /obj/item/weapon/tank/proc/bomb_assemble(W,user)	//Bomb assembly proc. This turns assembly+tank into a bomb
 	var/obj/item/device/assembly_holder/S = W
 	var/mob/M = user
-	if(isigniter(S.a_left) == isigniter(S.a_right))		//Check if either part of the assembly has an igniter, but if both parts are igniters, then fuck it
+	if(!S.secured)										//Check if the assembly is secured
 		return
-	if(!M.drop_item())			//Remove the assembly from your hands
+	if(isigniter(S.a_left) == isigniter(S.a_right))		//Check if either part of the assembly has an igniter, but if both parts are igniters, then fuck it
 		return
 
 	var/obj/item/device/onetankbomb/R = new /obj/item/device/onetankbomb(loc)
 
+	M.drop_item()			//Remove the assembly from your hands
 	M.remove_from_mob(src)	//Remove the tank from your character,in case you were holding it
 	M.put_in_hands(R)		//Equips the bomb if possible, or puts it on the floor.
 
@@ -153,8 +158,8 @@
 
 	air_update_turf()
 	if(master)
-		qdel(master)
-	qdel(src)
+		del(master)
+	del(src)
 
 /obj/item/weapon/tank/proc/release()	//This happens when the bomb is not welded. Tank contents are just spat out.
 	var/datum/gas_mixture/removed = air_contents.remove(air_contents.total_moles())

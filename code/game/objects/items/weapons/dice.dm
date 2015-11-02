@@ -1,23 +1,3 @@
-/obj/item/weapon/storage/pill_bottle/dice
-	name = "bag of dice"
-	desc = "Contains all the luck you'll ever need."
-	icon = 'icons/obj/dice.dmi'
-	icon_state = "dicebag"
-
-/obj/item/weapon/storage/pill_bottle/dice/New()
-	..()
-	var/special_die = pick("1","2","00","100")
-	if(special_die == "1")		new /obj/item/weapon/dice/d1(src)
-	if(special_die == "2")		new /obj/item/weapon/dice/d2(src)
-	new /obj/item/weapon/dice/d4(src)
-	new /obj/item/weapon/dice(src)
-	new /obj/item/weapon/dice/d8(src)
-	new /obj/item/weapon/dice/d10(src)
-	if(special_die == "00")		new /obj/item/weapon/dice/d00(src)
-	new /obj/item/weapon/dice/d12(src)
-	new /obj/item/weapon/dice/d20(src)
-	if(special_die == "100")	new /obj/item/weapon/dice/d100(src)
-
 /obj/item/weapon/dice
 	name = "d6"
 	desc = "A die with six sides. Basic and servicable."
@@ -25,17 +5,9 @@
 	icon_state = "d6"
 	w_class = 1
 	var/sides = 6
-	var/result = null
 
 /obj/item/weapon/dice/New()
-	result = rand(1, sides)
-	update_icon()
-
-/obj/item/weapon/dice/d1
-	name = "d1"
-	desc = "A die with one side. Deterministic!"
-	icon_state = "d1"
-	sides = 1
+	icon_state = "[initial(icon_state)][rand(1, sides)]"
 
 /obj/item/weapon/dice/d2
 	name = "d2"
@@ -79,47 +51,32 @@
 	icon_state = "d20"
 	sides = 20
 
-/obj/item/weapon/dice/d100
-	name = "d100"
-	desc = "A die with one hundred sides! Probably not fairly weighted..."
-	icon_state = "d100"
-	sides = 100
-
-/obj/item/weapon/dice/attack_self(mob/user)
+/obj/item/weapon/dice/attack_self(mob/user as mob)
 	diceroll(user)
 
-/obj/item/weapon/dice/throw_at(atom/target, range, speed, mob/user, spin=1)
-	if(!..())
-		return
+/obj/item/weapon/dice/throw_at(atom/target, range, speed, mob/user as mob)
+	..()
 	diceroll(user)
 
-/obj/item/weapon/dice/proc/diceroll(mob/user)
-	result = rand(1, sides)
+/obj/item/weapon/dice/proc/diceroll(mob/user as mob)
+	var/result = rand(1, sides)
 	var/comment = ""
 	if(sides == 20 && result == 20)
 		comment = "Nat 20!"
 	else if(sides == 20 && result == 1)
 		comment = "Ouch, bad luck."
-	update_icon()
+	icon_state = "[initial(icon_state)][result]"
 	if(initial(icon_state) == "d00")
 		result = (result - 1)*10
 	if(user != null) //Dice was rolled in someone's hand
-		user.visible_message("[user] has thrown [src]. It lands on [result]. [comment]", \
+		user.visible_message("<span class='notice'>[user] has thrown [src]. It lands on [result]. [comment]</span>", \
 							 "<span class='notice'>You throw [src]. It lands on [result]. [comment]</span>", \
-							 "<span class='italics'>You hear [src] rolling.</span>")
+							 "<span class='notice'>You hear [src] landing on [result]. [comment]</span>")
 	else if(src.throwing == 0) //Dice was thrown and is coming to rest
-		visible_message("<span class='notice'>[src] rolls to a stop, landing on [result]. [comment]</span>")
+		src.loc.visible_message("<span class='notice'>[src] rolls to a stop, landing on [result]. [comment]</span>")
 
-/obj/item/weapon/dice/d4/Crossed(mob/living/carbon/human/H)
+/obj/item/weapon/dice/d4/Crossed(var/mob/living/carbon/human/H)
 	if(istype(H) && !H.shoes)
-		if(PIERCEIMMUNE in H.dna.species.specflags)
-			return 0
 		H << "<span class='userdanger'>You step on the D4!</span>"
 		H.apply_damage(4,BRUTE,(pick("l_leg", "r_leg")))
 		H.Weaken(3)
-
-/obj/item/weapon/dice/update_icon()
-	overlays.Cut()
-	if(sides == 100)
-		return
-	overlays += "[src.icon_state][src.result]"

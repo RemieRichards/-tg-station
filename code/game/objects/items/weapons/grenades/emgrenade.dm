@@ -8,5 +8,5 @@
 /obj/item/weapon/grenade/empgrenade/prime()
 	update_mob()
 	empulse(src, 4, 10)
-	qdel(src)
+	del(src)
 

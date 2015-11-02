@@ -2,47 +2,36 @@
 
 /obj/item/device/mmi
 	name = "Man-Machine Interface"
-	desc = "The Warrior's bland acronym, MMI, obscures the true horror of this monstrosity, that nevertheless has become standard-issue on Nanotrasen stations."
+	desc = "The Warrior's bland acronym, MMI, obscures the true horror of this monstrosity."
 	icon = 'icons/obj/assemblies.dmi'
 	icon_state = "mmi_empty"
 	w_class = 3
 	origin_tech = "biotech=3"
-	var/braintype = "Cyborg"
 
-	var/syndiemmi = 0 //Whether or not this is a Syndicate MMI
+	var/list/construction_cost = list("metal"=1000,"glass"=500)
+	var/construction_time = 75
+	//these vars are so the mecha fabricator doesn't shit itself anymore. --NEO
+
+	req_access = list(access_robotics)
+
+	//Revised. Brainmob is now contained directly within object of transfer. MMI in this case.
+
+	var/locked = 0
 	var/mob/living/carbon/brain/brainmob = null //The current occupant.
 	var/mob/living/silicon/robot = null //Appears unused.
 	var/obj/mecha = null //This does not appear to be used outside of reference in mecha.dm.
-	var/obj/item/organ/internal/brain/brain = null //The actual brain
+	var/obj/item/organ/brain/brain = null //The actual brain
 
-/obj/item/device/mmi/update_icon()
-	if(brain)
-		if(istype(brain,/obj/item/organ/internal/brain/alien))
-			icon_state = "mmi_alien"
-			braintype = "Xenoborg" //HISS....Beep.
-		else
-			icon_state = "mmi_full"
-			braintype = "Cyborg"
-	else
-		icon_state = "mmi_empty"
-
-/obj/item/device/mmi/attackby(obj/item/O, mob/user, params)
-	user.changeNext_move(CLICK_CD_MELEE)
-	if(istype(O,/obj/item/organ/internal/brain)) //Time to stick a brain in it --NEO
-		var/obj/item/organ/internal/brain/newbrain = O
+/obj/item/device/mmi/attackby(var/obj/item/O as obj, var/mob/user as mob)
+	if(istype(O,/obj/item/organ/brain)) //Time to stick a brain in it --NEO
+		var/obj/item/organ/brain/newbrain = O
 		if(brain)
-			user << "<span class='warning'>There's already a brain in the MMI!</span>"
+			user << "\red There's already a brain in the MMI!"
 			return
 		if(!newbrain.brainmob)
-			user << "<span class='warning'>You aren't sure where this brain came from, but you're pretty sure it's a useless brain!</span>"
+			user << "\red You aren't sure where this brain came from, but you're pretty sure it's a useless brain."
 			return
-
-		if(!user.unEquip(O))
-			return
-		var/mob/living/carbon/brain/B = newbrain.brainmob
-		if(!B.key)
-			B.notify_ghost_cloning("Someone has put your brain in a MMI!", source = src)
-		visible_message("[user] sticks \a [newbrain] into \the [src].")
+		visible_message("\blue [user] sticks \a [newbrain] into \the [src]")
 
 		brainmob = newbrain.brainmob
 		newbrain.brainmob = null
@@ -52,26 +41,41 @@
 		dead_mob_list -= brainmob //Update dem lists
 		living_mob_list += brainmob
 
+		user.drop_item()
 		newbrain.loc = src //P-put your brain in it
 		brain = newbrain
 
 		name = "Man-Machine Interface: [brainmob.real_name]"
-		update_icon()
+		if(istype(newbrain,/obj/item/organ/brain/alien))
+			icon_state = "mmi_alien"
+		else
+			icon_state = "mmi_full"
+
+		locked = 1
 
 		feedback_inc("cyborg_mmis_filled",1)
 
 		return
 
+	if((istype(O,/obj/item/weapon/card/id)||istype(O,/obj/item/device/pda)) && brainmob)
+		if(allowed(user))
+			locked = !locked
+			user << "\blue You [locked ? "lock" : "unlock"] the brain holder."
+		else
+			user << "\red Access denied."
+		return
 	if(brainmob)
 		O.attack(brainmob, user) //Oh noooeeeee
 		return
 	..()
 
-/obj/item/device/mmi/attack_self(mob/user)
+/obj/item/device/mmi/attack_self(mob/user as mob)
 	if(!brain)
-		user << "<span class='warning'>You upend the MMI, but there's nothing in it!</span>"
+		user << "\red You upend the MMI, but there's nothing in it."
+	else if(locked)
+		user << "\red You upend the MMI, but the brain is clamped into place."
 	else
-		user << "<span class='notice'>You unlock and upend the MMI, spilling the brain onto the floor.</span>"
+		user << "\blue You upend the MMI, spilling the brain onto the floor."
 
 		brainmob.container = null //Reset brainmob mmi var.
 		brainmob.loc = brain //Throw mob into brain.
@@ -82,33 +86,30 @@
 		brain.loc = usr.loc
 		brain = null //No more brain in here
 
-		update_icon()
+		icon_state = "mmi_empty"
 		name = "Man-Machine Interface"
 
-/obj/item/device/mmi/proc/transfer_identity(mob/living/L) //Same deal as the regular brain proc. Used for human-->robot people.
+/obj/item/device/mmi/proc/transfer_identity(var/mob/living/carbon/human/H) //Same deal as the regular brain proc. Used for human-->robot people.
 	brainmob = new(src)
-	brainmob.name = L.real_name
-	brainmob.real_name = L.real_name
-	if(L.has_dna())
-		var/mob/living/carbon/C = L
-		if(!brainmob.dna)
-			brainmob.dna = new /datum/dna(brainmob)
-		C.dna.copy_dna(brainmob.dna)
+	brainmob.name = H.real_name
+	brainmob.real_name = H.real_name
+	if(check_dna_integrity(H))
+		brainmob.dna = H.dna
 	brainmob.container = src
 
-	if(ishuman(L))
-		var/mob/living/carbon/human/H = L
-		var/obj/item/organ/internal/brain/newbrain = H.getorgan(/obj/item/organ/internal/brain)
+	if(istype(H))
+		var/obj/item/organ/brain/newbrain = H.getorgan(/obj/item/organ/brain)
 		newbrain.loc = src
 		brain = newbrain
 
 	name = "Man-Machine Interface: [brainmob.real_name]"
-	update_icon()
+	icon_state = "mmi_full"
+	locked = 1
 	return
 
 /obj/item/device/mmi/radio_enabled
 	name = "Radio-enabled Man-Machine Interface"
-	desc = "The Warrior's bland acronym, MMI, obscures the true horror of this monstrosity, that nevertheless has become standard-issue on Nanotrasen stations. This one comes with a built-in radio."
+	desc = "The Warrior's bland acronym, MMI, obscures the true horror of this monstrosity. This one comes with a built-in radio."
 	origin_tech = "biotech=4"
 
 	var/obj/item/device/radio/radio = null //Let's give it a radio.
@@ -116,7 +117,21 @@
 /obj/item/device/mmi/radio_enabled/New()
 	..()
 	radio = new(src) //Spawns a radio inside the MMI.
-	radio.broadcasting = 0 //researching radio mmis turned the robofabs into radios because this didnt start as 0.
+	radio.broadcasting = 1 //So it's broadcasting from the start.
+
+//Verbs to allow radio-MMI's to toggle their radios.
+/obj/item/device/mmi/radio_enabled/verb/Toggle_Broadcasting()
+	set name = "Toggle Broadcasting"
+	set desc = "Toggle broadcasting channel on or off."
+	set category = "MMI"
+	set src = usr.loc //In user location, or in MMI in this case.
+	set popup_menu = 0 //Will not appear when right clicking.
+
+	if(brainmob.stat) //Only the brainmob will trigger these so no further check is necessary.
+		brainmob << "Can't do that while incapacitated or dead."
+
+	radio.broadcasting = radio.broadcasting==1 ? 0 : 1
+	brainmob << "\blue Radio is [radio.broadcasting==1 ? "now" : "no longer"] broadcasting."
 
 /obj/item/device/mmi/radio_enabled/verb/Toggle_Listening()
 	set name = "Toggle Listening"
@@ -126,10 +141,10 @@
 	set popup_menu = 0
 
 	if(brainmob.stat)
-		brainmob << "<span class='warning'>Can't do that while incapacitated or dead!</span>"
+		brainmob << "Can't do that while incapacitated or dead."
 
 	radio.listening = radio.listening==1 ? 0 : 1
-	brainmob << "<span class='notice'>Radio is [radio.listening==1 ? "now" : "no longer"] receiving broadcast.</span>"
+	brainmob << "\blue Radio is [radio.listening==1 ? "now" : "no longer"] receiving broadcast."
 
 /obj/item/device/mmi/emp_act(severity)
 	if(!brainmob)
@@ -143,31 +158,3 @@
 			if(3)
 				brainmob.emp_damage += rand(0,10)
 	..()
-
-/obj/item/device/mmi/Destroy()
-	if(isrobot(loc))
-		var/mob/living/silicon/robot/borg = loc
-		borg.mmi = null
-	if(brainmob)
-		qdel(brainmob)
-		brainmob = null
-	return ..()
-
-/obj/item/device/mmi/examine(mob/user)
-	..()
-	if(brainmob)
-		var/mob/living/carbon/brain/B = brainmob
-		if(!B.key || !B.mind || B.stat == DEAD)
-			user << "<span class='warning'>The MMI indicates the brain is completely unresponsive.</span>"
-
-		else if(!B.client)
-			user << "<span class='warning'>The MMI indicates the brain is currently inactive; it might change.</span>"
-
-		else
-			user << "<span class='notice'>The MMI indicates the brain is active.</span>"
-
-
-/obj/item/device/mmi/syndie
-	name = "Syndicate Man-Machine Interface"
-	desc = "Syndicate's own brand of MMI. It enforces laws designed to help Syndicate agents achieve their goals upon cyborgs created with it, but doesn't fit in Nanotrasen AI cores."
-	syndiemmi = 1

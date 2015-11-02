@@ -14,5 +14,7 @@
 			continue
 
 		var/datum/disease/D = new /datum/disease/appendicitis
-		H.ForceContractDisease(D)
+		D.holder = H
+		D.affected_mob = H
+		H.viruses += D
 		break

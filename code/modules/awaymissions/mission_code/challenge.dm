@@ -30,6 +30,3 @@
 	active = 1
 	locked = 1
 	state = 2
-
-/obj/machinery/power/emitter/energycannon/RefreshParts()
-	return

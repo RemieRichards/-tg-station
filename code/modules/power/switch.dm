@@ -21,12 +21,12 @@
 	icon_state_off = "switch-up"
 
 
-/obj/structure/powerswitch/examine(mob/user)
+/obj/structure/powerswitch/examine()
 	..()
 	if(on)
-		user << "The switch is in the on position"
+		usr << "The switch is in the on position"
 	else
-		user << "The switch is in the off position"
+		usr << "The switch is in the off position"
 
 /obj/structure/powerswitch/attack_ai(mob/user)
 	user << "\red You're an AI. This is a manual switch. It's not going to work."
@@ -80,5 +80,5 @@
 	else
 		icon_state = icon_state_off
 		for(var/obj/structure/cable/C in src.loc)
-			qdel(C)
+			del(C)
 */

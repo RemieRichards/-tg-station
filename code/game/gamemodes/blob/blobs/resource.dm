@@ -2,16 +2,19 @@
 	name = "resource blob"
 	icon = 'icons/mob/blob.dmi'
 	icon_state = "blob_resource"
-	desc = "A thin spire of slightly swaying tendrils."
-	health = 60
-	maxhealth = 60
+	health = 30
+	fire_resist = 2
+	var/mob/camera/blob/overmind = null
 	var/resource_delay = 0
 
 /obj/effect/blob/resource/update_icon()
 	if(health <= 0)
-		qdel(src)
+		playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
+		Delete()
+		return
+	return
 
-/obj/effect/blob/resource/PulseAnimation(activate = 0)
+/obj/effect/blob/resource/PulseAnimation(var/activate = 0)
 	if(activate)
 		..()
 	return

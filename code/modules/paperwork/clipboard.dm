@@ -4,13 +4,13 @@
 	icon_state = "clipboard"
 	item_state = "clipboard"
 	throwforce = 0
-	w_class = 2
+	w_class = 2.0
 	throw_speed = 3
-	throw_range = 7
+	throw_range = 10
 	var/obj/item/weapon/pen/haspen		//The stored pen.
 	var/obj/item/weapon/paper/toppaper	//The topmost piece of paper.
 	slot_flags = SLOT_BELT
-	burn_state = 0 //Burnable
+
 
 /obj/item/weapon/clipboard/New()
 	update_icon()
@@ -26,10 +26,9 @@
 	overlays += "clipboard_over"
 
 
-/obj/item/weapon/clipboard/attackby(obj/item/weapon/W, mob/user, params)
+/obj/item/weapon/clipboard/attackby(obj/item/weapon/W, mob/user)
 	if(istype(W, /obj/item/weapon/paper))
-		if(!user.unEquip(W))
-			return
+		user.drop_item()
 		W.loc = src
 		toppaper = W
 		user << "<span class='notice'>You clip the paper onto \the [src].</span>"
@@ -77,8 +76,7 @@
 			if(!haspen)
 				if(istype(usr.get_active_hand(), /obj/item/weapon/pen))
 					var/obj/item/weapon/pen/W = usr.get_active_hand()
-					if(!usr.unEquip(W))
-						return
+					usr.drop_item()
 					W.loc = src
 					haspen = W
 					usr << "<span class='notice'>You slot [W] into [src].</span>"
@@ -105,7 +103,7 @@
 		if(href_list["read"])
 			var/obj/item/weapon/paper/P = locate(href_list["read"])
 			if(istype(P) && P.loc == src)
-				usr.examinate(P)
+				P.examine()
 
 		if(href_list["top"])
 			var/obj/item/P = locate(href_list["top"])

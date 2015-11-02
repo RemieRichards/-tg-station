@@ -20,7 +20,7 @@
 
 /datum/round_event/wormholes/start()
 	for(var/turf/simulated/floor/T in world)
-		if(T.z == ZLEVEL_STATION)
+		if(T.z == 1)
 			pick_turfs += T
 
 	for(var/i = 1, i <= number_of_wormholes, i++)
@@ -28,7 +28,10 @@
 		wormholes += new /obj/effect/portal/wormhole(T, null, null, -1)
 
 /datum/round_event/wormholes/announce()
-	priority_announce("Space-time anomalies detected on the station. There is no additional data.", "Anomaly Alert", 'sound/AI/spanomalies.ogg')
+	command_alert("Space-time anomalies detected on the station. There is no additional data.", "Anomaly Alert")
+	for(var/mob/M in player_list)
+		if(!istype(M, /mob/new_player))
+			M << sound('sound/AI/spanomalies.ogg')
 
 /datum/round_event/wormholes/tick()
 	if(activeFor % shift_frequency == 0)
@@ -48,11 +51,12 @@
 	desc = "It looks highly unstable; It could close at any moment."
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "anom"
+	failchance = 0
 
 /obj/effect/portal/wormhole/attack_hand(mob/user)
 	teleport(user)
 
-/obj/effect/portal/wormhole/attackby(obj/item/I, mob/user, params)
+/obj/effect/portal/wormhole/attackby(obj/item/I, mob/user)
 	teleport(user)
 
 /obj/effect/portal/wormhole/teleport(atom/movable/M)

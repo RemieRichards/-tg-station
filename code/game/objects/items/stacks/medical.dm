@@ -2,80 +2,60 @@
 	name = "medical pack"
 	singular_name = "medical pack"
 	icon = 'icons/obj/items.dmi'
-	amount = 6
-	max_amount = 6
+	amount = 5
+	max_amount = 5
 	w_class = 1
-	throw_speed = 3
-	throw_range = 7
-	burn_state = 0 //Burnable
-	burntime = 5
+	throw_speed = 4
+	throw_range = 20
 	var/heal_brute = 0
 	var/heal_burn = 0
-	var/stop_bleeding = 0
-	var/self_delay = 50
 
-/obj/item/stack/medical/attack(mob/living/M, mob/user)
+/obj/item/stack/medical/attack(mob/living/carbon/M as mob, mob/user as mob)
 
-	if(M.stat == 2)
+	if (M.stat == 2)
 		var/t_him = "it"
-		if(M.gender == MALE)
+		if (M.gender == MALE)
 			t_him = "him"
-		else if(M.gender == FEMALE)
+		else if (M.gender == FEMALE)
 			t_him = "her"
-		user << "<span class='danger'>\The [M] is dead, you cannot help [t_him]!</span>"
+		user << "\red \The [M] is dead, you cannot help [t_him]!"
 		return
 
-	if(!istype(M, /mob/living/carbon) && !istype(M, /mob/living/simple_animal))
-		user << "<span class='danger'>You don't know how to apply \the [src] to [M]!</span>"
+	if (!istype(M))
+		user << "\red \The [src] cannot be applied to [M]!"
 		return 1
 
-	if(ishuman(M))
-		var/mob/living/carbon/human/H = M
-		if(stop_bleeding)
-			if(H.bleedsuppress)
-				user << "<span class='warning'>[H]'s bleeding is already bandaged!</span>"
-				return
-			else if(!H.blood_max)
-				user << "<span class='warning'>[H] isn't bleeding!</span>"
-				return
+	if ( ! (istype(user, /mob/living/carbon/human) || \
+			istype(user, /mob/living/silicon) || \
+			istype(user, /mob/living/carbon/monkey) && ticker && ticker.mode.name == "monkey") )
+		user << "\red You don't have the dexterity to do this!"
+		return 1
 
-	if(isliving(M))
-		if(!M.can_inject(user, 1))
-			return
-
-	if(user)
+	if (user)
 		if (M != user)
-			if (istype(M, /mob/living/simple_animal))
-				var/mob/living/simple_animal/critter = M
-				if (!(critter.healable))
-					user << "<span class='notice'> You cannot use [src] on [M]!</span>"
-					return
-				else if (critter.health == critter.maxHealth)
-					user << "<span class='notice'> [M] is at full health.</span>"
-					return
-				else if(src.heal_brute < 1)
-					user << "<span class='notice'> [src] won't help [M] at all.</span>"
-					return
-			user.visible_message("<span class='green'>[user] applies [src] on [M].</span>", "<span class='green'>You apply [src] on [M].</span>")
+			user.visible_message( \
+				"\blue [M] has been applied with [src] by [user].", \
+				"\blue You apply \the [src] to [M]." \
+			)
 		else
 			var/t_himself = "itself"
-			if(user.gender == MALE)
+			if (user.gender == MALE)
 				t_himself = "himself"
-			else if(user.gender == FEMALE)
+			else if (user.gender == FEMALE)
 				t_himself = "herself"
-			user.visible_message("<span class='notice'>[user] starts to apply [src] on [t_himself]...</span>", "<span class='notice'>You begin applying [src] on yourself...</span>")
-			if(!do_mob(user, M, self_delay))	return
-			user.visible_message("<span class='green'>[user] applies [src] on [t_himself].</span>", "<span class='green'>You apply [src] on yourself.</span>")
 
+			user.visible_message( \
+				"\blue [M] applied [src] on [t_himself].", \
+				"\blue You apply \the [src] on yourself." \
+			)
 
-	if(ishuman(M))
+	if (istype(M, /mob/living/carbon/human))
+
 		var/mob/living/carbon/human/H = M
 		var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
-		if(stop_bleeding)
-			if(!H.bleedsuppress) //so you can't stack bleed suppression
-				H.suppress_bloodloss(stop_bleeding)
+
 		if(affecting.status == ORGAN_ORGANIC) //Limb must be organic to be healed - RR
-			if(affecting.heal_damage(src.heal_brute, src.heal_burn, 0))
+			if (affecting.heal_damage(src.heal_brute, src.heal_burn, 0))
 				H.update_damage_overlays(0)
 
 			M.updatehealth()
@@ -92,34 +72,14 @@
 /obj/item/stack/medical/bruise_pack
 	name = "bruise pack"
 	singular_name = "bruise pack"
-	desc = "A theraputic gel pack and bandages designed to treat blunt-force trauma."
+	desc = "A pack designed to treat blunt-force trauma."
 	icon_state = "brutepack"
-	heal_brute = 40
+	heal_brute = 60
 	origin_tech = "biotech=1"
-
-/obj/item/stack/medical/gauze
-	name = "medical gauze"
-	desc = "A roll of elastic cloth that is extremely effective at stopping bleeding, but does not heal wounds."
-	gender = PLURAL
-	singular_name = "medical gauze"
-	icon_state = "gauze"
-	stop_bleeding = 1800
-	self_delay = 80
-
-/obj/item/stack/medical/gauze/improvised
-	name = "improvised gauze"
-	singular_name = "improvised gauze"
-	desc = "A roll of cloth roughly cut from something that can stop bleeding, but does not heal wounds."
-	stop_bleeding = 900
-
-/obj/item/stack/medical/gauze/cyborg/
-	materials = list()
-	is_cyborg = 1
-	cost = 250
 
 /obj/item/stack/medical/ointment
 	name = "ointment"
-	desc = "Used to treat those nasty burn wounds."
+	desc = "Used to treat those nasty burns."
 	gender = PLURAL
 	singular_name = "ointment"
 	icon_state = "ointment"

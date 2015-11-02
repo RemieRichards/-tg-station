@@ -4,13 +4,13 @@
 /obj/machinery/computer/robotics
 	name = "robotics control console"
 	desc = "Used to remotely lockdown or detonate linked Cyborgs."
-	icon_screen = "robot"
-	icon_keyboard = "rd_key"
+	icon = 'icons/obj/computer.dmi'
+	icon_state = "robot"
 	req_access = list(access_robotics)
 	circuit = /obj/item/weapon/circuitboard/robotics
 	var/temp = null
 
-/obj/machinery/computer/robotics/proc/can_control(mob/user, mob/living/silicon/robot/R)
+/obj/machinery/computer/robotics/proc/can_control(var/mob/user, var/mob/living/silicon/robot/R)
 	if(!istype(R))
 		return 0
 	if(istype(user, /mob/living/silicon/ai))
@@ -23,14 +23,14 @@
 		return 0
 	return 1
 
-/obj/machinery/computer/robotics/attack_hand(mob/user)
+/obj/machinery/computer/robotics/attack_hand(var/mob/user as mob)
 	if(..())
 		return
 	interact(user)
 
-/obj/machinery/computer/robotics/interact(mob/user)
+/obj/machinery/computer/robotics/interact(var/mob/user as mob)
 	if (src.z > 6)
-		user << "<span class='boldannounce'>Unable to establish a connection</span>: \black You're too far away from the station!"
+		user << "\red <b>Unable to establish a connection</b>: \black You're too far away from the station!"
 		return
 	user.set_machine(src)
 	var/dat
@@ -92,13 +92,11 @@
 						R << "Extreme danger.  Termination codes detected.  Scrambling security codes and automatic AI unlink triggered."
 						R.ResetSecurityCodes()
 					else
-						message_admins("<span class='notice'>[key_name_admin(usr)] (<A HREF='?_src_=holder;adminplayerobservefollow=\ref[usr]'>FLW</A>) detonated [key_name(R, R.client)](<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[R.x];Y=[R.y];Z=[R.z]'>JMP</a>)!</span>")
-						log_game("\<span class='notice'>[key_name(usr)] detonated [key_name(R)]!</span>")
-						if(R.connected_ai)
-							R.connected_ai << "<br><br><span class='alert'>ALERT - Cyborg detonation detected: [R.name]</span><br>"
+						message_admins("\blue [key_name_admin(usr)] detonated [R.name]!")
+						log_game("\blue [key_name(usr)] detonated [R.name]!")
 						R.self_destruct()
 		else
-			usr << "<span class='danger'>Access Denied.</span>"
+			usr << "\red Access Denied."
 
 	else if (href_list["stopbot"])
 		if(src.allowed(usr))
@@ -106,15 +104,13 @@
 			if(can_control(usr, R))
 				var/choice = input("Are you certain you wish to [R.canmove ? "lock down" : "release"] [R.name]?") in list("Confirm", "Abort")
 				if(choice == "Confirm" && can_control(usr, R) && !..())
-					message_admins("<span class='notice'>[key_name_admin(usr)] (<A HREF='?_src_=holder;adminplayerobservefollow=\ref[usr]'>FLW</A>) [R.canmove ? "locked down" : "released"] [key_name(R, R.client)](<A HREF='?_src_=holder;adminplayerobservefollow=\ref[usr]'>FLW</A>)!</span>")
-					log_game("[key_name(usr)] [R.canmove ? "locked down" : "released"] [key_name(R)]!")
+					message_admins("\blue [key_name_admin(usr)] [R.canmove ? "locked down" : "released"] [R.name]!")
+					log_game("[key_name(usr)] [R.canmove ? "locked down" : "released"] [R.name]!")
 					R.SetLockdown(!R.lockcharge)
 					R << "[!R.lockcharge ? "<span class='notice'>Your lockdown has been lifted!" : "<span class='alert'>You have been locked down!"]</span>"
-					if(R.connected_ai)
-						R.connected_ai << "[!R.lockcharge ? "<span class='notice'>NOTICE - Cyborg lockdown lifted" : "<span class='alert'>ALERT - Cyborg lockdown detected"]: <a href='?src=\ref[R.connected_ai];track=[html_encode(R.name)]'>[R.name]</a></span><br>"
 
 		else
-			usr << "<span class='danger'>Access Denied.</span>"
+			usr << "\red Access Denied."
 
 	else if (href_list["magbot"])
 		if(issilicon(usr) && is_special_character(usr))

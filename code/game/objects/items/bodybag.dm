@@ -5,13 +5,12 @@
 	desc = "A folded bag designed for the storage and transportation of cadavers."
 	icon = 'icons/obj/bodybag.dmi'
 	icon_state = "bodybag_folded"
-	var/unfoldedbag_path = /obj/structure/closet/body_bag
 	w_class = 2
 
 /obj/item/bodybag/attack_self(mob/user)
-		var/obj/structure/closet/body_bag/R = new unfoldedbag_path(user.loc)
+		var/obj/structure/closet/body_bag/R = new /obj/structure/closet/body_bag(user.loc)
 		R.add_fingerprint(user)
-		qdel(src)
+		del(src)
 
 
 /obj/item/weapon/storage/box/bodybags
@@ -19,53 +18,47 @@
 	desc = "The label indicates that it contains body bags."
 	icon_state = "bodybags"
 
-/obj/item/weapon/storage/box/bodybags/New()
-	..()
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
-	new /obj/item/bodybag(src)
+	New()
+		..()
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
+		new /obj/item/bodybag(src)
 
 
 /obj/structure/closet/body_bag
 	name = "body bag"
 	desc = "A plastic bag designed for the storage and transportation of cadavers."
 	icon = 'icons/obj/bodybag.dmi'
-	icon_state = "bodybag"
-	var/foldedbag_path = /obj/item/bodybag
-	var/tagged = 0 // so closet code knows to put the tag overlay back
+	icon_state = "bodybag_closed"
+	icon_closed = "bodybag_closed"
+	icon_opened = "bodybag_open"
 	density = 0
-	mob_storage_capacity = 2
-	open_sound = 'sound/items/zip.ogg'
 
 
-/obj/structure/closet/body_bag/attackby(obj/item/I, mob/user, params)
-	if (istype(I, /obj/item/weapon/pen) || istype(I, /obj/item/toy/crayon))
-		var/t = stripped_input(user, "What would you like the label to be?", name, null, 53)
+/obj/structure/closet/body_bag/attackby(obj/item/I, mob/user)
+	if (istype(I, /obj/item/weapon/pen))
+		var/t = input(user, "What would you like the label to be?", name, null) as text
 		if(user.get_active_hand() != I)
 			return
 		if(!in_range(src, user) && loc != user)
 			return
+		t = copytext(sanitize(t), 1, 53)	//max length of 64 - "body bag - " instead of MAX_MESSAGE_LEN, as per the hand labeler
 		if(t)
-			name = "body bag - [t]"
-			tagged = 1
-			update_icon()
+			name = "body bag - "
+			name += t
+			overlays += "bodybag_label"
 		else
 			name = "body bag"
 		return
 	else if(istype(I, /obj/item/weapon/wirecutters))
-		user << "<span class='notice'>You cut the tag off [src].</span>"
+		user << "<span class='notice'>You cut the tag off of [src].</span>"
 		name = "body bag"
-		tagged = 0
-		update_icon()
+		overlays.Cut()
 
-/obj/structure/closet/body_bag/update_icon()
-	..()
-	if (tagged)
-		overlays += "bodybag_label"
 
 /obj/structure/closet/body_bag/close()
 	if(..())
@@ -76,7 +69,7 @@
 
 /obj/structure/closet/body_bag/MouseDrop(over_object, src_location, over_location)
 	..()
-	if(over_object == usr && Adjacent(usr) && (in_range(src, usr) || usr.contents.Find(src)))
+	if(over_object == usr && (in_range(src, usr) || usr.contents.Find(src)))
 		if(!ishuman(usr))
 			return 0
 		if(opened)
@@ -84,27 +77,13 @@
 		if(contents.len)
 			return 0
 		visible_message("<span class='notice'>[usr] folds up [src].</span>")
-		var/obj/item/bodybag/B = new foldedbag_path(get_turf(src))
+		var/obj/item/bodybag/B = new /obj/item/bodybag(get_turf(src))
 		usr.put_in_hands(B)
-		qdel(src)
+		del(src)
 
 
-// Bluespace bodybag
-
-/obj/item/bodybag/bluespace
-	name = "bluespace body bag"
-	desc = "A folded bluespace body bag designed for the storage and transportation of cadavers."
-	icon = 'icons/obj/bodybag.dmi'
-	icon_state = "bluebodybag_folded"
-	unfoldedbag_path = /obj/structure/closet/body_bag/bluespace
-	w_class = 2
-
-/obj/structure/closet/body_bag/bluespace
-	name = "bluespace body bag"
-	desc = "A bluespace body bag designed for the storage and transportation of cadavers."
-	icon = 'icons/obj/bodybag.dmi'
-	icon_state = "bluebodybag"
-	foldedbag_path = /obj/item/bodybag/bluespace
-	density = 0
-	mob_storage_capacity = 15
-	max_mob_size = MOB_SIZE_LARGE
+/obj/structure/closet/bodybag/update_icon()
+	if(!opened)
+		icon_state = icon_closed
+	else
+		icon_state = icon_opened

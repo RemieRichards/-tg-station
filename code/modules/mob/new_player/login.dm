@@ -4,10 +4,7 @@
 		src << "<div class=\"motd\">[join_motd]</div>"
 
 	if(admin_notice)
-		src << "<span class='notice'><b>Admin Notice:</b>\n \t [admin_notice]</span>"
-
-	if(config.soft_popcap && living_player_count() >= config.soft_popcap)
-		src << "<span class='notice'><b>Server Notice:</b>\n \t [config.soft_popcap_message]</span>"
+		src << "\blue <b>Admin Notice:</b>\n \t [admin_notice]"
 
 	if(!mind)
 		mind = new /datum/mind(key)
@@ -18,6 +15,7 @@
 		loc = pick(newplayer_start)
 	else
 		loc = locate(1,1,1)
+	lastarea = loc
 
 	sight |= SEE_TURFS
 	player_list |= src
@@ -32,8 +30,7 @@
 		loc = pick(watch_locations)
 */
 	new_player_panel()
-	if(ckey in deadmins)
-		verbs += /client/proc/readmin
 	spawn(40)
 		if(client)
+			handle_privacy_poll()
 			client.playtitlemusic()

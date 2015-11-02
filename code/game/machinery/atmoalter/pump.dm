@@ -43,7 +43,7 @@
 
 	..(severity)
 
-/obj/machinery/portable_atmospherics/pump/process_atmos()
+/obj/machinery/portable_atmospherics/pump/process()
 	..()
 	if(on)
 		var/datum/gas_mixture/environment
@@ -85,21 +85,20 @@
 
 				air_contents.merge(removed)
 		//src.update_icon()
-/obj/machinery/portable_atmospherics/pump/process()
-	..()
+
 	src.updateDialog()
 	return
 
 /obj/machinery/portable_atmospherics/pump/return_air()
 	return air_contents
 
-/obj/machinery/portable_atmospherics/pump/attack_ai(mob/user)
+/obj/machinery/portable_atmospherics/pump/attack_ai(var/mob/user as mob)
 	return src.attack_hand(user)
 
-/obj/machinery/portable_atmospherics/pump/attack_paw(mob/user)
+/obj/machinery/portable_atmospherics/pump/attack_paw(var/mob/user as mob)
 	return src.attack_hand(user)
 
-/obj/machinery/portable_atmospherics/pump/attack_hand(mob/user)
+/obj/machinery/portable_atmospherics/pump/attack_hand(var/mob/user as mob)
 
 	user.set_machine(src)
 	var/holding_text

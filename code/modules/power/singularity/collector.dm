@@ -8,9 +8,10 @@ var/global/list/rad_collectors = list()
 	icon_state = "ca"
 	anchored = 0
 	density = 1
+	directwired = 1
 	req_access = list(access_engine_equip)
 //	use_power = 0
-	var/obj/item/weapon/tank/internals/plasma/P = null
+	var/obj/item/weapon/tank/plasma/P = null
 	var/last_power = 0
 	var/active = 0
 	var/locked = 0
@@ -20,9 +21,9 @@ var/global/list/rad_collectors = list()
 	..()
 	rad_collectors += src
 
-/obj/machinery/power/rad_collector/Destroy()
+/obj/machinery/power/rad_collector/Del()
 	rad_collectors -= src
-	return ..()
+	..()
 
 /obj/machinery/power/rad_collector/process()
 	if(P)
@@ -35,37 +36,34 @@ var/global/list/rad_collectors = list()
 	return
 
 
-/obj/machinery/power/rad_collector/attack_hand(mob/user)
-	if(..())
-		return
+/obj/machinery/power/rad_collector/attack_hand(mob/user as mob)
 	if(anchored)
 		if(!src.locked)
 			toggle_power()
 			user.visible_message("[user.name] turns the [src.name] [active? "on":"off"].", \
-			"<span class='notice'>You turn the [src.name] [active? "on":"off"].</span>")
+			"You turn the [src.name] [active? "on":"off"].")
 			investigate_log("turned [active?"<font color='green'>on</font>":"<font color='red'>off</font>"] by [user.key]. [P?"Fuel: [round(P.air_contents.toxins/0.29)]%":"<font color='red'>It is empty</font>"].","singulo")
 			return
 		else
-			user << "<span class='warning'>The controls are locked!</span>"
+			user << "\red The controls are locked!"
 			return
 ..()
 
 
-/obj/machinery/power/rad_collector/attackby(obj/item/W, mob/user, params)
+/obj/machinery/power/rad_collector/attackby(obj/item/W, mob/user)
 	if(istype(W, /obj/item/device/multitool))
-		user << "<span class='notice'>The [W.name] detects that [last_power]W were recently produced.</span>"
+		user << "\blue The [W.name] detects that [last_power]W were recently produced."
 		return 1
 	else if(istype(W, /obj/item/device/analyzer) && P)
 		atmosanalyzer_scan(P.air_contents, user)
-	else if(istype(W, /obj/item/weapon/tank/internals/plasma))
+	else if(istype(W, /obj/item/weapon/tank/plasma))
 		if(!src.anchored)
-			user << "<span class='warning'>The [src] needs to be secured to the floor first!</span>"
+			user << "\red The [src] needs to be secured to the floor first."
 			return 1
 		if(src.P)
-			user << "<span class='warning'>There's already a plasma tank loaded!</span>"
+			user << "\red There's already a plasma tank loaded."
 			return 1
-		if(!user.drop_item())
-			return 1
+		user.drop_item()
 		src.P = W
 		W.loc = src
 		update_icons()
@@ -75,39 +73,39 @@ var/global/list/rad_collectors = list()
 			return 1
 	else if(istype(W, /obj/item/weapon/wrench))
 		if(P)
-			user << "<span class='warning'>Remove the plasma tank first!</span>"
+			user << "\blue Remove the plasma tank first."
 			return 1
 		if(!anchored && !isinspace())
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
 			anchored = 1
 			user.visible_message("[user.name] secures the [src.name].", \
-				"<span class='notice'>You secure the external bolts.</span>", \
-				"<span class='italics'>You hear a ratchet.</span>")
-			connect_to_network()
+				"You secure the external bolts.", \
+				"You hear a ratchet")
+			disconnect_from_network()
 		else if(anchored)
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
 			anchored = 0
 			user.visible_message("[user.name] unsecures the [src.name].", \
-				"<span class='notice'>You unsecure the external bolts.</span>", \
-				"<span class='italics'>You hear a ratchet.</span>")
+				"You unsecure the external bolts.", \
+				"You hear a ratchet")
 			disconnect_from_network()
 	else if(istype(W, /obj/item/weapon/card/id)||istype(W, /obj/item/device/pda))
 		if (src.allowed(user))
 			if(active)
 				src.locked = !src.locked
-				user << "<span class='notice'>You [src.locked ? "lock" : "unlock"] the controls.</span>"
+				user << "The controls are now [src.locked ? "locked." : "unlocked."]"
 			else
 				src.locked = 0 //just in case it somehow gets locked
-				user << "<span class='warning'>The controls can only be locked when \the [src] is active!</span>"
+				user << "\red The controls can only be locked when the [src] is active"
 		else
-			user << "<span class='danger'>Access denied.</span>"
+			user << "\red Access denied!"
 			return 1
 	else
 		..()
 		return 1
 
 
-/obj/machinery/power/rad_collector/ex_act(severity, target)
+/obj/machinery/power/rad_collector/ex_act(severity)
 	switch(severity)
 		if(2, 3)
 			eject()
@@ -116,7 +114,7 @@ var/global/list/rad_collectors = list()
 
 /obj/machinery/power/rad_collector/proc/eject()
 	locked = 0
-	var/obj/item/weapon/tank/internals/plasma/Z = src.P
+	var/obj/item/weapon/tank/plasma/Z = src.P
 	if (!Z)
 		return
 	Z.loc = get_turf(src)
@@ -127,7 +125,7 @@ var/global/list/rad_collectors = list()
 	else
 		update_icons()
 
-/obj/machinery/power/rad_collector/proc/receive_pulse(pulse_strength)
+/obj/machinery/power/rad_collector/proc/receive_pulse(var/pulse_strength)
 	if(P && active)
 		var/power_produced = 0
 		power_produced = P.air_contents.toxins*pulse_strength*20

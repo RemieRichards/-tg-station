@@ -6,24 +6,19 @@
 	icon_dead = "mouse_gray_dead"
 	speak = list("Squeek!","SQUEEK!","Squeek?")
 	speak_emote = list("squeeks")
-	emote_hear = list("squeeks.")
-	emote_see = list("runs in a circle.", "shakes.")
+	emote_hear = list("squeeks")
+	emote_see = list("runs in a circle", "shakes")
 	speak_chance = 1
 	turns_per_move = 5
 	see_in_dark = 6
 	maxHealth = 5
 	health = 5
-	butcher_results = list(/obj/item/weapon/reagent_containers/food/snacks/meat/slab = 1)
+	meat_type = /obj/item/weapon/reagent_containers/food/snacks/meat
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "splats"
 	density = 0
-	ventcrawler = 2
-	pass_flags = PASSTABLE | PASSGRILLE | PASSMOB
-	mob_size = MOB_SIZE_TINY
 	var/body_color //brown, gray and white, leave blank for random
-	gold_core_spawnable = 2
-	var/chew_probability = 1
 
 /mob/living/simple_animal/mouse/New()
 	..()
@@ -37,42 +32,22 @@
 /mob/living/simple_animal/mouse/proc/splat()
 	src.health = 0
 	src.icon_dead = "mouse_[body_color]_splat"
-	death()
+	Die()
 
-/mob/living/simple_animal/mouse/death(gibbed, toast)
+/mob/living/simple_animal/mouse/Die()
+	..()
 	if(!ckey)
-		..(1)
 		var/obj/item/trash/deadmouse/M = new(src.loc)
-		M.icon_state = icon_dead
-		if(toast)
-			M.color = "#3A3A3A"
-			M.desc = "It's toast."
-		qdel(src)
-	else
-		..(gibbed)
+		M.icon_state = src.icon_dead
+		del (src)
 
 /mob/living/simple_animal/mouse/Crossed(AM as mob|obj)
 	if( ishuman(AM) )
 		if(!stat)
 			var/mob/M = AM
-			M << "<span class='notice'>\icon[src] Squeek!</span>"
+			M << "\blue \icon[src] Squeek!"
 			playsound(src, 'sound/effects/mousesqueek.ogg', 100, 1)
 	..()
-
-/mob/living/simple_animal/mouse/handle_automated_action()
-	if(prob(chew_probability))
-		var/turf/simulated/floor/F = get_turf(src)
-		if(istype(F) && !F.intact)
-			var/obj/structure/cable/C = locate() in F
-			if(C && prob(15))
-				if(C.avail())
-					visible_message("<span class='warning'>[src] chews through the [C]. It's toast!</span>")
-					playsound(src, 'sound/effects/sparks2.ogg', 100, 1)
-					C.Deconstruct()
-					death(toast=1)
-				else
-					C.Deconstruct()
-					visible_message("<span class='warning'>[src] chews through the [C].</span>")
 
 /*
  * Mouse types
@@ -97,7 +72,6 @@
 	response_help  = "pets"
 	response_disarm = "gently pushes aside"
 	response_harm   = "splats"
-	gold_core_spawnable = 0
 
 /obj/item/trash/deadmouse
 	name = "dead mouse"

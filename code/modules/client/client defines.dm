@@ -1,4 +1,3 @@
-
 /client
 		////////////////
 		//ADMIN THINGS//
@@ -27,8 +26,10 @@
 		////////////
 		//SECURITY//
 		////////////
+	var/next_allowed_topic_time = 10
 	// comment out the line below when debugging locally to enable the options & messages menu
 	control_freak = 1
+
 
 		////////////////////////////////////
 		//things that require the database//
@@ -38,14 +39,3 @@
 	var/related_accounts_cid = "Requires database"	//So admins know why it isn't working - Used to determine what other accounts previously logged in from this computer id
 
 	preload_rsc = PRELOAD_RSC
-
-	var/global/obj/screen/click_catcher/void
-
-	// Used by html_interface module.
-	var/hi_last_pos
-
-
-	//datum that controls the displaying and hiding of tooltips
-	var/datum/tooltip/tooltips
-
-

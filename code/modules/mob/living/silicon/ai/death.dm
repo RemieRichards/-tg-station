@@ -1,17 +1,8 @@
 /mob/living/silicon/ai/death(gibbed)
-	if(stat == DEAD)
-		return
-	if(!gibbed)
-		emote("me", 1, "sparks and its screen flickers, its systems slowly coming to a halt.")
+	if(stat == DEAD)	return
 	stat = DEAD
+	icon_state = "ai-crash"
 
-
-	if("[icon_state]_dead" in icon_states(src.icon,1))
-		icon_state = "[icon_state]_dead"
-	else
-		icon_state = "ai_dead"
-
-	anchored = 0 //unbolt floorbolts
 	update_canmove()
 	if(src.eyeobj)
 		src.eyeobj.setLoc(get_turf(src))
@@ -21,18 +12,17 @@
 	see_invisible = SEE_INVISIBLE_LEVEL_TWO
 
 	shuttle_caller_list -= src
-	SSshuttle.autoEvac()
+	emergency_shuttle.autoshuttlecall()
 
 	if(explosive)
 		spawn(10)
 			explosion(src.loc, 3, 6, 12, 15)
 
 	for(var/obj/machinery/ai_status_display/O in world) //change status
-		if(src.key)
-			spawn( 0 )
-			O.mode = 2
-			if (istype(loc, /obj/item/device/aicard))
-				loc.icon_state = "aicard-404"
+		spawn( 0 )
+		O.mode = 2
+		if (istype(loc, /obj/item/device/aicard))
+			loc.icon_state = "aicard-404"
 
 	tod = worldtime2text() //weasellos time of death patch
 	if(mind)	mind.store_memory("Time of death: [tod]", 0)

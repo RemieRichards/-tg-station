@@ -1,5 +1,3 @@
-var/obj/machinery/gateway/centerstation/the_gateway = null
-
 /obj/machinery/gateway
 	name = "gateway"
 	desc = "A mysterious gateway built by unknown hands, it allows for faster than light travel to far-flung locations."
@@ -7,20 +5,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 	icon_state = "off"
 	density = 1
 	anchored = 1
-	unacidable = 1
 	var/active = 0
-
-
-/obj/machinery/gateway/centerstation/New()
-	..()
-	if(!the_gateway)
-		the_gateway = src
-
-
-/obj/machinery/gateway/centerstation/Destroy()
-	if(the_gateway == src)
-		the_gateway = null
-	..()
 
 
 /obj/machinery/gateway/initialize()
@@ -35,9 +20,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 		return
 	icon_state = "off"
 
-//prevents shuttles attempting to rotate this since it messes up sprites
-/obj/machinery/gateway/shuttleRotate()
-	return
+
 
 //this is da important part wot makes things go
 /obj/machinery/gateway/centerstation
@@ -65,7 +48,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 
 
 
-/obj/machinery/gateway/centerstation/process()
+obj/machinery/gateway/centerstation/process()
 	if(stat & (NOPOWER))
 		if(active) toggleoff()
 		return
@@ -94,7 +77,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 		ready = 1
 
 
-/obj/machinery/gateway/centerstation/proc/toggleon(mob/user)
+/obj/machinery/gateway/centerstation/proc/toggleon(mob/user as mob)
 	if(!ready)			return
 	if(linked.len != 8)	return
 	if(!powered())		return
@@ -120,7 +103,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 	update_icon()
 
 
-/obj/machinery/gateway/centerstation/attack_hand(mob/user)
+/obj/machinery/gateway/centerstation/attack_hand(mob/user as mob)
 	if(!ready)
 		detect()
 		return
@@ -135,7 +118,6 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 	if(!ready)		return
 	if(!active)		return
 	if(!awaygate)	return
-
 	if(awaygate.calibrated)
 		M.loc = get_step(awaygate.loc, SOUTH)
 		M.dir = SOUTH
@@ -149,7 +131,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 		return
 
 
-/obj/machinery/gateway/centerstation/attackby(obj/item/device/W, mob/user, params)
+/obj/machinery/gateway/centerstation/attackby(obj/item/device/W as obj, mob/user as mob)
 	if(istype(W,/obj/item/device/multitool))
 		user << "\black The gate is already calibrated, there is no work for you to do here."
 		return
@@ -199,7 +181,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 		ready = 1
 
 
-/obj/machinery/gateway/centeraway/proc/toggleon(mob/user)
+/obj/machinery/gateway/centeraway/proc/toggleon(mob/user as mob)
 	if(!ready)			return
 	if(linked.len != 8)	return
 	if(!stationgate)
@@ -221,7 +203,7 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 	update_icon()
 
 
-/obj/machinery/gateway/centeraway/attack_hand(mob/user)
+/obj/machinery/gateway/centeraway/attack_hand(mob/user as mob)
 	if(!ready)
 		detect()
 		return
@@ -243,12 +225,12 @@ var/obj/machinery/gateway/centerstation/the_gateway = null
 	M.dir = SOUTH
 
 
-/obj/machinery/gateway/centeraway/attackby(obj/item/device/W, mob/user, params)
+/obj/machinery/gateway/centeraway/attackby(obj/item/device/W as obj, mob/user as mob)
 	if(istype(W,/obj/item/device/multitool))
 		if(calibrated)
 			user << "\black The gate is already calibrated, there is no work for you to do here."
 			return
 		else
-			user << "<span class='boldnotice'>Recalibration successful!</span>: \black This gate's systems have been fine tuned.  Travel to this gate will now be on target."
+			user << "\blue <b>Recalibration successful!</b>: \black This gate's systems have been fine tuned.  Travel to this gate will now be on target."
 			calibrated = 1
 			return

@@ -6,8 +6,9 @@
 	var/code = "electronic"
 	origin_tech = "bluespace=1"
 
-/obj/item/device/radio/beacon/Hear(message, atom/movable/speaker, message_langs, raw_message, radio_freq, list/spans)
+/obj/item/device/radio/beacon/hear_talk()
 	return
+
 
 /obj/item/device/radio/beacon/send_hear()
 	return null
@@ -29,4 +30,4 @@
 /obj/item/device/radio/beacon/bacon //Probably a better way of doing this, I'm lazy.
 	proc/digest_delay()
 		spawn(600)
-			qdel(src)*/ //Bacon beacons are no more rip in peace
+			del(src)*/ //Bacon beacons are no more rip in peace

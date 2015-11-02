@@ -1,7 +1,3 @@
-/obj/structure/flora
-	burn_state = 0 //Burnable
-	burntime = 30
-
 //trees
 /obj/structure/flora/tree
 	name = "tree"
@@ -48,7 +44,6 @@
 	name = "grass"
 	icon = 'icons/obj/flora/snowflora.dmi'
 	anchored = 1
-	gender = PLURAL	//"this is grass" not "this is a grass"
 
 /obj/structure/flora/grass/brown
 	icon_state = "snowgrass1bb"
@@ -93,8 +88,7 @@
 	anchored = 1
 
 /obj/structure/flora/ausbushes/New()
-	if(icon_state == "firstbush_1")
-		icon_state = "firstbush_[rand(1, 4)]"
+	icon_state = "firstbush_[rand(1, 4)]"
 	..()
 
 /obj/structure/flora/ausbushes/reedbush
@@ -185,7 +179,7 @@
 	icon_state = "ppflowers_1"
 
 /obj/structure/flora/ausbushes/ppflowers/New()
-	icon_state = "ppflowers_[rand(1, 3)]"
+	icon_state = "ppflowers_[rand(1, 4)]"
 	..()
 
 /obj/structure/flora/ausbushes/sparsegrass
@@ -203,7 +197,7 @@
 	..()
 
 /obj/structure/flora/kirbyplants
-	name = "potted plant"
+	name = "Potted plant"
 	icon = 'icons/obj/flora/plants.dmi'
 	icon_state = "plant-01"
 
@@ -211,27 +205,3 @@
 	name = "RD's potted plant"
 	desc = "A gift from the botanical staff, presented after the RD's reassignment. There's a tag on it that says \"Y'all come back now, y'hear?\"\nIt doesn't look very healthy..."
 	icon_state = "plant-25"
-
-
-//a rock is flora according to where the icon file is
-//and now these defines
-/obj/structure/flora/rock
-	name = "rock"
-	desc = "a rock"
-	icon_state = "rock1"
-	icon = 'icons/obj/flora/rocks.dmi'
-	anchored = 1
-	burn_state = -1 //Not Burnable
-
-/obj/structure/flora/rock/New()
-	..()
-	icon_state = "rock[rand(1,5)]"
-
-/obj/structure/flora/rock/pile
-	name = "rocks"
-	desc = "some rocks"
-	icon_state = "rockpile1"
-
-/obj/structure/flora/rock/pile/New()
-	..()
-	icon_state = "rockpile[rand(1,5)]"

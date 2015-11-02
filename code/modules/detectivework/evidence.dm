@@ -8,22 +8,16 @@
 	item_state = ""
 	w_class = 1
 
-/obj/item/weapon/evidencebag/afterattack(obj/item/I, mob/user,proximity)
-	if(!proximity || loc == I)
+/obj/item/weapon/evidencebag/afterattack(obj/item/I, mob/user as mob,proximity)
+	if(!proximity)
 		return
-	evidencebagEquip(I, user)
 
-/obj/item/weapon/evidencebag/attackby(obj/item/I, mob/user, params)
-	if(evidencebagEquip(I, user))
-		return 1
-
-/obj/item/weapon/evidencebag/proc/evidencebagEquip(obj/item/I, mob/user)
 	if(!istype(I) || I.anchored == 1)
-		return
+		return ..()
 
 	if(istype(I, /obj/item/weapon/evidencebag))
 		user << "<span class='notice'>You find putting an evidence bag in another evidence bag to be slightly absurd.</span>"
-		return 1 //now this is podracing
+		return
 
 	if(I.w_class > 3)
 		user << "<span class='notice'>[I] won't fit in [src].</span>"
@@ -31,7 +25,7 @@
 
 	if(contents.len)
 		user << "<span class='notice'>[src] already has something inside it.</span>"
-		return
+		return ..()
 
 	if(!isturf(I.loc)) //If it isn't on the floor. Do some checks to see if it's in our hands or a box. Otherwise give up.
 		if(istype(I.loc,/obj/item/weapon/storage))	//in a container.
@@ -45,8 +39,8 @@
 		else
 			return
 
-	user.visible_message("[user] puts [I] into [src].", "<span class='notice'>You put [I] inside [src].</span>",\
-	"<span class='italics'>You hear a rustle as someone puts something into a plastic bag.</span>")
+	user.visible_message("[user] puts [I] into [src]", "You put [I] inside [src].",\
+	"You hear a rustle as someone puts something into a plastic bag.")
 
 	icon_state = "evidence"
 
@@ -63,13 +57,14 @@
 	desc = "An evidence bag containing [I]. [I.desc]"
 	I.loc = src
 	w_class = I.w_class
-	return 1
+	return
 
-/obj/item/weapon/evidencebag/attack_self(mob/user)
+
+/obj/item/weapon/evidencebag/attack_self(mob/user as mob)
 	if(contents.len)
 		var/obj/item/I = contents[1]
-		user.visible_message("[user] takes [I] out of [src].", "<span class='notice'>You take [I] out of [src].</span>",\
-		"<span class='italics'>You hear someone rustle around in a plastic bag, and remove something.</span>")
+		user.visible_message("[user] takes [I] out of [src]", "You take [I] out of [src].",\
+		"You hear someone rustle around in a plastic bag, and remove something.")
 		overlays.Cut()	//remove the overlays
 		user.put_in_hands(I)
 		w_class = 1

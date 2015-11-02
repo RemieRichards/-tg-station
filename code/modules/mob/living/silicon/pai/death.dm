@@ -15,4 +15,4 @@
 	if(mind)	del(mind)
 	living_mob_list -= src
 	ghostize()
-	qdel(src)
+	del(src)

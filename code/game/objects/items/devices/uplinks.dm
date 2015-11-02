@@ -6,28 +6,18 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 
 */
 
-var/list/world_uplinks = list()
-
 /obj/item/device/uplink
-	var/welcome = "Syndicate Uplink Console:"	// Welcoming menu message
-	var/uses = 20								// Numbers of crystals
+	var/welcome 					// Welcoming menu message
+	var/uses 						// Numbers of crystals
 	// List of items not to shove in their hands.
-	var/purchase_log = ""
+	var/list/purchase_log = list()
 	var/show_description = null
 	var/active = 0
 
-	var/uplink_owner = null//text-only
-	var/used_TC = 0
-
-	var/mode_override = null
-
 /obj/item/device/uplink/New()
 	..()
-	world_uplinks+=src
-
-/obj/item/device/uplink/Destroy()
-	world_uplinks-=src
-	return ..()
+	welcome = ticker.mode.uplink_welcome
+	uses = ticker.mode.uplink_uses
 
 //Let's build a menu!
 /obj/item/device/uplink/proc/generate_menu()
@@ -38,7 +28,7 @@ var/list/world_uplinks = list()
 	dat += "<B>Request item:</B><BR>"
 	dat += "<I>Each item costs a number of tele-crystals as indicated by the number following their name.</I><br><BR>"
 
-	var/list/buyable_items = get_uplink_items(mode_override)
+	var/list/buyable_items = get_uplink_items()
 
 	// Loop through categories
 	var/index = 0
@@ -102,7 +92,7 @@ var/list/world_uplinks = list()
 			var/category = split[1]
 			var/number = text2num(split[2])
 
-			var/list/buyable_items = get_uplink_items(mode_override)
+			var/list/buyable_items = get_uplink_items()
 
 			var/list/uplink = buyable_items[category]
 			if(uplink && uplink.len >= number)
@@ -135,8 +125,6 @@ var/list/world_uplinks = list()
 	desc = "There is something wrong if you're examining this."
 
 /obj/item/device/uplink/hidden/Topic(href, href_list)
-	if(usr.stat || usr.restrained() || usr.paralysis || usr.stunned || usr.weakened)
-		return 0		// To stop people using their uplink when they shouldn't be able to
 	..()
 	if(href_list["lock"])
 		toggle()
@@ -148,7 +136,7 @@ var/list/world_uplinks = list()
 	active = !active
 
 // Directly trigger the uplink. Turn on if it isn't already.
-/obj/item/device/uplink/hidden/proc/trigger(mob/user)
+/obj/item/device/uplink/hidden/proc/trigger(mob/user as mob)
 	if(!active)
 		toggle()
 	interact(user)
@@ -156,7 +144,7 @@ var/list/world_uplinks = list()
 // Checks to see if the value meets the target. Like a frequency being a traitor_frequency, in order to unlock a headset.
 // If true, it accesses trigger() and returns 1. If it fails, it returns false. Use this to see if you need to close the
 // current item's menu.
-/obj/item/device/uplink/hidden/proc/check_trigger(mob/user, value, target)
+/obj/item/device/uplink/hidden/proc/check_trigger(mob/user as mob, var/value, var/target)
 	if(value == target)
 		trigger(user)
 		return 1
@@ -174,15 +162,15 @@ var/list/world_uplinks = list()
 			return 1
 	return 0
 //Refund proc for the borg teleporter (later I'll make a general refund proc if there is demand for it)
-/obj/item/device/radio/uplink/attackby(obj/item/weapon/W, mob/user, params)
+/obj/item/device/radio/uplink/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/weapon/antag_spawner/borg_tele))
 		var/obj/item/weapon/antag_spawner/borg_tele/S = W
 		if(!S.used)
 			hidden_uplink.uses += S.TC_cost
-			qdel(S)
+			del(S)
 			user << "<span class='notice'>Teleporter refunded.</span>"
 		else
-			user << "<span class='warning'>This teleporter is already used!</span>"
+			user << "<span class='notice'>This teleporter is already used.</span>"
 
 // PRESET UPLINKS
 // A collection of preset uplinks.
@@ -194,14 +182,14 @@ var/list/world_uplinks = list()
 	hidden_uplink = new(src)
 	icon_state = "radio"
 
-/obj/item/device/radio/uplink/attack_self(mob/user)
+/obj/item/device/radio/uplink/attack_self(mob/user as mob)
 	if(hidden_uplink)
 		hidden_uplink.trigger(user)
 
 /obj/item/device/multitool/uplink/New()
 	hidden_uplink = new(src)
 
-/obj/item/device/multitool/uplink/attack_self(mob/user)
+/obj/item/device/multitool/uplink/attack_self(mob/user as mob)
 	if(hidden_uplink)
 		hidden_uplink.trigger(user)
 
@@ -211,7 +199,7 @@ var/list/world_uplinks = list()
 /obj/item/device/radio/headset/uplink/New()
 	..()
 	hidden_uplink = new(src)
-	hidden_uplink.uses = 20
+	hidden_uplink.uses = 10
 
 
 

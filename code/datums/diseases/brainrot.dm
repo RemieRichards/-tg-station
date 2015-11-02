@@ -1,16 +1,18 @@
 /datum/disease/brainrot
 	name = "Brainrot"
 	max_stages = 4
-	spread_text = "On contact"
-	spread_flags = CONTACT_GENERAL
-	cure_text = "Mannitol"
-	cures = list("mannitol")
+	spread = "On contact"
+	spread_type = CONTACT_GENERAL
+	cure = "Alkysine"
+	cure_id = list("alkysine")
 	agent = "Cryptococcus Cosmosis"
-	viable_mobtypes = list(/mob/living/carbon/human)
+	affected_species = list("Human")
+	curable = 0
 	cure_chance = 15//higher chance to cure, since two reagents are required
 	desc = "This disease destroys the braincells, causing brain fever, brain necrosis and general intoxication."
-	required_organs = list(/obj/item/organ/limb/head)
-	severity = DANGEROUS
+	severity = "Major"
+	requires = 1
+	required_limb = list(/obj/item/organ/limb/head)
 
 /datum/disease/brainrot/stage_act() //Removed toxloss because damaging diseases are pretty horrible. Last round it killed the entire station because the cure didn't work -- Urist -ACTUALLY Removed rather than commented out, I don't see it returning - RR
 	..()
@@ -22,7 +24,7 @@
 			if(prob(2))
 				affected_mob.emote("yawn")
 			if(prob(2))
-				affected_mob << "<span class='danger'>Your don't feel like yourself.</span>"
+				affected_mob << "\red Your don't feel like yourself."
 			if(prob(5))
 				affected_mob.adjustBrainLoss(1)
 				affected_mob.updatehealth()
@@ -35,7 +37,7 @@
 				affected_mob.adjustBrainLoss(2)
 				affected_mob.updatehealth()
 				if(prob(2))
-					affected_mob << "<span class='danger'>Your try to remember something important...but can't.</span>"
+					affected_mob << "\red Your try to remember something important...but can't."
 
 		if(4)
 			if(prob(2))
@@ -46,10 +48,11 @@
 				affected_mob.adjustBrainLoss(3)
 				affected_mob.updatehealth()
 				if(prob(2))
-					affected_mob << "<span class='danger'>Strange buzzing fills your head, removing all thoughts.</span>"
+					affected_mob << "\red Strange buzzing fills your head, removing all thoughts."
 			if(prob(3))
-				affected_mob << "<span class='danger'>You lose consciousness...</span>"
-				affected_mob.visible_message("<span class='warning'>[affected_mob] suddenly collapses</span>")
+				affected_mob << "\red You lose consciousness..."
+				for(var/mob/O in viewers(affected_mob, null))
+					O.show_message("[affected_mob] suddenly collapses", 1)
 				affected_mob.Paralyse(rand(5,10))
 				if(prob(1))
 					affected_mob.emote("snore")

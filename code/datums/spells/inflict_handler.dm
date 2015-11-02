@@ -22,18 +22,15 @@
 /obj/effect/proc_holder/spell/targeted/inflict_handler/cast(list/targets)
 
 	for(var/mob/living/target in targets)
-		playsound(target,sound, 50,1)
 		switch(destroys)
 			if("gib")
 				target.gib()
 			if("gib_brain")
 				if(ishuman(target) || ismonkey(target))
-					var/mob/living/carbon/C_target = target
-					var/obj/item/organ/internal/brain/B = C_target.getorgan(/obj/item/organ/internal/brain)
+					var/obj/item/organ/brain/B = target.getorgan(/obj/item/organ/brain)
 					if(B)
-						B.loc = get_turf(C_target)
-						B.transfer_identity(C_target)
-						C_target.internal_organs -= B
+						B.loc = get_turf(target)
+						B.transfer_identity(target)
 				target.gib()
 			if("disintegrate")
 				target.dust()

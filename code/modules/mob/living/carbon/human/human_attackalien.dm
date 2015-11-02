@@ -1,49 +1,58 @@
-/mob/living/carbon/human/attack_alien(mob/living/carbon/alien/humanoid/M)
+/mob/living/carbon/human/attack_alien(mob/living/carbon/alien/humanoid/M as mob)
 	if(check_shields(0, M.name))
-		visible_message("<span class='danger'>[M] attempted to touch [src]!</span>")
+		visible_message("\red <B>[M] attempted to touch [src]!</B>")
 		return 0
 
-	if(..())
-		if(M.a_intent == "harm")
+	switch(M.a_intent)
+		if ("help")
+			visible_message(text("\blue [M] caresses [src] with its scythe like arm."))
+		if ("grab")
+			if(M == src || anchored)
+				return
 			if (w_uniform)
 				w_uniform.add_fingerprint(M)
-			var/damage = prob(90) ? 20 : 0
+			var/obj/item/weapon/grab/G = new /obj/item/weapon/grab(M, src)
+
+			M.put_in_active_hand(G)
+
+			G.synch()
+			LAssailant = M
+
+			playsound(loc, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
+			visible_message(text("\red [] has grabbed [] passively!", M, src))
+
+		if("harm")
+			if (w_uniform)
+				w_uniform.add_fingerprint(M)
+			var/damage = rand(15, 30)
 			if(!damage)
 				playsound(loc, 'sound/weapons/slashmiss.ogg', 50, 1, -1)
-				visible_message("<span class='danger'>[M] has lunged at [src]!</span>", \
-					"<span class='userdanger'>[M] has lunged at [src]!</span>")
+				visible_message("\red <B>[M] has lunged at [src]!</B>")
 				return 0
 			var/obj/item/organ/limb/affecting = get_organ(ran_zone(M.zone_sel.selecting))
-			var/armor_block = run_armor_check(affecting, "melee","","",10)
+			var/armor_block = run_armor_check(affecting, "melee")
 
 			playsound(loc, 'sound/weapons/slice.ogg', 25, 1, -1)
-			visible_message("<span class='danger'>[M] has slashed at [src]!</span>", \
-				"<span class='userdanger'>[M] has slashed at [src]!</span>")
+			visible_message("\red <B>[M] has slashed at [src]!</B>")
 
 			apply_damage(damage, BRUTE, affecting, armor_block)
-			if (prob(30))
-				visible_message("<span class='danger'>[M] has wounded [src]!</span>", \
-					"<span class='userdanger'>[M] has wounded [src]!</span>")
+			if (damage >= 25)
+				visible_message("\red <B>[M] has wounded [src]!</B>")
 				apply_effect(4, WEAKEN, armor_block)
-				add_logs(M, src, "attacked")
 			updatehealth()
 
-		if(M.a_intent == "disarm")
+		if("disarm")
 			var/randn = rand(1, 100)
 			if (randn <= 80)
 				playsound(loc, 'sound/weapons/pierce.ogg', 25, 1, -1)
-				Weaken(5)
-				add_logs(M, src, "tackled")
-				visible_message("<span class='danger'>[M] has tackled down [src]!</span>", \
-					"<span class='userdanger'>[M] has tackled down [src]!</span>")
+				Weaken(10)
+				visible_message(text("\red <B>[] has tackled down []!</B>", M, src))
 			else
 				if (randn <= 99)
 					playsound(loc, 'sound/weapons/slash.ogg', 25, 1, -1)
 					drop_item()
-					visible_message("<span class='danger'>[M] disarmed [src]!</span>", \
-						"<span class='userdanger'>[M] disarmed [src]!</span>")
+					visible_message(text("\red <B>[] disarmed []!</B>", M, src))
 				else
 					playsound(loc, 'sound/weapons/slashmiss.ogg', 50, 1, -1)
-					visible_message("<span class='danger'>[M] has tried to disarm [src]!</span>", \
-						"<span class='userdanger'>[M] has tried to disarm [src]!</span>")
+					visible_message(text("\red <B>[] has tried to disarm []!</B>", M, src))
 	return

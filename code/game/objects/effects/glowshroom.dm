@@ -112,23 +112,23 @@
 	floor = 1
 	return 1
 
-/obj/effect/glowshroom/attackby(obj/item/weapon/W, mob/user, params)
+/obj/effect/glowshroom/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
 	endurance -= W.force
 	CheckEndurance()
 
-/obj/effect/glowshroom/ex_act(severity, target)
+/obj/effect/glowshroom/ex_act(severity)
 	switch(severity)
-		if(1)
-			qdel(src)
+		if(1.0)
+			del(src)
 			return
-		if(2)
+		if(2.0)
 			if (prob(50))
-				qdel(src)
+				del(src)
 				return
-		if(3)
+		if(3.0)
 			if (prob(5))
-				qdel(src)
+				del(src)
 				return
 		else
 	return
@@ -140,10 +140,4 @@
 
 /obj/effect/glowshroom/proc/CheckEndurance()
 	if(endurance <= 0)
-		qdel(src)
-
-/obj/effect/glowshroom/acid_act(acidpwr, toxpwr, acid_volume)
-	visible_message("<span class='danger'>[src] melts away!</span>")
-	var/obj/effect/decal/cleanable/molten_item/I = new (get_turf(src))
-	I.desc = "Looks like this was \an [src] some time ago."
-	qdel(src)
+		del(src)

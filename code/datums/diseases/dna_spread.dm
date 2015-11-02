@@ -1,32 +1,21 @@
 /datum/disease/dnaspread
 	name = "Space Retrovirus"
 	max_stages = 4
-	spread_text = "On contact"
-	spread_flags = CONTACT_GENERAL
-	cure_text = "Mutadone"
-	cures = list("mutadone")
-	disease_flags = CAN_CARRY|CAN_RESIST
+	spread = "On contact"
+	spread_type = CONTACT_GENERAL
+	cure = "Ryetalin"
+	cure = "ryetalyn"
+	curable = 0
 	agent = "S4E1 retrovirus"
-	viable_mobtypes = list(/mob/living/carbon/human)
-	var/datum/dna/original_dna = null
+	affected_species = list("Human")
+	var/list/original_dna = list()
 	var/transformed = 0
-	desc = "This disease transplants the genetic code of the initial vector into new hosts."
-	severity = MEDIUM
+	desc = "This disease transplants the genetic code of the intial vector into new hosts."
+	severity = "Medium"
 
 
 /datum/disease/dnaspread/stage_act()
 	..()
-	if(!affected_mob.dna)
-		cure()
-
-	if(!strain_data["dna"])
-		//Absorbs the target DNA.
-		strain_data["dna"] = new affected_mob.dna.type
-		affected_mob.dna.copy_dna(strain_data["dna"])
-		src.carrier = 1
-		src.stage = 4
-		return
-
 	switch(stage)
 		if(2 || 3) //Pretend to be a cold and give time to spread.
 			if(prob(8))
@@ -34,39 +23,43 @@
 			if(prob(8))
 				affected_mob.emote("cough")
 			if(prob(1))
-				affected_mob << "<span class='danger'>Your muscles ache.</span>"
+				affected_mob << "\red Your muscles ache."
 				if(prob(20))
 					affected_mob.take_organ_damage(1)
 			if(prob(1))
-				affected_mob << "<span class='danger'>Your stomach hurts.</span>"
+				affected_mob << "\red Your stomach hurts."
 				if(prob(20))
 					affected_mob.adjustToxLoss(2)
 					affected_mob.updatehealth()
 		if(4)
-			if(!transformed && !carrier)
+			if(!src.transformed)
+				if ((!strain_data["name"]) || (!strain_data["UI"]) || (!strain_data["SE"]))
+					del(affected_mob.virus)
+					return
+
 				//Save original dna for when the disease is cured.
-				original_dna = new affected_mob.dna.type
-				affected_mob.dna.copy_dna(original_dna)
+				src.original_dna["name"] = affected_mob.real_name
+				src.original_dna["UI"] = affected_mob.dna.uni_identity
+				src.original_dna["SE"] = affected_mob.dna.struc_enzymes
 
-				affected_mob << "<span class='danger'>You don't feel like yourself..</span>"
-				var/datum/dna/transform_dna = strain_data["dna"]
+				affected_mob << "\red You don't feel like yourself.."
+				affected_mob.dna.uni_identity = strain_data["UI"]
+				updateappearance(affected_mob)
+				affected_mob.dna.struc_enzymes = strain_data["SE"]
+				affected_mob.real_name = strain_data["name"]
+				domutcheck(affected_mob)
 
-				transform_dna.transfer_identity(affected_mob, transfer_SE = 1)
-				affected_mob.real_name = affected_mob.dna.real_name
-				affected_mob.updateappearance(mutcolor_update=1)
-				affected_mob.domutcheck()
-
-				transformed = 1
-				carrier = 1 //Just chill out at stage 4
+				src.transformed = 1
+				src.carrier = 1 //Just chill out at stage 4
 
 	return
 
-/datum/disease/dnaspread/Destroy()
-	if (original_dna && transformed && affected_mob)
-		original_dna.transfer_identity(affected_mob, transfer_SE = 1)
-		affected_mob.real_name = affected_mob.dna.real_name
-		affected_mob.updateappearance(mutcolor_update=1)
-		affected_mob.domutcheck()
+/datum/disease/dnaspread/Del()
+	if ((original_dna["name"]) && (original_dna["UI"]) && (original_dna["SE"]))
+		affected_mob.dna.uni_identity = original_dna["UI"]
+		updateappearance(affected_mob)
+		affected_mob.dna.struc_enzymes = original_dna["SE"]
+		affected_mob.real_name = original_dna["name"]
 
-		affected_mob << "<span class='notice'>You feel more like yourself.</span>"
-	return ..()
+		affected_mob << "\blue You feel more like yourself."
+	..()

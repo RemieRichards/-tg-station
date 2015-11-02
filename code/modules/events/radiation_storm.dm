@@ -10,11 +10,10 @@
 /datum/round_event/radiation_storm/setup()
 	startWhen = rand(10, 20)
 	endWhen = startWhen + 5
-	announceWhen	= 1
 
 /datum/round_event/radiation_storm/announce()
-	priority_announce("High levels of radiation detected near the station. Maintenance is best shielded from radiation.", "Anomaly Alert", 'sound/AI/radiation.ogg')
-	//sound not longer matches the text, but an audible warning is probably good
+	command_alert("High levels of radiation detected near the station. Maintenance is best shielded from radiation.", "Anomaly Alert")
+	world << sound('sound/AI/radiation.ogg')	//sound not longer matches the text, but an audible warning is probably good
 
 
 /datum/round_event/radiation_storm/start()
@@ -36,21 +35,21 @@
 
 		if(istype(C, /mob/living/carbon/human))
 			var/mob/living/carbon/human/H = C
+			H.apply_effect((rand(15, 75)), IRRADIATE, 0)
 			if(prob(5))
-				H.rad_act(rand(100, 160))
-			else
-				H.rad_act(rand(15, 75))
+				H.apply_effect((rand(90, 150)), IRRADIATE, 0)
 			if(prob(25))
 				if(prob(75))
 					randmutb(H)
+					domutcheck(H, null, 1)
 				else
 					randmutg(H)
-				H.domutcheck()
+					domutcheck(H, null, 1)
 
 		else if(istype(C, /mob/living/carbon/monkey))
 			var/mob/living/carbon/monkey/M = C
-			M.rad_act(rand(15, 75))
+			M.apply_effect((rand(15, 75)), IRRADIATE, 0)
 
 
 /datum/round_event/radiation_storm/end()
-	priority_announce("The radiation threat has passed. Please return to your workplaces.", "Anomaly Alert")
+	command_alert("The radiation threat has passed. Please return to your workplaces.", "Anomaly Alert")

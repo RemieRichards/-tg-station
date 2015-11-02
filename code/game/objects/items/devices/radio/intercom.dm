@@ -3,8 +3,9 @@
 	desc = "Talk through this."
 	icon_state = "intercom"
 	anchored = 1
-	w_class = 4
+	w_class = 4.0
 	canhear_range = 2
+	flags = CONDUCT
 	var/number = 0
 	var/anyai = 1
 	var/mob/living/silicon/ai/ai = list()
@@ -12,22 +13,22 @@
 
 /obj/item/device/radio/intercom/New()
 	..()
-	SSobj.processing += src
+	processing_objects += src
 
-/obj/item/device/radio/intercom/Destroy()
-	SSobj.processing -= src
-	return ..()
+/obj/item/device/radio/intercom/Del()
+	processing_objects -= src
+	..()
 
-/obj/item/device/radio/intercom/attack_ai(mob/user)
+/obj/item/device/radio/intercom/attack_ai(mob/user as mob)
 	src.add_fingerprint(user)
 	spawn (0)
 		attack_self(user)
 
-/obj/item/device/radio/intercom/attack_paw(mob/user)
+/obj/item/device/radio/intercom/attack_paw(mob/user as mob)
 	return src.attack_hand(user)
 
 
-/obj/item/device/radio/intercom/attack_hand(mob/user)
+/obj/item/device/radio/intercom/attack_hand(mob/user as mob)
 	src.add_fingerprint(user)
 	spawn (0)
 		attack_self(user)
@@ -50,8 +51,8 @@
 	return canhear_range
 
 
-/obj/item/device/radio/intercom/Hear(message, atom/movable/speaker, message_langs, raw_message, radio_freq, list/spans)
-	if(!anyai && !(speaker in ai))
+/obj/item/device/radio/intercom/hear_talk(mob/M as mob, msg)
+	if(!src.anyai && !(M in src.ai))
 		return
 	..()
 

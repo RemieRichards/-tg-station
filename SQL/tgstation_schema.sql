@@ -13,13 +13,13 @@ USE `feedback`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `admin`
+-- Table structure for table `erro_admin`
 --
 
-DROP TABLE IF EXISTS `admin`;
+DROP TABLE IF EXISTS `erro_admin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admin` (
+CREATE TABLE `erro_admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ckey` varchar(32) NOT NULL,
   `rank` varchar(32) NOT NULL DEFAULT 'Administrator',
@@ -31,13 +31,13 @@ CREATE TABLE `admin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `admin_log`
+-- Table structure for table `erro_admin_log`
 --
 
-DROP TABLE IF EXISTS `admin_log`;
+DROP TABLE IF EXISTS `erro_admin_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admin_log` (
+CREATE TABLE `erro_admin_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `datetime` datetime NOT NULL,
   `adminckey` varchar(32) NOT NULL,
@@ -48,37 +48,13 @@ CREATE TABLE `admin_log` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `admin_ranks`
+-- Table structure for table `erro_ban`
 --
 
-DROP TABLE IF EXISTS `admin_ranks`;
+DROP TABLE IF EXISTS `erro_ban`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admin_ranks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `rank` varchar(40) NOT NULL,
-  `flags` int(16) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-insert into admin_ranks (rank, flags) values ('Moderator',2);
-insert into admin_ranks (rank, flags) values ('Admin Candidate',2);
-insert into admin_ranks (rank, flags) values ('Trial Admin',5638);
-insert into admin_ranks (rank, flags) values ('Badmin',5727);
-insert into admin_ranks (rank, flags) values ('Game Admin',8063);
-insert into admin_ranks (rank, flags) values ('Game Master',65535);
-insert into admin_ranks (rank, flags) values ('Host',65535);
-insert into admin_ranks (rank, flags) values ('Coder',5168);
-
---
--- Table structure for table `ban`
---
-
-DROP TABLE IF EXISTS `ban`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ban` (
+CREATE TABLE `erro_ban` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `bantime` datetime NOT NULL,
   `serverip` varchar(32) NOT NULL,
@@ -107,13 +83,13 @@ CREATE TABLE `ban` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `connection_log`
+-- Table structure for table `erro_connection_log`
 --
 
-DROP TABLE IF EXISTS `connection_log`;
+DROP TABLE IF EXISTS `erro_connection_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `connection_log` (
+CREATE TABLE `erro_connection_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `datetime` datetime DEFAULT NULL,
   `serverip` varchar(45) DEFAULT NULL,
@@ -125,13 +101,13 @@ CREATE TABLE `connection_log` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `death`
+-- Table structure for table `erro_death`
 --
 
-DROP TABLE IF EXISTS `death`;
+DROP TABLE IF EXISTS `erro_death`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `death` (
+CREATE TABLE `erro_death` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pod` text NOT NULL COMMENT 'Place of death',
   `coord` text NOT NULL COMMENT 'X, Y, Z POD',
@@ -152,13 +128,13 @@ CREATE TABLE `death` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `feedback`
+-- Table structure for table `erro_feedback`
 --
 
-DROP TABLE IF EXISTS `feedback`;
+DROP TABLE IF EXISTS `erro_feedback`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `feedback` (
+CREATE TABLE `erro_feedback` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `time` datetime NOT NULL,
   `round_id` int(8) NOT NULL,
@@ -170,13 +146,13 @@ CREATE TABLE `feedback` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `legacy_population`
+-- Table structure for table `erro_legacy_population`
 --
 
-DROP TABLE IF EXISTS `legacy_population`;
+DROP TABLE IF EXISTS `erro_legacy_population`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `legacy_population` (
+CREATE TABLE `erro_legacy_population` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `playercount` int(11) DEFAULT NULL,
   `admincount` int(11) DEFAULT NULL,
@@ -186,11 +162,11 @@ CREATE TABLE `legacy_population` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `library`
+-- Table structure for table `erro_library`
 --
 
-DROP TABLE IF EXISTS `library`;
-CREATE TABLE `library` (
+DROP TABLE IF EXISTS `erro_library`;
+CREATE TABLE `erro_library` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` varchar(45) NOT NULL,
   `title` varchar(45) NOT NULL,
@@ -203,18 +179,13 @@ CREATE TABLE `library` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Create an index to speed up the libary
---
-CREATE INDEX deleted_idx ON `library` (`deleted`);
-
---
--- Table structure for table `player`
+-- Table structure for table `erro_player`
 --
 
-DROP TABLE IF EXISTS `player`;
+DROP TABLE IF EXISTS `erro_player`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `player` (
+CREATE TABLE `erro_player` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ckey` varchar(32) NOT NULL,
   `firstseen` datetime NOT NULL,
@@ -228,13 +199,13 @@ CREATE TABLE `player` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `poll_option`
+-- Table structure for table `erro_poll_option`
 --
 
-DROP TABLE IF EXISTS `poll_option`;
+DROP TABLE IF EXISTS `erro_poll_option`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `poll_option` (
+CREATE TABLE `erro_poll_option` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `pollid` int(11) NOT NULL,
   `text` varchar(255) NOT NULL,
@@ -249,13 +220,13 @@ CREATE TABLE `poll_option` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `poll_question`
+-- Table structure for table `erro_poll_question`
 --
 
-DROP TABLE IF EXISTS `poll_question`;
+DROP TABLE IF EXISTS `erro_poll_question`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `poll_question` (
+CREATE TABLE `erro_poll_question` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `polltype` varchar(16) NOT NULL DEFAULT 'OPTION',
   `starttime` datetime NOT NULL,
@@ -263,21 +234,18 @@ CREATE TABLE `poll_question` (
   `question` varchar(255) NOT NULL,
   `adminonly` tinyint(1) DEFAULT '0',
   `multiplechoiceoptions` int(2) DEFAULT NULL,
-  `createdby_ckey` varchar(45) NULL DEFAULT NULL,
-  `createdby_ip` varchar(45) NULL DEFAULT NULL,
-  `for_trialmin` varchar(45) NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `poll_textreply`
+-- Table structure for table `erro_poll_textreply`
 --
 
-DROP TABLE IF EXISTS `poll_textreply`;
+DROP TABLE IF EXISTS `erro_poll_textreply`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `poll_textreply` (
+CREATE TABLE `erro_poll_textreply` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `datetime` datetime NOT NULL,
   `pollid` int(11) NOT NULL,
@@ -290,13 +258,13 @@ CREATE TABLE `poll_textreply` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `poll_vote`
+-- Table structure for table `erro_poll_vote`
 --
 
-DROP TABLE IF EXISTS `poll_vote`;
+DROP TABLE IF EXISTS `erro_poll_vote`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `poll_vote` (
+CREATE TABLE `erro_poll_vote` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `datetime` datetime NOT NULL,
   `pollid` int(11) NOT NULL,
@@ -310,59 +278,29 @@ CREATE TABLE `poll_vote` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `watch`
+-- Table structure for table `erro_privacy`
 --
 
-DROP TABLE IF EXISTS `watch`;
+DROP TABLE IF EXISTS `erro_privacy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `watch` (
-  `ckey` varchar(32) NOT NULL,
-  `reason` text NOT NULL,
-  `timestamp` datetime NOT NULL,
-  `adminckey` varchar(32) NOT NULL,
-  `last_editor` varchar(32),
-  `edits` text,
-  PRIMARY KEY (`ckey`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `memo`
---
-
-DROP TABLE IF EXISTS `memo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `memo` (
-  `ckey` varchar(32) NOT NULL,
-  `memotext` text NOT NULL,
-  `timestamp` datetime NOT NULL,
-  `last_editor` varchar(32),
-  `edits` text,
-  PRIMARY KEY (`ckey`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `notes`
---
-
-DROP TABLE IF EXISTS `notes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notes` (
+CREATE TABLE `erro_privacy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `datetime` datetime NOT NULL,
   `ckey` varchar(32) NOT NULL,
-  `notetext` text NOT NULL,
-  `timestamp` datetime NOT NULL,
-  `adminckey` varchar(32) NOT NULL,
-  `last_editor` varchar(32),
-  `edits` text,
-  `server` varchar(50) NOT NULL,
+  `option` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2013-03-24 18:02:35

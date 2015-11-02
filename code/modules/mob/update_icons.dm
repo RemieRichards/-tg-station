@@ -43,10 +43,10 @@
 /mob/proc/update_inv_head()
 	return
 
-/mob/proc/update_hair()
+/mob/proc/update_inv_gloves()
 	return
 
-/mob/proc/update_inv_gloves()
+/mob/proc/update_mutations()
 	return
 
 /mob/proc/update_inv_wear_id()

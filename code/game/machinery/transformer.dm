@@ -28,7 +28,7 @@
 	else
 		icon_state = initial(icon_state)
 
-/obj/machinery/transformer/Bumped(atom/movable/AM)
+/obj/machinery/transformer/Bumped(var/atom/movable/AM)
 
 	if(cooldown == 1)
 		return
@@ -42,14 +42,14 @@
 			AM.loc = src.loc
 			do_transform(AM)
 
-/obj/machinery/transformer/CanPass(atom/movable/mover, turf/target, height=0)
+/obj/machinery/transformer/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if(!ishuman(mover)) // Allows items to go through, to stop them from blocking the conveyour belt.
 		var/dir = get_dir(src, mover)
 		if(dir == EAST)
 			return ..()
 	return 0
 
-/obj/machinery/transformer/proc/do_transform(mob/living/carbon/human/H)
+/obj/machinery/transformer/proc/do_transform(var/mob/living/carbon/human/H)
 	if(stat & (BROKEN|NOPOWER))
 		return
 	if(cooldown == 1)
@@ -87,7 +87,6 @@
 		sleep(30)
 		if(R)
 			R.SetLockdown(0)
-			R.notify_ai(1)
 
 /obj/machinery/transformer/conveyor/New()
 	..()

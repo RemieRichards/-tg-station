@@ -1,7 +1,7 @@
-/mob/living/carbon/monkey/gib_animation(animate)
+/mob/living/carbon/monkey/gib_animation(var/animate)
 	..(animate, "gibbed-m")
 
-/mob/living/carbon/monkey/dust_animation(animate)
+/mob/living/carbon/monkey/dust_animation(var/animate)
 	..(animate, "dust-m")
 
 /mob/living/carbon/monkey/dust(var/animation = 1)

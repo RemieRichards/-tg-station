@@ -1,5 +1,6 @@
 /obj/item/ammo_box/a357
-	name = "speed loader (.357)"
+	name = "ammo box (.357)"
+	desc = "A box of .357 ammo"
 	icon_state = "357"
 	ammo_type = /obj/item/ammo_casing/a357
 	max_ammo = 7
@@ -12,49 +13,49 @@
 	max_ammo = 6
 	multiple_sprites = 1
 
+
+
+/obj/item/ammo_box/a418
+	name = "ammo box (.418)"
+	icon_state = "418"
+	ammo_type = /obj/item/ammo_casing/a418
+	max_ammo = 7
+	multiple_sprites = 1
+
+
+
+/obj/item/ammo_box/a666
+	name = "ammo box (.666)"
+	icon_state = "666"
+	ammo_type = /obj/item/ammo_casing/a666
+	max_ammo = 4
+	multiple_sprites = 1
+
 /obj/item/ammo_box/c9mm
-	name = "ammo box (9mm)"
-	icon_state = "9mmbox"
+	name = "Ammunition Box (9mm)"
+	icon_state = "9mm"
 	origin_tech = "combat=2"
 	ammo_type = /obj/item/ammo_casing/c9mm
 	max_ammo = 30
 
 /obj/item/ammo_box/c10mm
-	name = "ammo box (10mm)"
-	icon_state = "10mmbox"
+	name = "Ammunition Box (10mm)"
+	icon_state = "9mm"
 	origin_tech = "combat=2"
 	ammo_type = /obj/item/ammo_casing/c10mm
-	max_ammo = 20
+	max_ammo = 30
+
 
 /obj/item/ammo_box/c45
-	name = "ammo box (.45)"
-	icon_state = "45box"
+	name = "Ammunition Box (.45)"
+	icon_state = "9mm"
 	origin_tech = "combat=2"
 	ammo_type = /obj/item/ammo_casing/c45
-	max_ammo = 20
+	max_ammo = 30
 
-/obj/item/ammo_box/a40mm
-	name = "ammo box (40mm grenades)"
-	icon_state = "40mm"
-	ammo_type = /obj/item/ammo_casing/a40mm
-	max_ammo = 4
-	multiple_sprites = 1
-
-/obj/item/ammo_box/a762
-	name = "stripper clip (7.62mm)"
-	desc = "A stripper clip."
-	icon_state = "762"
-	ammo_type = /obj/item/ammo_casing/a762
-	max_ammo = 5
-	multiple_sprites = 1
-
-/obj/item/ammo_box/foambox
-	name = "ammo box (Foam Darts)"
-	icon = 'icons/obj/guns/toy.dmi'
-	icon_state = "foambox"
-	ammo_type = /obj/item/ammo_casing/caseless/foam_dart
-	max_ammo = 40
-
-/obj/item/ammo_box/foambox/riot
-	icon_state = "foambox_riot"
-	ammo_type = /obj/item/ammo_casing/caseless/foam_dart/riot
+/obj/item/ammo_box/a12mm
+	name = "Ammunition Box (12mm)"
+	icon_state = "9mm"
+	origin_tech = "combat=2"
+	ammo_type = /obj/item/ammo_casing/a12mm
+	max_ammo = 30

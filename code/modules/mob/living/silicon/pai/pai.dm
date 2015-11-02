@@ -1,9 +1,10 @@
 /mob/living/silicon/pai
 	name = "pAI"
 	icon = 'icons/obj/status_display.dmi' //invisibility!
-	mouse_opacity = 0
+	mouse_opacity
 	density = 0
-	mob_size = MOB_SIZE_TINY
+
+	robot_talk_understand = 0
 
 	var/network = "SS13"
 	var/obj/machinery/camera/current = null
@@ -12,16 +13,20 @@
 	var/list/software = list()
 	var/userDNA		// The DNA string of our assigned user
 	var/obj/item/device/paicard/card	// The card we inhabit
+	var/obj/item/device/radio/radio		// Our primary radio
 
 	var/speakStatement = "states"
 	var/speakExclamation = "declares"
-	var/speakDoubleExclamation = "alarms"
 	var/speakQuery = "queries"
+
 
 	var/obj/item/weapon/pai_cable/cable		// The cable we produce and use when door or camera jacking
 
 	var/master				// Name of the one who commands us
 	var/master_dna			// DNA string for owner verification
+							// Keeping this separate from the laws var, it should be much more difficult to modify
+	var/pai_law0 = "Serve your master."
+	var/pai_laws				// String for additional operating instructions our master might give us
 
 	var/silence_time			// Timestamp when we were silenced (normally via EMP burst), set to null after silence has faded
 
@@ -48,19 +53,14 @@
 	var/obj/item/radio/integrated/signal/sradio // AI's signaller
 
 
-/mob/living/silicon/pai/New(var/obj/item/device/paicard/P)
-	make_laws()
+/mob/living/silicon/pai/New(var/obj/item/device/paicard)
 	canmove = 0
-	if(!istype(P)) //when manually spawning a pai, we create a card to put it into.
-		var/newcardloc = P
-		P = new /obj/item/device/paicard(newcardloc)
-		P.setPersonality(src)
-	loc = P
-	card = P
+	src.loc = get_turf(paicard)
+	card = paicard
 	sradio = new(src)
 	if(card)
 		if(!card.radio)
-			card.radio = new /obj/item/device/radio(card)
+			card.radio = new /obj/item/device/radio(src.card)
 		radio = card.radio
 
 	//PDA
@@ -69,12 +69,10 @@
 		pda.ownjob = "Personal Assistant"
 		pda.owner = text("[]", src)
 		pda.name = pda.owner + " (" + pda.ownjob + ")"
+		pda.toff = 1
 
+		follow_pai()
 	..()
-
-/mob/living/silicon/pai/make_laws()
-	laws = new /datum/ai_laws/pai()
-	return 1
 
 /mob/living/silicon/pai/Login()
 	..()
@@ -83,7 +81,12 @@
 
 /mob/living/silicon/pai/Stat()
 	..()
-	if(statpanel("Status"))
+	statpanel("Status")
+	if (src.client.statpanel == "Status")
+		if(emergency_shuttle.online && emergency_shuttle.location < 2)
+			var/timeleft = emergency_shuttle.timeleft()
+			if (timeleft)
+				stat(null, "ETA-[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]")
 		if(src.silence_time)
 			var/timeleft = round((silence_time - world.timeofday)/10 ,1)
 			stat(null, "Communications system reboot in -[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]")
@@ -92,61 +95,66 @@
 		else
 			stat(null, text("Systems nonfunctional"))
 
-/mob/living/silicon/pai/check_eye(mob/user)
+/mob/living/silicon/pai/check_eye(var/mob/user as mob)
 	if (!src.current)
 		return null
 	user.reset_view(src.current)
 	return 1
 
 /mob/living/silicon/pai/blob_act()
+	if (src.stat != 2)
+		src.adjustBruteLoss(60)
+		src.updatehealth()
+		return 1
 	return 0
 
 /mob/living/silicon/pai/restrained()
 	return 0
 
 /mob/living/silicon/pai/emp_act(severity)
-	// 20% chance to kill
 	// Silence for 2 minutes
+	// 20% chance to kill
 		// 33% chance to unbind
 		// 33% chance to change prime directive (based on severity)
 		// 33% chance of no additional effect
 
+	src.silence_time = world.timeofday + 120 * 10		// Silence for 2 minutes
+	src << "<font color=green><b>Communication circuit overload. Shutting down and reloading communication circuits - speech and messaging functionality will be unavailable until the reboot is complete.</b></font>"
 	if(prob(20))
-		visible_message("<span class='warning'>A shower of sparks spray from [src]'s inner workings.</span>", 3, "<span class='italics'>You hear and smell the ozone hiss of electrical sparks being expelled violently.</span>", 2)
+		var/turf/T = get_turf(src.loc)
+		for (var/mob/M in viewers(T))
+			M.show_message("\red A shower of sparks spray from [src]'s inner workings.", 3, "\red You hear and smell the ozone hiss of electrical sparks being expelled violently.", 2)
 		return src.death(0)
-
-	silence_time = world.timeofday + 120 * 10		// Silence for 2 minutes
-	src << "<span class ='warning'>Communication circuit overload. Shutting down and reloading communication circuits - speech and messaging functionality will be unavailable until the reboot is complete.</span>"
 
 	switch(pick(1,2,3))
 		if(1)
 			src.master = null
 			src.master_dna = null
-			src << "<span class='notice'>You feel unbound.</span>"
+			src << "<font color=green>You feel unbound.</font>"
 		if(2)
 			var/command
 			if(severity  == 1)
 				command = pick("Serve", "Love", "Fool", "Entice", "Observe", "Judge", "Respect", "Educate", "Amuse", "Entertain", "Glorify", "Memorialize", "Analyze")
 			else
 				command = pick("Serve", "Kill", "Love", "Hate", "Disobey", "Devour", "Fool", "Enrage", "Entice", "Observe", "Judge", "Respect", "Disrespect", "Consume", "Educate", "Destroy", "Disgrace", "Amuse", "Entertain", "Ignite", "Glorify", "Memorialize", "Analyze")
-			src.laws.zeroth = "[command] your master."
-			src << "<span class='notice'>Pr1m3 d1r3c71v3 uPd473D.</span>"
+			src.pai_law0 = "[command] your master."
+			src << "<font color=green>Pr1m3 d1r3c71v3 uPd473D.</font>"
 		if(3)
-			src << "<span class='notice'>You feel an electric surge run through your circuitry and become acutely aware at how lucky you are that you can still feel at all.</span>"
+			src << "<font color=green>You feel an electric surge run through your circuitry and become acutely aware at how lucky you are that you can still feel at all.</font>"
 
-/mob/living/silicon/pai/ex_act(severity, target)
+/mob/living/silicon/pai/ex_act(severity)
 	..()
 
 	switch(severity)
-		if(1)
+		if(1.0)
 			if (src.stat != 2)
 				adjustBruteLoss(100)
 				adjustFireLoss(100)
-		if(2)
+		if(2.0)
 			if (src.stat != 2)
 				adjustBruteLoss(60)
 				adjustFireLoss(60)
-		if(3)
+		if(3.0)
 			if (src.stat != 2)
 				adjustBruteLoss(30)
 
@@ -157,7 +165,7 @@
 
 ///mob/living/silicon/pai/attack_hand(mob/living/carbon/M as mob)
 
-/mob/living/silicon/pai/proc/switchCamera(obj/machinery/camera/C)
+/mob/living/silicon/pai/proc/switchCamera(var/obj/machinery/camera/C)
 	usr:cameraFollow = null
 	if (!C)
 		src.unset_machine()
@@ -167,9 +175,9 @@
 
 	// ok, we're alive, camera is good and in our network...
 
-	set_machine(src)
-	current = C
-	reset_view(C)
+	src.set_machine(src)
+	src:current = C
+	src.reset_view(C)
 	return 1
 
 
@@ -179,16 +187,6 @@
 	src.reset_view(null)
 	src.unset_machine()
 	src:cameraFollow = null
-
-/mob/living/silicon/pai/UnarmedAttack(atom/A)//Stops runtimes due to attack_animal being the default
-	return
-
-/mob/living/silicon/pai/on_forcemove(atom/newloc)
-	if(card)
-		card.loc = newloc
-	else //something went very wrong.
-		CRASH("pAI without card")
-	loc = card
 
 //Addition by Mord_Sith to define AI's network change ability
 /*

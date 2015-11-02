@@ -4,12 +4,12 @@
 	icon = 'icons/obj/items.dmi'
 	icon_state = "implantpad-0"
 	item_state = "electronic"
-	throw_speed = 3
+	throw_speed = 1
 	throw_range = 5
-	w_class = 2
+	w_class = 2.0
 	var/obj/item/weapon/implantcase/case = null
 	var/broadcasting = null
-	var/listening = 1
+	var/listening = 1.0
 
 
 /obj/item/weapon/implantpad/update_icon()
@@ -19,7 +19,7 @@
 		icon_state = "implantpad-0"
 
 
-/obj/item/weapon/implantpad/attack_hand(mob/user)
+/obj/item/weapon/implantpad/attack_hand(mob/user as mob)
 	if(case && (user.l_hand == src || user.r_hand == src))
 		user.put_in_active_hand(case)
 
@@ -32,12 +32,11 @@
 		return ..()
 
 
-/obj/item/weapon/implantpad/attackby(obj/item/weapon/implantcase/C, mob/user, params)
+/obj/item/weapon/implantpad/attackby(obj/item/weapon/implantcase/C, mob/user)
 	..()
 	if(istype(C, /obj/item/weapon/implantcase))
 		if(!case)
-			if(!user.unEquip(C))
-				return
+			user.drop_item()
 			C.loc = src
 			case = C
 	else

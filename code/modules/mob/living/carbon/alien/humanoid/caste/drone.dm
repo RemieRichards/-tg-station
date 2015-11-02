@@ -4,35 +4,45 @@
 	maxHealth = 100
 	health = 100
 	icon_state = "aliend_s"
+	plasma_rate = 15
 
 
 /mob/living/carbon/alien/humanoid/drone/New()
-	internal_organs += new /obj/item/organ/internal/alien/plasmavessel/large
-	internal_organs += new /obj/item/organ/internal/alien/resinspinner
-	internal_organs += new /obj/item/organ/internal/alien/acid
-
-	AddAbility(new/obj/effect/proc_holder/alien/evolve(null))
+	create_reagents(100)
+	if(src.name == "alien drone")
+		src.name = text("alien drone ([rand(1, 1000)])")
+	src.real_name = src.name
+	verbs.Add(/mob/living/carbon/alien/humanoid/proc/resin,/mob/living/carbon/alien/humanoid/proc/corrosive_acid)
 	..()
+//Drones use the same base as generic humanoids.
 
 /mob/living/carbon/alien/humanoid/drone/movement_delay()
 	. = ..()
 	. += 1
 
-/obj/effect/proc_holder/alien/evolve
-	name = "Evolve to Praetorian"
-	desc = "Praetorian"
-	plasma_cost = 500
 
-	action_icon_state = "alien_evolve_drone"
+//Drone verbs
+/mob/living/carbon/alien/humanoid/drone/verb/evolve() // -- TLE
+	set name = "Evolve (500)"
+	set desc = "Produce an interal egg sac capable of spawning children. Only one queen can exist at a time."
+	set category = "Alien"
 
-/obj/effect/proc_holder/alien/evolve/fire(mob/living/carbon/alien/user)
-	if(!alien_type_present(/mob/living/carbon/alien/humanoid/royal/))
-		user << "<span class='noticealien'>You begin to evolve!</span>"
-		user.visible_message("<span class='alertalien'>[user] begins to twist and contort!</span>")
-		var/mob/living/carbon/alien/humanoid/royal/praetorian/new_xeno = new (user.loc)
-		user.mind.transfer_to(new_xeno)
-		qdel(user)
-		return 1
-	else
-		user << "<span class='notice'>We already have a living royal!</span>"
-		return 0
+	if(powerc(500))
+		// Queen check
+		var/no_queen = 1
+		for(var/mob/living/carbon/alien/humanoid/queen/Q in living_mob_list)
+			if(!Q.key || !Q.getorgan(/obj/item/organ/brain))
+				continue
+			no_queen = 0
+
+		if(no_queen)
+			adjustToxLoss(-500)
+			src << "\green You begin to evolve!"
+			for(var/mob/O in viewers(src, null))
+				O.show_message(text("\green <B>[src] begins to twist and contort!</B>"), 1)
+			var/mob/living/carbon/alien/humanoid/queen/new_xeno = new (loc)
+			mind.transfer_to(new_xeno)
+			del(src)
+		else
+			src << "<span class='notice'>We already have an alive queen.</span>"
+	return

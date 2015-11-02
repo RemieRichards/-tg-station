@@ -5,16 +5,15 @@
 /obj/item/device/detective_scanner
 	name = "forensic scanner"
 	desc = "Used to remotely scan objects and biomass for DNA and fingerprints. Can print a report of the findings."
-	icon_state = "forensicnew"
-	w_class = 3
+	icon_state = "forensic1"
+	w_class = 3.0
 	item_state = "electronic"
 	flags = CONDUCT | NOBLUDGEON
 	slot_flags = SLOT_BELT
 	var/scanning = 0
 	var/list/log = list()
-	origin_tech = "engineering=3;biotech=2"
 
-/obj/item/device/detective_scanner/attack_self(mob/user)
+/obj/item/device/detective_scanner/attack_self(var/mob/user)
 	if(log.len && !scanning)
 		scanning = 1
 		user << "<span class='notice'>Printing report, please wait...</span>"
@@ -40,14 +39,14 @@
 	else
 		user << "<span class='notice'>The scanner has no logs or is in use.</span>"
 
-/obj/item/device/detective_scanner/attack(mob/living/M, mob/user)
+/obj/item/device/detective_scanner/attack(mob/living/M as mob, mob/user as mob)
 	return
 
 
-/obj/item/device/detective_scanner/afterattack(atom/A, mob/user, proximity)
+/obj/item/device/detective_scanner/afterattack(atom/A, mob/user as mob, proximity)
 	scan(A, user)
 
-/obj/item/device/detective_scanner/proc/scan(atom/A, mob/user)
+/obj/item/device/detective_scanner/proc/scan(var/atom/A, var/mob/user)
 
 	if(!scanning)
 		// Can remotely scan objects and mobs.
@@ -83,7 +82,7 @@
 		if(ishuman(A))
 
 			var/mob/living/carbon/human/H = A
-			if(!H.gloves)
+			if (istype(H.dna, /datum/dna) && !H.gloves)
 				fingerprints += md5(H.dna.uni_identity)
 
 		else if(!ismob(A))
@@ -152,7 +151,7 @@
 			if(!found_something)
 				add_log("<I># No forensic traces found #</I>", 0) // Don't display this to the holder user
 				if(holder)
-					holder << "<span class='warning'>Unable to locate any fingerprints, materials, fibers, or blood on \the [target_name]!</span>"
+					holder << "<span class='notice'>Unable to locate any fingerprints, materials, fibers, or blood on \the [target_name]!</span>"
 			else
 				if(holder)
 					holder << "<span class='notice'>You finish scanning \the [target_name].</span>"
@@ -161,7 +160,7 @@
 			scanning = 0
 			return
 
-/obj/item/device/detective_scanner/proc/add_log(msg, broadcast = 1)
+/obj/item/device/detective_scanner/proc/add_log(var/msg, var/broadcast = 1)
 	if(scanning)
 		if(broadcast && ismob(loc))
 			var/mob/M = loc
