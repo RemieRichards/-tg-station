@@ -6,11 +6,11 @@
 	icon_state = "candle1"
 	item_state = "candle1"
 	w_class = 1
-
 	var/wax = 200
 	var/lit = 0
+	heat = 1000
 	proc
-		light(var/flavor_text = "\red [usr] lights the [name].")
+		light(var/flavor_text = "<span class='danger'>[usr] lights the [name].</span>")
 
 
 /obj/item/candle/update_icon()
@@ -23,12 +23,12 @@
 	icon_state = "candle[i][lit ? "_lit" : ""]"
 
 
-/obj/item/candle/attackby(obj/item/weapon/W as obj, mob/user as mob)
+/obj/item/candle/attackby(obj/item/weapon/W, mob/user, params)
 	..()
 	if(istype(W, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/WT = W
 		if(WT.isOn()) //Badasses dont get blinded by lighting their candle with a welding tool
-			light("\red [user] casually lights the [name] with [W], what a badass.")
+			light("<span class='danger'>[user] casually lights the [name] with [W], what a badass.</span>")
 	else if(istype(W, /obj/item/weapon/lighter))
 		var/obj/item/weapon/lighter/L = W
 		if(L.lit)
@@ -46,15 +46,19 @@
 		if(M.lit)
 			light()
 
+/obj/item/candle/fire_act()
+	if(!src.lit)
+		light() //honk
+	return
 
-/obj/item/candle/light(var/flavor_text = "\red [usr] lights the [name].")
+/obj/item/candle/light(var/flavor_text = "<span class='danger'>[usr] lights the [name].</span>")
 	if(!src.lit)
 		src.lit = 1
 		//src.damtype = "fire"
 		for(var/mob/O in viewers(usr, null))
 			O.show_message(flavor_text, 1)
 		SetLuminosity(CANDLE_LUMINOSITY)
-		processing_objects.Add(src)
+		SSobj.processing |= src
 
 
 /obj/item/candle/process()
@@ -65,31 +69,34 @@
 		new/obj/item/trash/candle(src.loc)
 		if(istype(src.loc, /mob))
 			var/mob/M = src.loc
-			M.before_take_item(src)
-		del(src)
+			M.unEquip(src, 1) //src is being deleted anyway
+		qdel(src)
 	update_icon()
 	if(istype(loc, /turf)) //start a fire if possible
 		var/turf/T = loc
 		T.hotspot_expose(700, 5)
 
 
-/obj/item/candle/attack_self(mob/user as mob)
+/obj/item/candle/attack_self(mob/user)
 	if(lit)
 		lit = 0
 		update_icon()
 		SetLuminosity(0)
-		user.SetLuminosity(user.luminosity - CANDLE_LUMINOSITY)
+		user.AddLuminosity(-CANDLE_LUMINOSITY)
 
 
 /obj/item/candle/pickup(mob/user)
 	if(lit)
 		SetLuminosity(0)
-		user.SetLuminosity(user.luminosity + CANDLE_LUMINOSITY)
+		user.AddLuminosity(CANDLE_LUMINOSITY)
 
 
 /obj/item/candle/dropped(mob/user)
 	if(lit)
-		user.SetLuminosity(user.luminosity - CANDLE_LUMINOSITY)
+		user.AddLuminosity(-CANDLE_LUMINOSITY)
 		SetLuminosity(CANDLE_LUMINOSITY)
+
+/obj/item/candle/is_hot()
+	return lit * heat
 
 #undef CANDLE_LUMINOSITY

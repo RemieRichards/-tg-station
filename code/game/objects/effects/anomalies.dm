@@ -27,15 +27,15 @@
 
 
 /obj/effect/anomaly/proc/anomalyNeutralize()
-	new /obj/effect/effect/bad_smoke(loc)
+	PoolOrNew(/obj/effect/particle_effect/smoke/bad, loc)
 
 	for(var/atom/movable/O in src)
 		O.loc = src.loc
 
-	del(src)
+	qdel(src)
 
 
-/obj/effect/anomaly/attackby(obj/item/I, mob/user)
+/obj/effect/anomaly/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/device/analyzer))
 		user << "<span class='notice'>Analyzing... [src]'s unstable field is fluctuating along frequency [aSignal.code]:[format_frequency(aSignal.frequency)].</span>"
 
@@ -44,7 +44,7 @@
 /obj/effect/anomaly/grav
 	name = "gravitational anomaly"
 	icon_state = "shield2"
-	density = 1
+	density = 0
 	var/boing = 0
 
 /obj/effect/anomaly/grav/New()
@@ -60,6 +60,12 @@
 			step_towards(O,src)
 	for(var/mob/living/M in orange(4, src))
 		step_towards(M,src)
+	for(var/obj/O in orange(1,src))
+		if(!O.anchored)
+			var/mob/living/target = locate() in view(10,src)
+			if(!target)
+				O.throw_at(target, 5, 10)
+
 
 /obj/effect/anomaly/grav/Bump(mob/A)
 	gravShock(A)
@@ -69,7 +75,7 @@
 	gravShock(A)
 	return
 
-/obj/effect/anomaly/grav/proc/gravShock(var/mob/A)
+/obj/effect/anomaly/grav/proc/gravShock(mob/A)
 	if(boing && isliving(A) && !A.stat)
 		A.Weaken(2)
 		var/atom/target = get_edge_target_turf(A, get_dir(src, get_step_away(A, src)))
@@ -85,7 +91,7 @@
 
 /obj/effect/anomaly/flux/New()
 	..()
-	aSignal.origin_tech = "powerstorage=5;programming=3;plasmatech=2"
+	aSignal.origin_tech = "powerstorage=6;programming=4;plasmatech=4"
 
 /////////////////////
 
@@ -97,7 +103,7 @@
 
 /obj/effect/anomaly/bluespace/New()
 	..()
-	aSignal.origin_tech = "bluespace=5;magnets=3;powerstorage=2"
+	aSignal.origin_tech = "bluespace=5;magnets=5;powerstorage=3"
 
 /obj/effect/anomaly/bluespace/Bumped(atom/A)
 	if(isliving(A))
@@ -112,7 +118,7 @@
 
 /obj/effect/anomaly/pyro/New()
 	..()
-	aSignal.origin_tech = "plasmatech=5;powerstorage=3;biotech=3"
+	aSignal.origin_tech = "plasmatech=5;powerstorage=4;biotech=6"
 
 /obj/effect/anomaly/pyro/anomalyEffect()
 	..()
@@ -129,12 +135,12 @@
 
 /obj/effect/anomaly/bhole/New()
 	..()
-	aSignal.origin_tech = "materials=5;combat=4;engineering=3"
+	aSignal.origin_tech = "materials=5;combat=4;engineering=4"
 
 /obj/effect/anomaly/bhole/anomalyEffect()
 	..()
 	if(!isturf(loc)) //blackhole cannot be contained inside anything. Weird stuff might happen
-		del(src)
+		qdel(src)
 		return
 
 	grav(rand(0,3), rand(2,3), 50, 25)
@@ -150,7 +156,7 @@
 		else
 			O.ex_act(2)
 
-/obj/effect/anomaly/bhole/proc/grav(var/r, var/ex_act_force, var/pull_chance, var/turf_removal_chance)
+/obj/effect/anomaly/bhole/proc/grav(r, ex_act_force, pull_chance, turf_removal_chance)
 	for(var/t = -r, t < r, t++)
 		affect_coord(x+t, y-r, ex_act_force, pull_chance, turf_removal_chance)
 		affect_coord(x-t, y+r, ex_act_force, pull_chance, turf_removal_chance)
@@ -158,7 +164,7 @@
 		affect_coord(x-r, y-t, ex_act_force, pull_chance, turf_removal_chance)
 	return
 
-/obj/effect/anomaly/bhole/proc/affect_coord(var/x, var/y, var/ex_act_force, var/pull_chance, var/turf_removal_chance)
+/obj/effect/anomaly/bhole/proc/affect_coord(x, y, ex_act_force, pull_chance, turf_removal_chance)
 	//Get turf at coordinate
 	var/turf/T = locate(x, y, z)
 	if(isnull(T))	return
