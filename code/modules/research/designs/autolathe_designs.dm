@@ -97,13 +97,13 @@
 	materials = list(MAT_METAL = 1750, MAT_GLASS = 400)
 	build_path = /obj/item/clothing/head/welding
 	category = list("initial","Tools")
-	
+
 /datum/design/cable_coil
 	name = "Cable coil"
 	id = "cable_coil"
 	build_type = AUTOLATHE
 	materials = list(MAT_METAL = 10, MAT_GLASS = 5)
-	build_path = /obj/item/stack/cable_coil/random 
+	build_path = /obj/item/stack/cable_coil/random
 	category = list("initial","Tools")
 	maxstack = 30
 
@@ -153,6 +153,30 @@
 	build_type = AUTOLATHE
 	materials = list(MAT_METAL = 50, MAT_GLASS = 50)
 	build_path = /obj/item/weapon/electronics/firealarm
+	category = list("initial", "Electronics")
+
+/datum/design/terminal_circuit
+	name = "Terminal circuit board"
+	id = "terminal_circuit"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 75, MAT_GLASS = 150)
+	build_path = /obj/item/weapon/electronics/terminal
+	category = list("initial", "Electronics")
+
+/datum/design/terminal_modem
+	name = "Terminal modem"
+	id = "terminal_modem"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 25, MAT_GLASS = 200)
+	build_path = /obj/item/terminal/modem
+	category = list("initial", "Electronics")
+
+/datum/design/terminal_program_disk
+	name = "Terminal program disk"
+	id = "terminal_program_disk"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 50, MAT_GLASS = 50)
+	build_path = /obj/item/terminal/program_disk
 	category = list("initial", "Electronics")
 
 /datum/design/pipe_painter
