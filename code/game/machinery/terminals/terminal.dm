@@ -44,7 +44,7 @@ var/list/terminals = list() //All terminals in the game world
 
 /obj/machinery/terminal/syndicate //A modified terminal used for illicit actions. Equipped with a self-destruct in case of compromisation
 	desc = "A computer terminal developed by Cybersun Industries. It uses an on-screen keyboard and touch-based display." //Different examine text for the attentive
-	starting_commands = list("mail", "list", "shake_the_room")
+	starting_commands = list("mail", "list", "shake_the_room", "provirus")
 	syndicate = 1
 	net_access = 1
 
@@ -71,7 +71,7 @@ var/list/terminals = list() //All terminals in the game world
 				infect(pick("GreatDeals", "CourierCrusher")) //If you want a virus to be in the random infection list, just add its ID here!
 				if(has_command("antivirus") && prob(25))
 					print_message("<span class='warning'>Possible threat detected. It is recommended that you run a virus scan.</span>")
-		if(!owner.canUseTopic(src))
+		if(!has_owner())
 			owner = null
 			update_power(0)
 
@@ -313,13 +313,14 @@ var/list/terminals = list() //All terminals in the game world
 /obj/machinery/terminal/proc/add_command(var/command_id)
 	if(!command_id)
 		return 0
-	for(var/C in typesof(/datum/terminal_command))
+	for(var/C in subtypesof(/datum/terminal_command))
 		var/datum/terminal_command/CMD = C
 		if(initial(CMD.id) == command_id)
 			var/datum/terminal_command/CMD2 = new CMD(null)
 			loaded_commands.Add(CMD2)
 			CMD2.parent_terminal = src
-	return 1
+			return 1
+	return 0
 
 /obj/machinery/terminal/proc/parse_command(var/command_id)
 	if(!online)
@@ -329,7 +330,7 @@ var/list/terminals = list() //All terminals in the game world
 			log_game("Terminal [terminal_id] ran command \"[C]\"")
 			C.execute()
 			return 1
-	print_message("The entered command is either not accessible or not loaded on this terminal.")
+	print_message("The entered command is either not accessible or not loaded on this terminal. Unable to continue.")
 	return 0
 
 /obj/machinery/terminal/proc/has_command(var/command_id)
@@ -349,13 +350,24 @@ var/list/terminals = list() //All terminals in the game world
 /obj/machinery/terminal/proc/infect(var/virus_id)
 	if(!virus_id)
 		return 0
-	for(var/V in typesof(/datum/terminal_command/virus))
+	for(var/V in subtypesof(/datum/terminal_command/virus))
 		var/datum/terminal_command/virus/CMD = V
 		if(initial(CMD.id) == virus_id)
 			var/datum/terminal_command/virus/CMD2 = new CMD(null)
 			viruses.Add(CMD2)
 			CMD2.parent_terminal = src
-	return 1
+			return 1
+	return 0
+
+/obj/machinery/terminal/syndicate/infect(virus_id)
+	if(!virus_id)
+		return 0
+	for(var/V in subtypesof(/datum/terminal_command/virus))
+		var/datum/terminal_command/virus/CMD = V
+		if(initial(CMD.id) == virus_id)
+			stored_viruses.Add(virus_id) //Syndicate terminals store viruses for later use, keke
+			return 1
+	return 0
 
 /obj/machinery/terminal/proc/has_virus(var/virus_id)
 	for(var/datum/terminal_command/virus/V in viruses)
@@ -376,7 +388,7 @@ var/list/terminals = list() //All terminals in the game world
 	if(!owner)
 		return 0
 	var/input = stripped_input(owner,"Type \"help\" for a list of installed commands.","TLWMIT Terminal")
-	if(!input || !owner || !owner.canUseTopic(src))
+	if(!input || !has_owner())
 		return 0
 	parse_command(input)
 	if(online)
@@ -386,19 +398,21 @@ var/list/terminals = list() //All terminals in the game world
 /obj/machinery/terminal/proc/send_message(var/message, var/target, var/obfuscate_source)
 	if(!message || !target)
 		return 0
-	for(var/obj/machinery/terminal/T in (terminals - src))
-		if(T.terminal_id == target && T.net_access)
-			if(has_virus("CourierCrusher") || T.has_virus("CourierCrusher"))
-				return 0
-			if(!T.has_command("mail"))
-				print_message("The found terminal does not have mail access.")
-				return 0
-			log_game("Terminal [terminal_id] sent \"[message]\" to terminal [target]; sender ID was [obfuscate_source ? "" : "not"] hidden from recipient")
-			T.say("New message received!")
-			playsound(get_turf(T), 'sound/machines/twobeep.ogg', 75, 1)
-			T.inbox.Add("[obfuscate_source ? "\[UNKNOWN\]" : "Terminal [terminal_id]"]: \"[message]\" (received at [worldtime2text()])")
-			return 1
-	print_message("There is no terminal with the entered ID.")
+	var/obj/machinery/terminal/T = get_terminal_with_id(target)
+	if(!T)
+		return 0
+	if(T.terminal_id == target && T.net_access)
+		if(has_virus("CourierCrusher") || T.has_virus("CourierCrusher"))
+			return 0
+		if(!T.has_command("mail"))
+			print_message("The found terminal does not have mail access. Unable to continue.")
+			return 0
+		log_game("Terminal [terminal_id] sent \"[message]\" to terminal [target]; sender ID was [obfuscate_source ? "" : "not"] hidden from recipient")
+		T.say("New message received!")
+		playsound(get_turf(T), 'sound/machines/twobeep.ogg', 75, 1)
+		T.inbox.Add("[obfuscate_source ? "\[UNKNOWN\]" : "Terminal [terminal_id]"]: \"[message]\" (received at [worldtime2text()])")
+		return 1
+	print_message("There is no terminal with the entered ID. Unable to continue.")
 	return 0
 
 /obj/machinery/terminal/proc/break_terminal()
@@ -410,6 +424,17 @@ var/list/terminals = list() //All terminals in the game world
 	update_power(0)
 	icon_state = "broken"
 	update_icon()
+	return 1
+
+/proc/get_terminal_with_id(var/id)
+	for(var/obj/machinery/terminal/T in terminals)
+		if(T.terminal_id == id)
+			return T
+	return 0
+
+/obj/machinery/terminal/proc/has_owner()
+	if(!owner || !owner.canUseTopic(src))
+		return 0
 	return 1
 
 /obj/machinery/terminal/proc/self_destruct() //Of course they can self-destruct! What did you expect?

@@ -22,13 +22,13 @@ Commands can have a large variety of effects, from beneficial to harmful.
 /datum/terminal_command/proc/check_command()
 	if(!parent_terminal)
 		return 0
-	if(!parent_terminal.owner)
+	if(!parent_terminal.has_owner())
 		return 0
 	if(requires_network_access && !parent_terminal.net_access)
-		parent_terminal.print_message("This command requires network access. Unable to execute.")
+		parent_terminal.print_message("This command requires network access. Unable to continue.")
 		return 0
 	if(requires_cooldown && cooldown)
-		parent_terminal.print_message("This command is still rebooting. Unable to execute.")
+		parent_terminal.print_message("This command is still rebooting. Unable to continue.")
 		return 0
 	return 1
 
@@ -40,6 +40,9 @@ Commands can have a large variety of effects, from beneficial to harmful.
 	cooldown = 1
 	sleep(cooldown_time)
 	if(cooldown)
+		if(parent_terminal)
+			parent_terminal.print_message("Command \"[id]\" is now ready to be used again.")
+			playsound(get_turf(parent_terminal), 'sound/machines/chime.ogg', 50, 1)
 		cooldown = 0
 
 /datum/terminal_command/help //Displays the commands loaded onto the terminal
@@ -56,7 +59,7 @@ Commands can have a large variety of effects, from beneficial to harmful.
 
 /datum/terminal_command/orientation //Walks the user through the basics of terminal usage
 	id = "orientation"
-	desc = "A basic orientation on the TLWMIT Terminal and its functionalities."
+	desc = "A basic orientation on the TLWMIT terminal and its functionalities."
 
 /datum/terminal_command/orientation/execute()
 	if(!check_command())
@@ -81,7 +84,7 @@ Commands can have a large variety of effects, from beneficial to harmful.
 
 /datum/terminal_command/syndicate_orientation //Syndicate version of the standard orientation
 	id = "syndicate_orientation"
-	desc = "A basic orientation on the Cybersun Industries Terminal and its functionalities."
+	desc = "A basic orientation on the Cybersun Industries terminal and its functionalities."
 
 /datum/terminal_command/syndicate_orientation/execute()
 	if(!check_command())
@@ -132,7 +135,7 @@ Commands can have a large variety of effects, from beneficial to harmful.
 	if(!check_command())
 		return 0
 	var/function = alert(parent_terminal.owner, "View inbox or send mail?", "Mail", "View", "Compose", "Cancel")
-	if(!parent_terminal.owner || !parent_terminal.owner.canUseTopic(parent_terminal))
+	if(!parent_terminal.has_owner())
 		return 0
 	switch(function)
 		if("View")
@@ -144,7 +147,7 @@ Commands can have a large variety of effects, from beneficial to harmful.
 				text += "\n[T]"
 			parent_terminal.print_message(text)
 			return 1
-		if("Send")
+		if("Compose")
 			var/message_to_send = stripped_input(parent_terminal.owner, "Enter the message to send", "Messaging")
 			if(!message_to_send || !parent_terminal.owner)
 				return 0
@@ -184,8 +187,8 @@ Commands can have a large variety of effects, from beneficial to harmful.
 /datum/terminal_command/antivirus/execute()
 	if(!check_command())
 		return 0
-	var/function = alert(parent_terminal.owner, "Scan system or purge found viruses?", "Antivirus", "Scan", "Purge")
-	if(!parent_terminal.owner || !parent_terminal.owner.canUseTopic(parent_terminal))
+	var/function = alert(parent_terminal.owner, "Scan system or purge found viruses?", "Antivirus", "Scan", "Purge", "Cancel")
+	if(!parent_terminal.has_owner())
 		return 0
 	switch(function)
 		if("Scan")
@@ -218,6 +221,58 @@ Commands can have a large variety of effects, from beneficial to harmful.
 					parent_terminal.cleanse_virus(V.id)
 			parent_terminal.print_message("<span class='notice'>Cleansing complete!</span>")
 			return 1
+		if("Cancel")
+			return 0
+	return 1
+
+/datum/terminal_command/provirus //Creates and distributes viruses
+	id = "provirus" //Get it? Because antiviruses are AGAINST viruses? Heh... I'll see myself out.
+	desc = "Creates and distributes malicious software."
+	requires_network_access = 1
+	requires_cooldown = 1
+	cooldown_time = 3000 //Five minutes, maybe too much?
+
+/datum/terminal_command/provirus/execute()
+	if(!check_command())
+		return 0
+	var/function = alert(parent_terminal.owner, "Create or distribute viruses?", "Provirus", "Create", "Distribute", "Virus Encyclopedia")
+	if(!parent_terminal.has_owner())
+		return 0
+	switch(function)
+		if("Create")
+			var/list/possible_viruses = list("PowerOverwhelming", "RemoveViro", "(Cancel)")
+			var/virus_to_create = input(parent_terminal.owner, "Choose a virus to create.", "Malware Fabrication") in possible_viruses
+			if(virus_to_create == "(Cancel)")
+				return 0
+			if(!parent_terminal.has_owner() || !virus_to_create)
+				return 0
+			parent_terminal.infect(virus_to_create)
+			parent_terminal.print_message("Virus fabricated. Provirus is now rebooting. This will take five minutes.")
+			run_cooldown()
+			return 1
+		if("Distribute")
+			if(!parent_terminal.stored_viruses.len)
+				parent_terminal.print_message("No viruses in storage. Unable to continue.")
+				return 0
+			var/virus_to_send = input(parent_terminal.owner, "Choose a virus to send out.", "Malware Distribution") in (parent_terminal.stored_viruses + "(Cancel)")
+			if(virus_to_send == "(Cancel)")
+				return 0
+			if(!parent_terminal.has_owner() || !virus_to_send)
+				return 0
+			var/terminal_to_infect = stripped_input(parent_terminal.owner, "Enter the ID of a terminal to infect with [virus_to_send].", "Malware Distribution")
+			var/obj/machinery/terminal/T = get_terminal_with_id(terminal_to_infect)
+			if(!T || (T && !T.net_access))
+				parent_terminal.print_message("The entered ID was not found, or the terminal with that ID does not have network access. Unable to continue.")
+				return 0
+			if(T == parent_terminal)
+				parent_terminal.print_message("This program cannot target itself. Unable to continue.")
+				return 0
+			T.infect(virus_to_send)
+			parent_terminal.stored_viruses.Remove(virus_to_send)
+			parent_terminal.print_message("Virus sent. Have a nice day.")
+			return 1
+		if("Cancel")
+			return 0
 	return 1
 
 /datum/terminal_command/self_destruct //Do I really need to explain?
@@ -228,7 +283,7 @@ Commands can have a large variety of effects, from beneficial to harmful.
 	if(!check_command())
 		return 0
 	var/confirmation = alert(parent_terminal.owner, "Are you sure you want to self-destruct this terminal?", "Chick-Chicky Boom", "Proceed", "Cancel")
-	if(!parent_terminal.owner || !parent_terminal.owner.canUseTopic(parent_terminal))
+	if(!parent_terminal.has_owner())
 		return 0
 	switch(confirmation)
 		if("Proceed")
