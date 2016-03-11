@@ -11,8 +11,10 @@
 
 /datum/round_event/chain_mail/start()
 	for(var/obj/machinery/terminal/T in terminals)
-		if(T.net_access && prob(25))
-			T.infect("GreatDeals")
+	for(var/tid in terminals)
+		var/obj/machinery/terminal/T = terminals[tid]
+		if(T && T.net_access && prob(25))
+			T.add_command("GreatDeals")
 
 /datum/round_event/chain_mail/announce()
 	priority_announce("Rival corporations have begun an aggressive marketing campaign. Please run viral scans on all terminals connected to the network.", "Great Deals", 'sound/AI/attention.ogg')

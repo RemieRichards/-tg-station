@@ -39,6 +39,7 @@
 		surgeries_list += new path()
 
 	init_subtypes(/datum/table_recipe, table_recipes)
+	init_terminal_commands()
 
 /* // Uncomment to debug chemical reaction list.
 /client/verb/debug_chemical_list()

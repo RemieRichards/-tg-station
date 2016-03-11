@@ -8,7 +8,16 @@ This file contains:
  -Terminal construction
 */
 
-var/list/terminals = list() //All terminals in the game world
+var/global/list/terminals = list() //All terminals in the game world
+var/global/list/random_malware = list("GreatDeals", "CourierCrusher") //Viruses randomly gained fom the network
+var/global/list/terminal_commands_types = list()
+
+/proc/init_terminal_commands()
+	for(var/cmd in subtypesof(/datum/terminal_command))
+		var/datum/terminal_command/CMD = cmd
+		terminal_commands_types[initial(CMD.id)] = cmd
+
+
 /obj/machinery/terminal
 	name = "terminal"
 	desc = "A computer terminal developed by TLWM (Think Less Work More) Information Technologies. It uses an on-screen keyboard and touch-based display."
@@ -18,68 +27,73 @@ var/list/terminals = list() //All terminals in the game world
 	opacity = 0
 	anchored = 1
 	var/mob/living/owner = null //The person using the terminal. Can be synthetic or human.
-	var/list/loaded_commands = list() //Commands the terminal has loaded. All terminals have "help" and "orientation" unless set not to.
-	var/list/starting_commands = list() //All commands in the starting list. Terminals will load commands from this list via command ID. Does not include "help" and "orientation".
-	var/list/viruses = list() //Any viruses the terminal is infected with.
+	//Commands
+	var/list/loaded_commands = list() //Assoc list loaded_commands[command.id] = command
+	var/list/processing_commands = list() //terminal_commands that execute_process() in the computer's process() eg: Viruses
+	var/list/starting_commands = list("help", "orientation", "shutdown")//List of paths or IDs, starting commands for this terminal
+	//Access
 	var/net_access = 0 //Does the terminal have network access?
 	var/robot_access = 0 //Will this terminal allow synthetic lifeforms to access it?
-	var/start_with_basic_commands = 1 //Will the terminal start with the "orientaiton" command?
+	//Misc
 	var/online = 0 //Is the terminal turned on?
-	var/terminal_id = null //The ID of the terminal
-	var/list/inbox = list() //Any messages from other terminals not yet read
+	var/terminal_id = "" //The ID of the terminal
+	var/static/terminal_id_source = 0 //used to generate IDs
 	var/health = 25 //How much punishment the terminal can take before smashing
 	var/max_health = 25
 	var/broken = 0 //Will the terminal not function?
 	var/self_destructing = 0 //Is it fucking exploding?
 	var/syndicate = 0 //Is the terminal hacked/modified by Syndicate industries?
-	var/list/stored_viruses = list() //Used by Syndicate terminals for distribution
+
 
 /obj/machinery/terminal/public //Standard terminal used in public areas. Not important enough to warrant an antivirus.
-	starting_commands = list("mail", "list")
+	starting_commands = list("help", "orientation", "shutdown", "mail", "list")
 	net_access = 1
 
+
 /obj/machinery/terminal/personal //Standard terminal used in private areas like offices.
-	starting_commands = list("mail", "list", "antivirus")
+	starting_commands = list("help", "orientation", "shutdown", "mail", "list", "antivirus")
 	net_access = 1
+
 
 /obj/machinery/terminal/syndicate //A modified terminal used for illicit actions. Equipped with a self-destruct in case of compromisation
 	desc = "A computer terminal developed by Cybersun Industries. It uses an on-screen keyboard and touch-based display." //Different examine text for the attentive
-	starting_commands = list("mail", "list", "shake_the_room", "provirus")
+	starting_commands = list("help", "syndicate_orientation", "shutdown", "mail", "list", "shake_the_room", "provirus")
 	syndicate = 1
 	net_access = 1
 
+
 /obj/machinery/terminal/New()
 	..()
-	add_command("help") //Every terminal has "help" and "shutdown". No exceptions.
-	add_command("shutdown")
-	if(start_with_basic_commands)
-		add_basic_commands()
-	if(!terminal_id)
-		terminal_id = "[rand(0,99999)]" //Choose a random serial number. No failsafes because the chances of two terminals having the same ID in this way are astronomically low
-	terminals.Add(src)
+	for(var/I in starting_commands)
+		add_command(I)
+	if(!terminal_id) //unique mapped terminals could use ids as a way for the mapper to remember the terminal's purpose eg: "Spooky PC"
+		terminal_id = "[++terminal_id_source]"
+	terminals[terminal_id] = src
+
 
 /obj/machinery/terminal/Destroy()
-	terminals.Remove(src)
+	terminals[terminal_id] = null
 	..()
+
 
 /obj/machinery/terminal/process()
 	if(owner && online)
-		for(var/datum/terminal_command/virus/V in viruses)
-			V.handle_virus()
+
+		for(var/cmd in processing_commands)
+			var/datum/terminal_command/CMD = cmd
+			CMD.execute_process()
+
 		if(net_access)
 			if(prob(0.5)) //Very low chance to be come infected with a virus from the network; typically normal/basic
-				infect(pick("GreatDeals", "CourierCrusher")) //If you want a virus to be in the random infection list, just add its ID here!
+				if(random_malware.len)
+					add_command(pick(random_malware))
+
 				if(has_command("antivirus") && prob(25))
 					print_message("<span class='warning'>Possible threat detected. It is recommended that you run a virus scan.</span>")
 		if(!has_owner())
 			owner = null
 			update_power(0)
 
-/obj/machinery/terminal/syndicate/process()
-	..()
-	for(var/datum/terminal_command/virus/V in viruses)
-		stored_viruses.Add(V)
-		viruses.Remove(V)
 
 /obj/machinery/terminal/attack_hand(mob/user)
 	if((ishuman(user) || issilicon(user)) && user.canUseTopic(src))
@@ -99,7 +113,7 @@ var/list/terminals = list() //All terminals in the game world
 			user << "<span class='warning'>Someone is already using this [name]!</span>"
 			return 0
 		if(!online)
-			if(has_virus("RemoveViro") && user.mind.assigned_role == "Virologist")
+			if(has_command("RemoveViro") && user.mind.assigned_role == "Virologist")
 				user << "<span class='warning'>You turn on [src], but suddenly...!</span>"
 				update_power(1)
 				say("REMOVE VIRO REMOVE VIRO you are the worst viro")
@@ -114,6 +128,7 @@ var/list/terminals = list() //All terminals in the game world
 			update_power(1)
 			return 1
 		command_line()
+
 
 /obj/machinery/terminal/attackby(obj/item/I, mob/living/user, params)
 	if(broken)
@@ -136,16 +151,18 @@ var/list/terminals = list() //All terminals in the game world
 		health = max_health
 		update_icon()
 		return 1
+
 	if(istype(I, /obj/item/weapon/pen))
 		var/new_id = stripped_input(user, "What would you like to change this terminal's ID to?", "ID Change")
 		if(!new_id || !user.canUseTopic(src))
 			return 0
 		user.visible_message("<span class='notice'>[user] changes [src]'s id to \"[new_id]\".</span>", "<span class='notice'>You change [src]'s ID to \"[new_id]\".")
 		terminal_id = new_id
-		if(has_virus("GreatDeals"))
+		if(has_command("GreatDeals"))
 			print_message("<span class='warning'>Are you sure you want to miss out on all these great deals? >Y</span>")
 			cleanse_virus("GreatDeals")
 		return 1
+
 	else if(istype(I, /obj/item/weapon/screwdriver))
 		if(online)
 			user << "<span class='warning'>You can't open the maintenance panel while [src] is on!</span>"
@@ -154,6 +171,7 @@ var/list/terminals = list() //All terminals in the game world
 		user.visible_message("<span class='notice'>[user] [panel_open ? "open" : "close"] [src]'s panel.</span>", "<span class='notice'>You [panel_open ? "open" : "close"] [src]'s panel.</span>")
 		playsound(get_turf(src), 'sound/items/Screwdriver.ogg', 25, 1)
 		return 1
+
 	else if(istype(I, /obj/item/weapon/wirecutters))
 		if(!panel_open)
 			user << "<span class='warning'>Open the panel first!</span>"
@@ -163,6 +181,7 @@ var/list/terminals = list() //All terminals in the game world
 		net_access = 0
 		new /obj/item/terminal/modem (get_turf(src))
 		return 1
+
 	else if(istype(I, /obj/item/weapon/crowbar))
 		if(!panel_open)
 			user << "<span class='warning'>Open the panel first!</span>"
@@ -183,6 +202,7 @@ var/list/terminals = list() //All terminals in the game world
 		T.update_icon()
 		qdel(src)
 		return 1
+
 	else if(istype(I, /obj/item/terminal/modem))
 		if(!panel_open)
 			user << "<span class='warning'>Open the panel first!</span>"
@@ -196,28 +216,24 @@ var/list/terminals = list() //All terminals in the game world
 		user.drop_item()
 		qdel(I)
 		return 1
+
 	else if(istype(I, /obj/item/terminal/program_disk))
 		var/obj/item/terminal/program_disk/P = I
 		if(!P.loaded_program)
-			var/list/copyable_programs = list()
-			for(var/datum/terminal_command/C in loaded_commands)
-				copyable_programs.Add(initial(C.id))
-			var/program_to_copy = input(user, "Select a program to copy.", "Program Disk") as null|anything in copyable_programs
+			var/program_to_copy = input(user, "Select a program to copy.", "Program Disk") as null|anything in loaded_commands
 			if(!program_to_copy || !user.canUseTopic(src))
 				return 0
 			user << "<span class='notice'>You copy \"[program_to_copy]\" onto [P].</span>"
 			P.loaded_program = program_to_copy
 			P.icon_state = "disk_filled"
 		else if(P.loaded_program)
-			for(var/datum/terminal_command/C in loaded_commands)
-				if(initial(C.id) == P.loaded_program)
-					user << "<span class='warning'>That program is already on this [name]!</span>"
-					return 0
+			if(loaded_commands[P.loaded_program])
+				user << "<span class='warning'>That program is already on this [name]!</span>"
+				return 0
 			user << "<span class='notice'>You copy \"[P.loaded_program]\" onto [src].</span>"
 			add_command(P.loaded_program)
-			P.loaded_program = null
-			P.icon_state = "disk_empty"
 		return 1
+
 	else if(I.force && user.a_intent == "harm")
 		user.visible_message("<span class='warning'>[user] slams [I] into [src]'s display!</span>", "<span class='danger'>You strike [src] with [I]!</span>")
 		health -= I.force
@@ -242,11 +258,13 @@ var/list/terminals = list() //All terminals in the game world
 		return 1
 	..()
 
+
 /obj/machinery/terminal/attack_ai(mob/user)
 	if(!robot_access)
 		user << "<span class='warning'>[src] is configured to prevent access by synthetic lifeforms!</span>"
 		return 0
 	attack_hand(user)
+
 
 /obj/machinery/terminal/examine(mob/user)
 	..()
@@ -259,8 +277,6 @@ var/list/terminals = list() //All terminals in the game world
 				user << "It seems to be turned off."
 			else
 				user << "<span class='warning'>Its display is shattered and its monitor is dented.</span>"
-		if(start_with_basic_commands)
-			user << "A small sticker indicates that this terminal is loaded with the default commands."
 	else if(panel_open)
 		user << "Its maintenance panel is open."
 		if(net_access)
@@ -268,6 +284,7 @@ var/list/terminals = list() //All terminals in the game world
 		else
 			user << "It's missing a network modem."
 	user << "The terminal's ID is written on a label: [terminal_id]."
+
 
 /obj/machinery/terminal/ex_act(severity)
 	switch(severity)
@@ -278,13 +295,15 @@ var/list/terminals = list() //All terminals in the game world
 		if(3)
 			break_terminal()
 
-/obj/machinery/terminal/proc/print_message(var/message, var/print_text)
+
+/obj/machinery/terminal/proc/print_message(message, print_text)
 	if(!message || !owner || !online)
 		return 0
 	owner << "<i>[print_text ? "[print_text]" : "[src] displays"]:</i> <span class='robot'>[message]</span>"
 	return 1
 
-/obj/machinery/terminal/proc/update_power(var/intention)
+
+/obj/machinery/terminal/proc/update_power(intention)
 	if(self_destructing)
 		return 0
 	switch(intention)
@@ -301,93 +320,72 @@ var/list/terminals = list() //All terminals in the game world
 	update_icon()
 	return 1
 
-/obj/machinery/terminal/proc/add_basic_commands()
-	if(syndicate)
-		add_command("syndicate_orientation")
-	else
-		add_command("orientation")
-	for(var/I in starting_commands)
-		add_command(I)
-	return 1
 
-/obj/machinery/terminal/proc/add_command(var/command_id)
-	if(!command_id)
+
+/obj/machinery/terminal/proc/add_command(path_or_id)
+	if(!path_or_id)
 		return 0
-	for(var/C in subtypesof(/datum/terminal_command))
-		var/datum/terminal_command/CMD = C
-		if(initial(CMD.id) == command_id)
-			var/datum/terminal_command/CMD2 = new CMD(null)
-			loaded_commands.Add(CMD2)
-			CMD2.parent_terminal = src
-			return 1
+	var/cid
+	if(ispath(path_or_id))
+		var/datum/terminal_command/command_path = path_or_id
+		cid = initial(command_path.id)
+	else
+		cid = path_or_id
+	var/ctype = terminal_commands_types[cid]
+	if(loaded_commands[cid] || !ctype)
+		return 0
+	else
+		var/datum/terminal_command/CMD = new ctype ()
+		CMD.parent_terminal = src
+		if(CMD.processes)
+			processing_commands[cid] = CMD
+		loaded_commands[cid] = CMD
+		return 1
 	return 0
 
-/obj/machinery/terminal/proc/parse_command(var/command_id)
+
+/obj/machinery/terminal/proc/parse_command(command_id)
 	if(!online)
 		return 0
-	for(var/datum/terminal_command/C in loaded_commands)
-		if(C.id == command_id)
-			log_game("Terminal [terminal_id] ran command \"[C]\"")
-			C.execute()
-			return 1
+	var/datum/terminal_command/C = loaded_commands[command_id]
+	if(istype(C))
+		log_game("Terminal [terminal_id] ran command \"[C]\"")
+		C.execute()
+		return 1
 	print_message("The entered command is either not accessible or not loaded on this terminal. Unable to continue.")
 	return 0
 
-/obj/machinery/terminal/proc/has_command(var/command_id)
-	for(var/datum/terminal_command/T in loaded_commands)
-		if(initial(T.id) == command_id)
-			return 1
+
+/obj/machinery/terminal/proc/has_command(command_id)
+	var/datum/terminal_command/C = loaded_commands[command_id]
+	if(istype(C))
+		return C
 	return 0
 
-/obj/machinery/terminal/proc/remove_command(var/command_id)
-	for(var/datum/terminal_command/C in loaded_commands)
-		if(initial(C.id) == command_id)
-			loaded_commands.Remove(C)
-			qdel(C)
-			return 1
+
+/obj/machinery/terminal/proc/remove_command(command_id)
+	var/datum/terminal_command/C = loaded_commands[command_id]
+	if(istype(C))
+		loaded_commands[command_id] = null
+		loaded_commands -= command_id
+		processing_commands[command_id] = null
+		processing_commands -= command_id
+		qdel(C)
+		return 1
 	return 0
 
-/obj/machinery/terminal/proc/infect(var/virus_id)
-	if(!virus_id)
-		return 0
-	for(var/V in subtypesof(/datum/terminal_command/virus))
-		var/datum/terminal_command/virus/CMD = V
-		if(initial(CMD.id) == virus_id)
-			var/datum/terminal_command/virus/CMD2 = new CMD(null)
-			viruses.Add(CMD2)
-			CMD2.parent_terminal = src
-			return 1
+
+/obj/machinery/terminal/proc/cleanse_virus(virus_id)
+	if(remove_command(virus_id))
+		print_message("<span class='notice'>Malware has been successfully removed from this terminal.</span>")
+		return 1
 	return 0
 
-/obj/machinery/terminal/syndicate/infect(virus_id)
-	if(!virus_id)
-		return 0
-	for(var/V in subtypesof(/datum/terminal_command/virus))
-		var/datum/terminal_command/virus/CMD = V
-		if(initial(CMD.id) == virus_id)
-			stored_viruses.Add(virus_id) //Syndicate terminals store viruses for later use, keke
-			return 1
-	return 0
-
-/obj/machinery/terminal/proc/has_virus(var/virus_id)
-	for(var/datum/terminal_command/virus/V in viruses)
-		if(initial(V.id) == virus_id)
-			return 1
-	return 0
-
-/obj/machinery/terminal/proc/cleanse_virus(var/virus_id)
-	for(var/datum/terminal_command/virus/V in viruses)
-		if(initial(V.id) == virus_id)
-			viruses.Remove(V)
-			qdel(V)
-			print_message("<span class='notice'>Malware has been successfully removed from this terminal.</span>")
-			return 1
-	return 0
 
 /obj/machinery/terminal/proc/command_line()
 	if(!owner)
 		return 0
-	var/input = stripped_input(owner,"Type \"help\" for a list of installed commands.","TLWMIT Terminal")
+	var/input = stripped_input(owner,"Type \"help\" for a list of installed commands.","TLWMIT Terminal - [terminal_id]")
 	if(!input || !has_owner())
 		return 0
 	parse_command(input)
@@ -395,25 +393,28 @@ var/list/terminals = list() //All terminals in the game world
 		command_line() //If the terminal wasn't shut down, keep at it
 	return 1
 
-/obj/machinery/terminal/proc/send_message(var/message, var/target, var/obfuscate_source)
+
+/obj/machinery/terminal/proc/send_message(message, target, obfuscate_source)
 	if(!message || !target)
 		return 0
-	var/obj/machinery/terminal/T = get_terminal_with_id(target)
+	var/obj/machinery/terminal/T = terminals[target]
 	if(!T)
 		return 0
 	if(T.terminal_id == target && T.net_access)
-		if(has_virus("CourierCrusher") || T.has_virus("CourierCrusher"))
+		if(has_command("CourierCrusher") || T.has_command("CourierCrusher"))
 			return 0
-		if(!T.has_command("mail"))
+		var/datum/terminal_command/mail/mail = T.has_command("mail")
+		if(!mail)
 			print_message("The found terminal does not have mail access. Unable to continue.")
 			return 0
 		log_game("Terminal [terminal_id] sent \"[message]\" to terminal [target]; sender ID was [obfuscate_source ? "" : "not"] hidden from recipient")
 		T.say("New message received!")
 		playsound(get_turf(T), 'sound/machines/twobeep.ogg', 75, 1)
-		T.inbox.Add("[obfuscate_source ? "\[UNKNOWN\]" : "Terminal [terminal_id]"]: \"[message]\" (received at [worldtime2text()])")
+		mail.inbox.Add("[obfuscate_source ? "\[UNKNOWN\]" : "Terminal [terminal_id]"]: \"[message]\" (received at [worldtime2text()])")
 		return 1
 	print_message("There is no terminal with the entered ID. Unable to continue.")
 	return 0
+
 
 /obj/machinery/terminal/proc/break_terminal()
 	if(broken)
@@ -426,16 +427,12 @@ var/list/terminals = list() //All terminals in the game world
 	update_icon()
 	return 1
 
-/proc/get_terminal_with_id(var/id)
-	for(var/obj/machinery/terminal/T in terminals)
-		if(T.terminal_id == id)
-			return T
-	return 0
 
 /obj/machinery/terminal/proc/has_owner()
 	if(!owner || !owner.canUseTopic(src))
 		return 0
 	return 1
+
 
 /obj/machinery/terminal/proc/self_destruct() //Of course they can self-destruct! What did you expect?
 	if(broken)
@@ -461,6 +458,8 @@ var/list/terminals = list() //All terminals in the game world
 	if(src)
 		qdel(src)
 
+
+//Terminal items
 /obj/item/terminal
 	name = "fake terminal"
 	desc = "This shouldn't exist."
@@ -468,11 +467,13 @@ var/list/terminals = list() //All terminals in the game world
 	icon_state = "terminal"
 	w_class = 2
 
+
 //Terminal modems: required to connect a terminal to the network. Most terminals start with one, and more can be printed from an autolathe.
 /obj/item/terminal/modem
 	name = "terminal modem"
 	desc = "A specialized device for sending and receiving wireless signals. Used in terminals to provide network access."
 	icon_state = "modem"
+
 
 //Program disks: specialized disks used to copy programs onto terminals and vice-versa.
 /obj/item/terminal/program_disk
@@ -481,6 +482,7 @@ var/list/terminals = list() //All terminals in the game world
 	icon_state = "disk_empty"
 	w_class = 1
 	var/loaded_program = null //The program that the disk is currently holding
+
 
 /obj/item/terminal/program_disk/attack_self(mob/user)
 	if(!loaded_program)
@@ -492,12 +494,14 @@ var/list/terminals = list() //All terminals in the game world
 		icon_state = "disk_empty"
 	return 1
 
+
 /obj/item/terminal/program_disk/examine(mob/user)
 	..()
 	if(!loaded_program)
 		user << "It doesn't currently have a program written to it."
 	else
 		user << "The miniature display indicates that the \"[loaded_program]\" program is ready for transfer."
+
 
 //Terminal electronics: used in construction of terminals.
 /obj/item/weapon/electronics/terminal
@@ -525,6 +529,7 @@ Deconstruction:
 #define NEEDS_ELECTRONICS 2
 #define NEEDS_GLASS 3
 
+
 //Terminal casings, used to build terminals
 /obj/structure/terminal_casing
 	name = "terminal casing"
@@ -536,6 +541,7 @@ Deconstruction:
 	opacity = 0
 	var/construction_state = NEEDS_WIRES
 
+
 /obj/structure/terminal_casing/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/weapon/wrench))
 		anchored = !anchored
@@ -544,6 +550,7 @@ Deconstruction:
 		return 1
 	if(!attempt_construction(user, I))
 		..()
+
 
 /obj/structure/terminal_casing/examine(mob/user)
 	..()
@@ -555,7 +562,8 @@ Deconstruction:
 		if(NEEDS_GLASS)
 			user << "It's missing a display."
 
-/obj/structure/terminal_casing/proc/attempt_construction(var/mob/living/user, var/obj/item/I)
+
+/obj/structure/terminal_casing/proc/attempt_construction(mob/living/user, obj/item/I)
 	switch(construction_state)
 		if(NEEDS_WIRES)
 			if(istype(I, /obj/item/stack/cable_coil))
@@ -576,6 +584,7 @@ Deconstruction:
 				construction_state = NEEDS_ELECTRONICS
 				update_icon()
 				return 1
+
 			else if(istype(I, /obj/item/weapon/weldingtool))
 				var/obj/item/weapon/weldingtool/W = I
 				if(!W.isOn())
@@ -593,6 +602,7 @@ Deconstruction:
 				M.amount = 5
 				qdel(src)
 				return 1
+
 		if(NEEDS_ELECTRONICS)
 			if(istype(I, /obj/item/weapon/electronics/terminal)) //Fast because it just snaps in
 				user.visible_message("<span class='notice'>[user] installs [I] into [src].</span>", "<span class='notice'>You click [I] into place inside [src].</span>")
@@ -601,6 +611,7 @@ Deconstruction:
 				construction_state = NEEDS_GLASS
 				update_icon()
 				return 1
+
 			else if(istype(I, /obj/item/weapon/wirecutters))
 				user.visible_message("<span class='notice'>[user] begins gutting [src] of wires...</span>", "<span class='notice'>You begin cutting the wires from [src]...</span>")
 				playsound(get_turf(src), 'sound/items/Wirecutter.ogg', 50, 1)
@@ -612,6 +623,7 @@ Deconstruction:
 				construction_state = NEEDS_WIRES
 				update_icon()
 				return 1
+
 		if(NEEDS_GLASS)
 			if(istype(I, /obj/item/stack/sheet/glass))
 				var/obj/item/stack/sheet/glass/G = I //Only needs one sheet - don't check the amount
@@ -629,6 +641,7 @@ Deconstruction:
 				T.say("Hello World!")
 				qdel(src)
 				return 1
+
 			else if(istype(I, /obj/item/weapon/crowbar))
 				user.visible_message("<span class='notice'>[user] begins prying out [src]'s electronics...</span>", "<span class='notice'>You begin removing [src]'s electronics...</span>")
 				playsound(get_turf(src), 'sound/items/Crowbar.ogg', 50, 1)
@@ -641,6 +654,7 @@ Deconstruction:
 				update_icon()
 				return 1
 	return 0
+
 
 /obj/structure/terminal_casing/update_icon()
 	icon_state = "construction_[construction_state]"
