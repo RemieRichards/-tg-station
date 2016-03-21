@@ -228,7 +228,7 @@
 
 /obj/item/queen_bee
 	name = "queen bee"
-	desc = "she's the queen of bees, BZZ BZZ"
+	desc = "ill show you whos boss of this hive"
 	icon_state = "queen_item"
 	item_state = ""
 	icon = 'icons/mob/bees.dmi'
