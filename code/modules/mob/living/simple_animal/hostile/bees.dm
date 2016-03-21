@@ -9,7 +9,7 @@
 
 /mob/living/simple_animal/hostile/poison/bees
 	name = "bee"
-	desc = "buzzy buzzy bee, stingy sti- Ouch!"
+	desc = "hey buddy i think you got the wrong hive, the buzz club's two trays down<br>fuck you<br>ah, fuck you bee-head. maybe you and i should settle it right here on the hive floor"
 	icon_state = ""
 	icon_living = ""
 	icon = 'icons/mob/bees.dmi'
@@ -135,6 +135,7 @@
 		if(beegent && isliving(target))
 			var/mob/living/L = target
 			beegent.reaction_mob(L, TOUCH)
+			L.reagents.add_reagent(beegent.id, rand(1,5))
 		target.attack_animal(src)
 
 
@@ -193,7 +194,7 @@
 
  /mob/living/simple_animal/hostile/poison/bees/queen
  	name = "queen bee"
- 	desc = "she's the queen of bees, BZZ BZZ"
+ 	desc = "ill show you whos boss of this hive"
  	icon_base = "queen"
  	isqueen = TRUE
 
@@ -208,6 +209,7 @@
 	if(beegent && isliving(target))
 		var/mob/living/L = target
 		beegent.reaction_mob(L, TOUCH)
+		L.reagents.add_reagent(beegent.id, rand(5,10))
 	target.attack_animal(src)
 
 
@@ -226,7 +228,7 @@
 
 /obj/item/queen_bee
 	name = "queen bee"
-	desc = "she's the queen of bees, BZZ BZZ"
+	desc = "ill show you whos boss of this hive"
 	icon_state = "queen_item"
 	item_state = ""
 	icon = 'icons/mob/bees.dmi'
