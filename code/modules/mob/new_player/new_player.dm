@@ -257,6 +257,23 @@
 								usr << "<span class='danger'>Maximum replies reached.</span>"
 								break
 				usr << "<span class='notice'>Vote successful.</span>"
+			if(POLLTYPE_IRV)
+				var/id_max = text2num(href_list["maxoptionid"])
+				for(var/optionid = 1 to id_max)
+					if(!isnull(href_list["option_[optionid]"]))
+						var/i = vote_on_irv_poll(pollid, optionid)
+						switch(i)
+							if(0)
+								continue
+							if(1)
+								usr << "<span class='danger'>Vote failed, please try again or contact an administrator.</span>"
+								return
+							if(2)
+								usr << "<span class='danger'>You have voted on all candidates.</span>"
+								break
+							if(3)
+								usr << "<span class='danger'>No fuck you.</span>"
+				usr << "<span class='notice'>Vote successful.</span>"
 
 /mob/new_player/proc/IsJobAvailable(rank)
 	var/datum/job/job = SSjob.GetJob(rank)

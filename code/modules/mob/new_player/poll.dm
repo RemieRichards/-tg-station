@@ -1,6 +1,7 @@
 /datum/polloption
 	var/optionid
 	var/optiontext
+	var/optionrating
 
 /mob/new_player/proc/handle_player_polling()
 	if(!dbcon.IsConnected())
@@ -224,7 +225,48 @@
 				output += "<p><input type='submit' value='Vote'></form>"
 			output += "</div>"
 			src << browse(output,"window=playerpoll;size=500x250")
-	return
+		if(POLLTYPE_IRV)
+			var/DBQuery/voted_query = dbcon.NewQuery("SELECT o.id, o.text, v.rating FROM [format_table_name("poll_option")] o, [format_table_name("poll_vote")] v WHERE o.pollid = [pollid] AND v.ckey = '[ckey]' AND o.id = v.optionid")
+			if(!voted_query.Execute())
+				var/err = voted_query.ErrorMsg()
+				log_game("SQL ERROR obtaining o.id, o.text, v.rating from poll_option and poll_vote tables. Error : \[[err]\]\n")
+				return
+			var/list/votedfor = list()
+			while(voted_query.NextRow())
+				votedfor.Add(text2num(voted_query.item[1]))
+			var/list/datum/polloption/options = list()
+			while(voted_query.NextRow())
+				var/datum/polloption/O = new()
+				O.optionid = text2num(voted_query.item[1])
+				O.optiontext = voted_query.item[2] //optiontext stores the Candidate's name
+				O.optionrating = voted_query.item[3] //how we rate Candidate, 1st, 2nd, 3rd choice etc.
+				options += O
+			shuffle(options)
+			var/output = "<div align='center'><B>Player poll</B><hr>"
+			output += "<b>Question: [pollquestion]</b><br>"
+			output += "<font size='2'>Poll runs from <b>[pollstarttime]</b> until <b>[pollendtime]</b></font><p>"
+			if(!votedfor.len)
+				output += "<form name = 'cardcomp' action='>src=\ref[src]' method='get'>"
+				output += "<input type='hidden' name='src' value=\ref[src]'>"
+				output += "<input type='hidden' name='votepollid' value='[pollid]'>"
+				output += "<input type='hidden' name='votetype' value=[POLLTYPE_IRV]>"
+				output += "<input type='hidden' name='maxoptionid' value='[options.len]'>"
+			output += "<table><tr><td>"
+			for(var/datum/polloption/O in options)
+				if(O.optionid && O.optiontext && O.optionrating)
+					if(votedfor.len)
+						if(O.optionid in votedfor)
+							output += "[O.optiontext] - \[<B>[O.optionrating]</B>\]<br>"
+						else
+							output += "[O.optiontext] - \[0\]<br>"
+					else
+						output += "<input type='number' name='option_[O.optionid]' min='1' max='[options.len]'>[O.optiontext] - \[ \]\<br>"
+			output += "</td></tr></table>"
+			if(!votedfor.len)
+				output += "<p><input type='submit' value='Vote'></form>"
+			output += "</div>"
+			src << browse(output,"window=playerpoll;size=500x250")
+
 
 /mob/new_player/proc/poll_check_voted(pollid, table)
 	if(!dbcon.IsConnected())
@@ -333,6 +375,46 @@
 	if(client.holder)
 		adminrank = client.holder.rank
 	var/DBQuery/query_insert = dbcon.NewQuery("INSERT INTO [format_table_name("poll_vote")] (datetime, pollid, optionid, ckey, ip, adminrank) VALUES (Now(), [pollid], [optionid], '[ckey]', '[client.address]', '[adminrank]')")
+	if(!query_insert.Execute())
+		var/err = query_insert.ErrorMsg()
+		log_game("SQL ERROR adding vote to table. Error : \[[err]\]\n")
+		return 1
+	usr << browse(null,"window=playerpoll")
+	return 0
+
+/mob/new_player/proc/vote_on_irv_poll(pollid, optionid)
+	if(!pollid || !optionid)
+		return 1
+	if(!dbcon.IsConnected())
+		usr << "<span class='danger'>Failed to establish database connection.</span>"
+		return 1
+	var/DBQuery/query_get_candidates = dbcon.NewQuery("SELECT multiplechoiceoptions FROM [format_table_name("poll_question")] WHERE id = [pollid]")
+	if(!query_get_candidates.Execute())
+		var/err = query_get_candidates.ErrorMsg()
+		log_game("SQL ERROR obtaining multiplechoiceoptions from poll_question table. Error : \[[err]\]\n")
+		return 1
+	var/i
+	if(query_get_candidates.NextRow())
+		i = text2num(query_get_candidates.item[1])
+	var/DBQuery/query_hasvoted = dbcon.NewQuery("SELECT id FROM [format_table_name("poll_vote")] WHERE pollid = [pollid] AND ckey = '[ckey]'")
+	if(!query_hasvoted.Execute())
+		var/err = query_hasvoted.ErrorMsg()
+		log_game("SQL ERROR obtaining id from poll_vote table. Error : \[[err]\]\n")
+		return 1
+	while(i)
+		if(query_hasvoted.NextRow())
+			i--
+		else
+			break
+	if(!i)
+		return 2
+	var/adminrank = "Player"
+	if(client.holder)
+		adminrank = client.holder.rank
+	var/rating = input(usr, "How preferable is this candidate? Available options are above [WHAT_YOU_VOTED_LAST] (Based on previous votes)", "Preference Number") as num
+	if(rating <= WHAT_YOU_VOTED_LAST) //I don't want to put this variable on the mob, maybe the DB, idk
+		return 3
+	var/DBQuery/query_insert = dbcon.NewQuery("INSERT INTO [format_table_name("poll_vote")] (datetime, pollid, optionid, ckey, ip, adminrank, rating) VALUES (Now(), [pollid], [optionid], '[ckey]', '[client.address]', '[adminrank]', [rating])")
 	if(!query_insert.Execute())
 		var/err = query_insert.ErrorMsg()
 		log_game("SQL ERROR adding vote to table. Error : \[[err]\]\n")

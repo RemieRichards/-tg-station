@@ -48,6 +48,11 @@
 			choice_amount = input("How many choices should be allowed?","Select choice amount") as num|null
 			if(!choice_amount)
 				return
+		if("Instant Run-off")
+			polltype = POLLTYPE_IRV
+			choice_amount = input("How many candidates are running?", "Select number of running candidates") as num|null
+			if(!choice_amount)
+				return
 	var/starttime = SQLtime()
 	var/endtime = input("Set end time for poll as format YYYY-MM-DD HH:MM:SS. All times in server time. HH:MM:SS is optional and 24-hour. Must be later than starting time for obvious reasons.", "Set end time", SQLtime()) as text
 	if(!endtime)

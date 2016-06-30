@@ -302,6 +302,7 @@ var/list/bloody_footprints_cache = list()
 #define POLLTYPE_TEXT		"TEXT"
 #define POLLTYPE_RATING		"NUMVAL"
 #define POLLTYPE_MULTI		"MULTICHOICE"
+#define POLLTYPE_IRV		"INSTANTRUNOFFVOTING"
 
 //lighting area defines
 #define DYNAMIC_LIGHTING_DISABLED 0 //dynamic lighting disabled (area stays at full brightness)
