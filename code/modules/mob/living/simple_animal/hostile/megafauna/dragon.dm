@@ -271,4 +271,15 @@ Difficulty: Medium
 /mob/living/simple_animal/hostile/megafauna/dragon/lesser/grant_achievement(medaltype,scoretype)
 	return
 
+
+
+//Dragon ridiiiiiiiiiiing
+/mob/living/simple_animal/hostile/megafauna/dragon/post_buckle_mob(mob/living/L)
+	if(L in buckled_mobs)
+		L.pixel_z = 32
+	else
+		L.pixel_z = initial(L.pixel_z)
+
+
+
 #undef MEDAL_PREFIX
