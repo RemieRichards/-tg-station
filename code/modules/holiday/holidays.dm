@@ -417,7 +417,10 @@
 	return ..()
 
 /datum/holiday/mothering_sunday/greet()
-	return "It's Mothering Sunday! the -REAL- Mother's Day, you did remember to get her a gift right?"
+	if(prob(50))
+		return "It's Mothering Sunday! You <i>did</i> remember to get her a gift, <b>right?</b>"
+	else
+		return "It's Mother's Day! You <i>did</i> remember to get her a gift, <b>right?</b>"
 
 
 /datum/holiday/ashwednesday
